@@ -751,10 +751,22 @@
         }
       };
 
-      // ✅ 본인 카드만 초기화 (교환횟수는 그대로)
+      // ✅ 본인 카드만 초기화 (교환횟수는 그대로) - "초기화" 입력 필수
       const resetMyCards = async () => {
         if (!userData.value) return;
-        if (!confirm("본인 카드만 전부 0으로 초기화할까요?\n(오늘 교환 횟수는 유지됩니다.)")) return;
+
+        const phrase = "초기화";
+        const input = prompt(
+        `⚠️ 본인 카드(81칸)를 전부 0으로 초기화합니다.\n` +
+        `오늘 교환 횟수는 유지됩니다.\n\n` +
+        `진행하려면 아래 문구를 정확히 입력하세요:\n[${phrase}]`
+        );
+
+        if (input === null) return; // 취소
+          if (String(input).trim() !== phrase) {
+          alert("문구가 일치하지 않아 취소되었습니다.");
+        return;
+        }
 
         isLoading.value = true;
         try {
@@ -766,17 +778,17 @@
             collection: zero,
             lastUpdated: now,
             lastActive: now
-          });
+        });
 
-          userData.value.collection = zero;
-          localStorage.setItem('oq_user_v4', JSON.stringify(userData.value));
-          alert("초기화 완료 ✅");
-        } catch (e) {
-          alert("초기화 실패: " + (e.message || e));
-        } finally {
-          isLoading.value = false;
-        }
-      };
+    userData.value.collection = zero;
+    localStorage.setItem('oq_user_v4', JSON.stringify(userData.value));
+    alert("초기화 완료 ✅");
+  } catch (e) {
+    alert("초기화 실패: " + (e.message || e));
+  } finally {
+    isLoading.value = false;
+  }
+};
 
       const refreshSpareOwnerCounts = async () => {
         if (!userData.value) return;
@@ -1345,4 +1357,5 @@
 </script>
 </body>
 </html>
+
 

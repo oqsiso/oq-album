@@ -677,7 +677,7 @@
 
       // ✅ 공지(Notice) - notice.json에서 읽음
       const notice = ref({ text: "", updatedAt: "" });
-      const noticeOpen = ref(true);
+      const noticeOpen = ref(false);
 
       const safeNick = (v) => (v || '').toString().trim();
       const safeServer = (v) => Number(v || 0);
@@ -1438,3 +1438,4 @@
 </script>
 </body>
 </html>
+

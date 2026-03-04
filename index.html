@@ -102,6 +102,48 @@
       </div>
     </div>
 
+    <!-- ✅ 공지바 (팝업 X / 대시보드에서만 표시) -->
+    <div v-if="notice.text && currentView === 'dashboard'" class="px-3 pt-2 flex-none">
+      <div class="bg-yellow-50 border border-yellow-200 rounded-2xl shadow-sm overflow-hidden">
+        <!-- 헤더(한 줄 요약) -->
+        <button @click="toggleNotice"
+                class="w-full px-3 py-2 flex items-center justify-between btn-press">
+          <div class="flex items-center gap-2 min-w-0">
+            <span class="text-xs font-extrabold text-yellow-700">📢 공지</span>
+            <span class="text-xs text-gray-700 truncate">
+              {{ notice.text.split('\n')[0] }}
+            </span>
+            <span v-if="notice.updatedAt" class="text-[10px] text-gray-400 flex-none">
+              ({{ notice.updatedAt }})
+            </span>
+          </div>
+          <i class="fas" :class="noticeOpen ? 'fa-chevron-up' : 'fa-chevron-down'"></i>
+        </button>
+
+        <!-- 본문(펼침) -->
+        <div v-if="noticeOpen" class="px-3 pb-3">
+          <div class="text-xs text-gray-800 whitespace-pre-line leading-relaxed">
+            {{ notice.text }}
+          </div>
+
+          <div class="mt-2 flex items-center justify-between">
+            <button @click="loadNotice"
+                    class="text-[10px] bg-white border border-yellow-200 text-yellow-700 px-2 py-1 rounded-lg font-extrabold btn-press">
+              🔄 새로고침
+            </button>
+
+            <!-- ✅ 시소만: 모바일에서도 GitHub 편집으로 바로 -->
+            <a v-if="canEditAlbums"
+               href="https://github.com/oqsiso/oq-album/edit/main/notice.json"
+               target="_blank"
+               class="text-[10px] bg-gray-900 text-white px-2 py-1 rounded-lg font-extrabold btn-press">
+              ✏️ 공지 수정
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <!-- 본문 -->
     <div class="flex-1 overflow-y-auto hide-scroll p-4 pb-24">
 
@@ -633,6 +675,10 @@
         albumCovers: Array(9).fill("")
       });
 
+      // ✅ 공지(Notice) - notice.json에서 읽음
+      const notice = ref({ text: "", updatedAt: "" });
+      const noticeOpen = ref(true);
+
       const safeNick = (v) => (v || '').toString().trim();
       const safeServer = (v) => Number(v || 0);
 
@@ -640,6 +686,39 @@
         if (!userData.value) return false;
         return Number(userData.value.server) === 67 && String(userData.value.nickname) === '시소';
       });
+
+      const noticeKey = computed(() => {
+        if (!userData.value) return "oq_notice_open_guest";
+        return `oq_notice_open_S${userData.value.server}_${userData.value.nickname}`;
+      });
+
+      const loadNoticeOpen = () => {
+        try {
+          const v = localStorage.getItem(noticeKey.value);
+          if (v === null) return; // default true
+          noticeOpen.value = v === "1";
+        } catch (e) {}
+      };
+
+      const toggleNotice = () => {
+        noticeOpen.value = !noticeOpen.value;
+        try {
+          localStorage.setItem(noticeKey.value, noticeOpen.value ? "1" : "0");
+        } catch (e) {}
+      };
+
+      const loadNotice = async () => {
+        try {
+          const res = await fetch(`./notice.json?ts=${Date.now()}`);
+          if (!res.ok) throw new Error("notice.json 로드 실패");
+          const data = await res.json();
+          notice.value.text = typeof data.text === "string" ? data.text : "";
+          notice.value.updatedAt = data.updatedAt || "";
+        } catch (e) {
+          notice.value.text = "";
+          notice.value.updatedAt = "";
+        }
+      };
 
       const getGameDate = () => {
         const now = new Date();
@@ -751,21 +830,21 @@
         }
       };
 
-      // ✅ 본인 카드만 초기화 (교환횟수는 그대로) - "초기화" 입력 필수
+      // ✅ 본인 카드만 초기화 (교환횟수 유지) - "초기화" 입력 필수
       const resetMyCards = async () => {
         if (!userData.value) return;
 
         const phrase = "초기화";
         const input = prompt(
-        `⚠️ 본인 카드(81칸)를 전부 0으로 초기화합니다.\n` +
-        `오늘 교환 횟수는 유지됩니다.\n\n` +
-        `진행하려면 아래 문구를 정확히 입력하세요:\n[${phrase}]`
+          `⚠️ 본인 카드(81칸)를 전부 0으로 초기화합니다.\n` +
+          `오늘 교환 횟수는 유지됩니다.\n\n` +
+          `진행하려면 아래 문구를 정확히 입력하세요:\n[${phrase}]`
         );
 
-        if (input === null) return; // 취소
-          if (String(input).trim() !== phrase) {
+        if (input === null) return;
+        if (String(input).trim() !== phrase) {
           alert("문구가 일치하지 않아 취소되었습니다.");
-        return;
+          return;
         }
 
         isLoading.value = true;
@@ -778,17 +857,17 @@
             collection: zero,
             lastUpdated: now,
             lastActive: now
-        });
+          });
 
-    userData.value.collection = zero;
-    localStorage.setItem('oq_user_v4', JSON.stringify(userData.value));
-    alert("초기화 완료 ✅");
-  } catch (e) {
-    alert("초기화 실패: " + (e.message || e));
-  } finally {
-    isLoading.value = false;
-  }
-};
+          userData.value.collection = zero;
+          localStorage.setItem('oq_user_v4', JSON.stringify(userData.value));
+          alert("초기화 완료 ✅");
+        } catch (e) {
+          alert("초기화 실패: " + (e.message || e));
+        } finally {
+          isLoading.value = false;
+        }
+      };
 
       const refreshSpareOwnerCounts = async () => {
         if (!userData.value) return;
@@ -803,7 +882,7 @@
 
             const col = Array.isArray(u.collection) ? u.collection : [];
             for (let i=0; i<81; i++) {
-              if ((col[i] || 0) > 1) counts[i] += 1; // 여유분(2장 이상) 보유자 수
+              if ((col[i] || 0) > 1) counts[i] += 1;
             }
           });
           spareOwnerCounts.value = counts;
@@ -814,7 +893,6 @@
         }
       };
 
-      // ✅ 비교 결과 생성: giveOnly/receiveOnly
       const buildCompare = (targetUser) => {
         compareTarget.value = targetUser || {};
         const myCol = (userData.value && Array.isArray(userData.value.collection)) ? userData.value.collection : Array(81).fill(0);
@@ -824,9 +902,9 @@
 
         for (let i=0; i<81; i++) {
           const cardObj = { index: i, name: cardNameByIndex(i) };
-          const iHaveSpare = (myCol[i] || 0) > 1;      // ✅ 여유분 2장 이상
+          const iHaveSpare = (myCol[i] || 0) > 1;
           const iNeed = (myCol[i] || 0) === 0;
-          const uHaveSpare = (targetCol[i] || 0) > 1;  // ✅ 여유분 2장 이상
+          const uHaveSpare = (targetCol[i] || 0) > 1;
           const uNeed = (targetCol[i] || 0) === 0;
 
           if (iHaveSpare && uNeed) res.giveOnly.push(cardObj);
@@ -922,7 +1000,6 @@
         }
       };
 
-      // ✅ 거래 만들기 팝업
       const openDealBuilder = (type) => {
         dealType.value = type;
         dealGiveIndex.value = null;
@@ -972,7 +1049,6 @@
         }
       };
 
-      // ✅ 핵심: 거래 1건 = 교환횟수 1회 (한 번의 트랜잭션)
       const confirmDeal = async () => {
         await checkAndResetDailyLimit();
         const today = getGameDate();
@@ -1032,15 +1108,12 @@
               const g = dealGiveIndex.value;
               const r = dealReceiveIndex.value;
 
-              // ✅ 주는 카드는 여유분(2장 이상)만
               if ((myCol[g] || 0) <= 1) throw "오류: 내 여유분(2장↑)이 아닌 카드는 줄 수 없어요!";
               if ((targetCol[g] || 0) !== 0) throw "오류: 상대가 이미 가진 카드라 교환 조건이 바뀌었어요.";
 
-              // ✅ 받는 카드는 상대 여유분(2장 이상)만
               if ((targetCol[r] || 0) <= 1) throw "오류: 상대 여유분(2장↑)이 부족해요!";
               if ((myCol[r] || 0) !== 0) throw "오류: 나는 이미 가진 카드라 조건이 바뀌었어요.";
 
-              // 교환 적용
               myCol[g]--; targetCol[g]++;
               myCol[r]++; targetCol[r]--;
 
@@ -1050,18 +1123,16 @@
               if ((targetCol[g] || 0) !== 0) throw "오류: 상대가 이미 가진 카드라 조건이 바뀌었어요.";
               myCol[g]--; targetCol[g]++;
 
-            } else { // receive
+            } else {
               const r = dealReceiveIndex.value;
               if ((targetCol[r] || 0) <= 1) throw "오류: 상대 여유분(2장↑)이 부족해요!";
               if ((myCol[r] || 0) !== 0) throw "오류: 나는 이미 가진 카드라 조건이 바뀌었어요.";
               myCol[r]++; targetCol[r]--;
             }
 
-            // ✅ 거래 1건 = 양쪽 교환횟수 +1 (한 번만)
             tx.update(myDocRef, { collection: myCol, dailyExchangeCount: myCount + 1, dailyExchangeDate: today, lastUpdated: now, lastActive: now });
             tx.update(targetDocRef, { collection: targetCol, dailyExchangeCount: targetCount + 1, dailyExchangeDate: today, lastUpdated: now });
 
-            // local 반영
             userData.value.collection = myCol;
             userData.value.dailyExchangeCount = myCount + 1;
             userData.value.dailyExchangeDate = today;
@@ -1070,16 +1141,14 @@
             compareTarget.value.collection = targetCol;
             compareTarget.value.dailyExchangeCount = targetCount + 1;
             compareTarget.value.dailyExchangeDate = today;
-            compareTarget.value.isTradeClosed = (today === today && (targetCount + 1) >= 3);
+            compareTarget.value.isTradeClosed = ((targetCount + 1) >= 3);
           });
 
           localStorage.setItem('oq_user_v4', JSON.stringify(userData.value));
           alert(`거래 기록 완료! (오늘 ${tradeCount.value}/3회)`);
 
-          // compare 갱신
           buildCompare(compareTarget.value);
 
-          // 멤버 리스트 열려 있으면 갱신(선택)
           if (showUserListPopup.value) {
             await fetchUsersAndShowList();
           }
@@ -1141,7 +1210,7 @@
             if (u.server === userData.value.server && u.nickname === userData.value.nickname) return;
 
             const uCol = Array.isArray(u.collection) ? u.collection : Array(81).fill(0);
-            if ((uCol[absIdx] || 0) > 1) { // ✅ 여유분(2장↑)만 보유자로
+            if ((uCol[absIdx] || 0) > 1) {
               const giveable = [];
               for (let k=0; k<81; k++) {
                 if ((myCol[k] || 0) > 1 && (uCol[k] || 0) === 0) giveable.push(cardNameByIndex(k));
@@ -1244,6 +1313,7 @@
       const processLogin = async (docId, userInfo) => {
         isLoading.value = true;
         await loadAppConfig();
+        await loadNotice();
 
         try {
           const docRef = db.collection('users').doc(docId);
@@ -1272,6 +1342,9 @@
           localStorage.setItem('oq_user_v4', JSON.stringify(finalData));
           favSet.value = loadFavSet();
 
+          // ✅ 공지 접힘 상태 로드
+          loadNoticeOpen();
+
           isLoggedIn.value = true;
           await checkAndResetDailyLimit();
           updateLastActive();
@@ -1284,12 +1357,17 @@
 
       const checkLogin = async () => {
         const saved = localStorage.getItem('oq_user_v4');
+        await loadNotice();
+
         if (!saved) return;
         try {
           userData.value = JSON.parse(saved);
           await loadAppConfig();
           favSet.value = loadFavSet();
           isLoggedIn.value = true;
+
+          // ✅ 공지 접힘 상태 로드
+          loadNoticeOpen();
 
           await checkAndResetDailyLimit();
           updateLastActive();
@@ -1325,6 +1403,9 @@
         tradeCount,
         resetMyCards,
 
+        // notice
+        notice, noticeOpen, toggleNotice, loadNotice,
+
         // popups
         showPopup, showUserListPopup, showComparePopup, showHelpPopup,
         showNeedsPopup, openNeedsPopup, needsKeyword, needsListFiltered, needsLoading,
@@ -1357,5 +1438,3 @@
 </script>
 </body>
 </html>
-
-

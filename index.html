@@ -45,7 +45,7 @@
 
     <div class="text-center mb-10">
       <span class="text-4xl">👸</span>
-      <h1 class="text-3xl font-bold text-pink-600 mt-2">오피스퀸<br>앨범 교환소</h1>
+      <h1 class="text-3xl font-bold text-pink-600 mt-2">오피스퀸<br>스티커 교환소</h1>
     </div>
 
     <div class="space-y-4">
@@ -166,7 +166,7 @@
                  @mousedown="onCardHoldStart(i)" @mouseup="onCardHoldEnd" @mouseleave="onCardHoldEnd"
                  @touchstart.passive="onCardHoldStart(i)" @touchend="onCardHoldEnd" @touchcancel="onCardHoldEnd">
               <div class="absolute inset-0 flex flex-col items-center justify-center text-gray-300">
-                <span class="text-[9px]">사진</span><span class="text-xs font-bold">{{ i + 1 }}</span>
+                <span class="text-[9px]">스티커</span><span class="text-xs font-bold">{{ i + 1 }}</span>
               </div>
 
               <div v-if="count === 0" class="absolute inset-0 bg-white/90 flex flex-col items-center justify-center text-red-500 font-bold z-10 group-hover:bg-white/70 transition">
@@ -470,7 +470,7 @@
       </div>
 
       <div class="mb-3 relative">
-        <input v-model="needsKeyword" type="text" placeholder="앨범명/사진번호 검색" class="w-full p-2.5 pl-9 border border-gray-200 rounded-xl text-sm bg-gray-50 focus:bg-white focus:ring-2 focus:ring-pink-100 transition">
+        <input v-model="needsKeyword" type="text" placeholder="앨범명/스티커번호 검색" class="w-full p-2.5 pl-9 border border-gray-200 rounded-xl text-sm bg-gray-50 focus:bg-white focus:ring-2 focus:ring-pink-100 transition">
         <i class="fas fa-search absolute left-3 top-3 text-gray-400 text-xs"></i>
       </div>
 
@@ -763,7 +763,7 @@
         const aIdx = Math.floor(absIdx/9);
         const cIdx = (absIdx%9)+1;
         const albumName = appConfig.value.albumNames[aIdx] || `앨범${aIdx+1}`;
-        return `${albumName} - 사진${cIdx}`;
+        return `${albumName} - 스티커${cIdx}`;
       };
 
       // ===== favorites =====
@@ -1429,6 +1429,7 @@
 </script>
 </body>
 </html>
+
 
 
 

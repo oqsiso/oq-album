@@ -62,46 +62,61 @@
 <div id="app" v-cloak class="max-w-md mx-auto bg-white min-h-screen relative flex flex-col overflow-hidden shadow-2xl">
 
   <!-- ===== 로그인 ===== -->
-  <div v-if="!isLoggedIn" class="login-bg flex flex-col justify-center min-h-screen p-8 relative">
-    <button @click="openHelp" class="absolute top-5 right-5 w-9 h-9 rounded-full bg-white/70 flex items-center justify-center text-pink-400 shadow-sm btn-press">
-      <i class="fas fa-question text-sm"></i>
-    </button>
+  <div v-if="!isLoggedIn" class="flex flex-col min-h-screen bg-white relative overflow-hidden">
 
-    <div class="text-center mb-10 fade-up">
-      <div class="text-5xl mb-3">👸</div>
-      <h1 class="text-2xl font-black text-pink-600 leading-tight">오피스퀸<br><span class="text-purple-500">스티커 교환소</span></h1>
-      <p class="text-xs text-pink-300 mt-2 font-bold">v2.0 · 쪽지 · 랭킹 · 히스토리</p>
-    </div>
+    <!-- 상단 핑크 물결 배경 -->
+    <div class="absolute top-0 left-0 right-0 h-64 bg-gradient-to-br from-pink-100 to-pink-50 rounded-b-[60px]"></div>
 
-    <div class="space-y-3 fade-up">
-      <div class="relative">
-        <i class="fas fa-server absolute left-3.5 top-3.5 text-pink-300 text-sm"></i>
-        <input v-model="loginForm.server" type="number" placeholder="서버 번호"
-               @keyup.enter="handleLogin"
-               class="w-full pl-10 pr-4 py-3.5 border-2 border-pink-100 rounded-2xl bg-white focus:outline-none focus:border-pink-300 text-sm font-bold">
-      </div>
-      <div class="relative">
-        <i class="fas fa-user absolute left-3.5 top-3.5 text-pink-300 text-sm"></i>
-        <input v-model="loginForm.nickname" type="text" placeholder="닉네임"
-               @keyup.enter="handleLogin"
-               class="w-full pl-10 pr-4 py-3.5 border-2 border-pink-100 rounded-2xl bg-white focus:outline-none focus:border-pink-300 text-sm font-bold">
-      </div>
-      <div class="relative">
-        <i class="fas fa-lock absolute left-3.5 top-3.5 text-pink-300 text-sm"></i>
-        <input v-model="loginForm.password" type="password" maxlength="4" placeholder="비밀번호 4자리"
-               @keyup.enter="handleLogin"
-               class="w-full pl-10 pr-4 py-3.5 border-2 border-pink-100 rounded-2xl bg-white focus:outline-none focus:border-pink-300 text-sm font-bold">
-      </div>
-      <button @click="handleLogin" :disabled="isLoading"
-              class="w-full bg-gradient-to-r from-pink-500 to-purple-500 text-white py-4 rounded-2xl font-black text-base shadow-lg flex justify-center items-center gap-2 btn-press">
-        <div v-if="isLoading" class="loader border-white/30 border-t-white w-5 h-5 border-2"></div>
-        <span>{{ isLoading ? '로딩 중...' : '✨ 입장하기' }}</span>
+    <!-- 물음표 버튼 -->
+    <div class="relative z-10 flex justify-end p-5">
+      <button @click="openHelp" class="w-9 h-9 rounded-full bg-white shadow-sm flex items-center justify-center text-pink-400 btn-press border border-pink-100">
+        <i class="fas fa-question text-sm"></i>
       </button>
     </div>
-    <p class="text-xs text-pink-300 text-center mt-5 font-bold">처음이면 자동으로 가입돼요!</p>
+
+    <!-- 로고 영역 -->
+    <div class="relative z-10 px-8 pt-4 pb-10 fade-up">
+      <div class="text-[11px] font-black text-pink-400 tracking-widest mb-3">OFFICE QUEEN</div>
+      <h1 class="text-4xl font-black text-gray-900 leading-tight">스티커<br>교환소</h1>
+      <p class="text-sm text-gray-400 mt-3">서버번호와 닉네임으로 시작하세요</p>
+    </div>
+
+    <!-- 입력 폼 카드 -->
+    <div class="relative z-10 flex-1 px-6 fade-up">
+      <div class="bg-white rounded-3xl shadow-lg border border-pink-100 p-6 space-y-4">
+        <div>
+          <label class="text-xs font-black text-gray-500 mb-1.5 block">서버 번호</label>
+          <input v-model="loginForm.server" type="number" placeholder="예) 67"
+                 @keyup.enter="handleLogin"
+                 class="w-full px-4 py-3.5 border border-gray-200 rounded-2xl bg-gray-50 focus:outline-none focus:border-pink-300 focus:bg-white text-sm font-bold transition">
+        </div>
+        <div>
+          <label class="text-xs font-black text-gray-500 mb-1.5 block">닉네임</label>
+          <input v-model="loginForm.nickname" type="text" placeholder="게임 닉네임 입력"
+                 @keyup.enter="handleLogin"
+                 class="w-full px-4 py-3.5 border border-gray-200 rounded-2xl bg-gray-50 focus:outline-none focus:border-pink-300 focus:bg-white text-sm font-bold transition">
+        </div>
+        <div>
+          <label class="text-xs font-black text-gray-500 mb-1.5 block">비밀번호</label>
+          <input v-model="loginForm.password" type="password" maxlength="4" placeholder="숫자 4자리"
+                 @keyup.enter="handleLogin"
+                 class="w-full px-4 py-3.5 border border-gray-200 rounded-2xl bg-gray-50 focus:outline-none focus:border-pink-300 focus:bg-white text-sm font-bold transition">
+        </div>
+
+        <button @click="handleLogin" :disabled="isLoading"
+                class="w-full bg-pink-500 text-white py-4 rounded-2xl font-black text-base flex justify-center items-center gap-2 btn-press shadow-md mt-2">
+          <div v-if="isLoading" class="loader border-white/30 border-t-white w-5 h-5 border-2"></div>
+          <span>{{ isLoading ? '로딩 중...' : '시작하기 →' }}</span>
+        </button>
+      </div>
+
+      <p class="text-xs text-gray-400 text-center mt-4">처음이면 자동으로 가입돼요</p>
+    </div>
+
+    <div class="h-10"></div>
   </div>
 
-  <!-- ===== 메인 ===== -->
+    <!-- ===== 메인 ===== -->
   <div v-else class="flex flex-col h-screen bg-[#fdf2f8]">
 
     <!-- 상단바 -->
@@ -184,7 +199,8 @@
 
       <div class="flex items-center gap-1.5 px-3 pb-2 overflow-x-auto hide-scroll">
         <div class="text-[11px] font-black flex-none" :class="tradeCount >= 3 ? 'text-red-500' : 'text-emerald-600'">
-          <i class="fas fa-repeat mr-0.5"></i>오늘 {{ tradeCount }}/3
+          <i class="fas fa-repeat mr-0.5"></i>
+          <span @click="showTradeAdjust = true" class="underline decoration-dotted cursor-pointer">오늘 {{ tradeCount }}/3</span>
         </div>
         <div class="flex gap-1.5 ml-auto flex-none">
           <button @click="openNeedsPopup" class="text-xs bg-pink-500 text-white px-2.5 py-1.5 rounded-xl font-black btn-press">🔍구해요</button>
@@ -534,6 +550,10 @@
             <div class="flex items-center gap-1.5 flex-wrap">
               <span class="text-[9px] text-gray-400">{{ getActiveText(user.lastActive) }}</span>
               <span class="text-[10px] px-1.5 rounded-full" :class="user.totalCount>=40?'bg-pink-100 text-pink-600 font-black':'bg-gray-100 text-gray-500'">{{ user.totalCount }}/81</span>
+              <span class="text-[9px] font-black px-1.5 py-0.5 rounded-full"
+                    :class="user.isTradeClosed ? 'bg-red-100 text-red-500' : 'bg-emerald-100 text-emerald-600'">
+                {{ user.isTradeClosed ? '마감' : '교환 ' + (3-(user.dailyExchangeCount||0)) + '회 남음' }}
+              </span>
               <span v-if="user.match.winwin" class="text-[9px] bg-red-100 text-red-600 font-black px-1.5 py-0.5 rounded-full">🔥추천</span>
               <span v-else-if="user.match.receive" class="text-[9px] bg-green-100 text-green-700 font-black px-1.5 py-0.5 rounded-full">구함</span>
               <span v-else-if="user.match.give" class="text-[9px] bg-blue-100 text-blue-700 font-black px-1.5 py-0.5 rounded-full">선물가능</span>
@@ -1020,6 +1040,46 @@
     </div>
   </div>
 
+  <!-- ===== 교환 횟수 조정 팝업 ===== -->
+  <div v-if="showTradeAdjust" class="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4" @click.self="showTradeAdjust=false">
+    <div class="bg-white rounded-2xl w-72 p-6 shadow-2xl">
+      <div class="flex items-center justify-between mb-4">
+        <h3 class="text-base font-black text-gray-800">교환 횟수 조정</h3>
+        <button @click="showTradeAdjust=false" class="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center text-gray-400 btn-press">
+          <i class="fas fa-times text-sm"></i>
+        </button>
+      </div>
+
+      <p class="text-xs text-gray-400 mb-4 text-center">게임에서 직접 교환했을 때 수동으로 조정하세요</p>
+
+      <div class="flex items-center justify-center gap-6 mb-6">
+        <button @click="adjustTradeCount(-1)" :disabled="tradeCount <= 0"
+                class="w-12 h-12 rounded-2xl bg-gray-100 text-gray-600 flex items-center justify-center text-2xl font-black btn-press disabled:opacity-30">
+          −
+        </button>
+        <div class="text-center">
+          <div class="text-4xl font-black text-gray-800">{{ tradeCount }}</div>
+          <div class="text-xs text-gray-400 mt-1">/ 3회</div>
+        </div>
+        <button @click="adjustTradeCount(1)" :disabled="tradeCount >= 3"
+                class="w-12 h-12 rounded-2xl bg-sky-500 text-white flex items-center justify-center text-2xl font-black btn-press disabled:opacity-30">
+          +
+        </button>
+      </div>
+
+      <div class="w-full bg-gray-100 rounded-full h-2 mb-5">
+        <div class="bg-gradient-to-r from-sky-400 to-purple-400 h-2 rounded-full gauge-fill"
+             :style="{width: (tradeCount/3*100)+'%'}"></div>
+      </div>
+
+      <button @click="showTradeAdjust=false"
+              class="w-full py-3 bg-gray-800 text-white rounded-2xl font-black text-sm btn-press">
+        확인
+      </button>
+      <p class="text-[10px] text-gray-400 text-center mt-2">매일 오전 8시 자동 초기화</p>
+    </div>
+  </div>
+
   <!-- ===== 도움말 팝업 ===== -->
   <div v-if="showHelpPopup" class="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4" @click.self="closeHelp">
     <div class="bg-white rounded-2xl w-full max-w-sm p-6 shadow-2xl max-h-[90vh] overflow-y-auto hide-scroll">
@@ -1314,6 +1374,7 @@ createApp({
 
     // ─── 관리자 전용 상태 ────────────────────────────────────
     const showAdminPopup = ref(false);
+    const showTradeAdjust = ref(false);
     const adminTab = ref('members');
     const adminSearch = ref('');
     const adminMembers = ref([]);
@@ -1553,6 +1614,24 @@ createApp({
     };
 
     // ─── 초기화 ──────────────────────────────────────────────
+    // 교환 횟수 수동 조정
+    const adjustTradeCount = async (chg) => {
+      if (!userData.value) return;
+      const next = (tradeCount.value || 0) + chg;
+      if (next < 0 || next > 3) return;
+      const today = getGameDate();
+      tradeCount.value = next;
+      userData.value.dailyExchangeCount = next;
+      userData.value.dailyExchangeDate = today;
+      try {
+        await db.collection('users').doc(myDocId.value).update({
+          dailyExchangeCount: next,
+          dailyExchangeDate: today
+        });
+        localStorage.setItem('oq_user_v4', JSON.stringify(userData.value));
+      } catch(e) {}
+    };
+
     const resetMyStickers = async () => {
       if (!userData.value) return;
       const input = prompt('⚠️ 스티커를 전부 0으로 초기화합니다.\n진행하려면 [초기화] 라고 입력하세요:');
@@ -2445,7 +2524,7 @@ createApp({
       openAlbum, prevAlbum, nextAlbum,
       updateCount, onStickerTap, onStickerHoldStart, onStickerHoldEnd,
       getAlbumCount, totalCount, totalProgress,
-      tradeCount, resetMyStickers,
+      tradeCount, resetMyStickers, adjustTradeCount, showTradeAdjust,
       showPopup, showUserListPopup, showComparePopup,
       showNeedsPopup, openNeedsPopup, needsKeyword, needsListFiltered, needsLoading,
       openExchangeByAbsoluteIndex, exchangeList, popupStickerName,

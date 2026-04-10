@@ -695,7 +695,7 @@
     </div>
   </div>
 
- ===== 쪽지함 팝업 ===== -->
+<!-- ===== 쪽지함 팝업 ===== -->
   <div v-if="showChatPopup" class="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-end justify-center z-50" @click.self="closeChatPopup">
     <div class="bg-white sheet w-full max-w-md shadow-2xl flex flex-col" style="height:85vh">
 
@@ -1082,53 +1082,81 @@ createApp({
     const charStorageKey = 'oq_chars_v1';
 
     // Firebase에서 내 캐릭터 목록 불러오기
+    // 비밀번호를 공통 키로 사용 - 같은 비번이면 같은 그룹 (단순하고 확실)
+    // 실제로는 현재 로그인 캐릭 docId 기준으로 저장, 다른 캐릭 추가 시 서로 연결
+    const getLinkedDocId = () => {
+      // 현재 캐릭터의 linkedChars 문서 ID 찾기
+      // localStorage에 마스터 docId 기록
+      const masterKey = 'oq_master_' + myDocId.value;
+      return localStorage.getItem(masterKey) || myDocId.value;
+    };
+
     const loadSavedChars = async () => {
       if (!userData.value) return;
+      const myDoc = myDocId.value;
       try {
-        const docId = myDocId.value;
-        // 현재 캐릭터 기준으로 Firebase에서 linked chars 불러오기
-        const doc = await db.collection('linkedChars').doc(docId).get();
-        let chars = doc.exists ? (doc.data().chars || []) : [];
+        // 1) 내 docId로 직접 조회
+        const doc = await db.collection('linkedChars').doc(myDoc).get();
+        let chars = [];
 
-        // 현재 캐릭터가 목록에 없으면 추가
-        const exists = chars.find(c => c.docId === docId);
+        if (doc.exists) {
+          chars = doc.data().chars || [];
+        }
+
+        // 2) 현재 캐릭터가 목록에 없으면 추가
+        const exists = chars.find(c => c.docId === myDoc);
         if (!exists) {
           chars.unshift({
-            docId,
+            docId: myDoc,
             server: userData.value.server,
             nickname: userData.value.nickname,
             password: userData.value.password
           });
-          await db.collection('linkedChars').doc(docId).set({ chars }, { merge: true });
+          await db.collection('linkedChars').doc(myDoc).set({ chars }, { merge: true });
         }
+
+        // 3) 목록 안의 다른 캐릭들도 각자 이 목록을 가리키도록 업데이트
+        // (어떤 캐릭으로 로그인해도 같은 목록 보이게)
+        const batch = db.batch();
+        chars.forEach(c => {
+          if (c.docId !== myDoc) {
+            const ref = db.collection('linkedChars').doc(c.docId);
+            batch.set(ref, { chars, syncFrom: myDoc }, { merge: false });
+          }
+        });
+        await batch.commit();
+
         savedChars.value = chars;
       } catch {
         // Firebase 실패 시 localStorage 폴백
         try {
           const raw = localStorage.getItem(charStorageKey);
           savedChars.value = raw ? JSON.parse(raw) : [];
-          if (userData.value) {
-            const docId = myDocId.value;
-            const exists = savedChars.value.find(c => c.docId === docId);
-            if (!exists) {
-              savedChars.value.unshift({
-                docId,
-                server: userData.value.server,
-                nickname: userData.value.nickname,
-                password: userData.value.password
-              });
-            }
+          const exists = savedChars.value.find(c => c.docId === myDoc);
+          if (!exists) {
+            savedChars.value.unshift({
+              docId: myDoc,
+              server: userData.value.server,
+              nickname: userData.value.nickname,
+              password: userData.value.password
+            });
           }
         } catch { savedChars.value = []; }
       }
     };
 
     const saveSavedChars = async () => {
-      // Firebase에 저장 (모든 기기에서 동기화)
+      if (!userData.value) return;
+      const myDoc = myDocId.value;
       try {
-        await db.collection('linkedChars').doc(myDocId.value).set({ chars: savedChars.value }, { merge: true });
+        // 모든 연결된 캐릭터 문서에 동일하게 저장
+        const batch = db.batch();
+        savedChars.value.forEach(c => {
+          const ref = db.collection('linkedChars').doc(c.docId);
+          batch.set(ref, { chars: savedChars.value }, { merge: false });
+        });
+        await batch.commit();
       } catch {
-        // 실패 시 localStorage 폴백
         localStorage.setItem(charStorageKey, JSON.stringify(savedChars.value));
       }
     };

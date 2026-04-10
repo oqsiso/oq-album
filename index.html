@@ -530,10 +530,10 @@
                 :style="memberFilter==='winwin'?'background:#111827;color:#fff;border-color:#111827;':'background:#f9fafb;color:#6b7280;border-color:#e5e7eb;'">🔥 추천</button>
         <button @click="memberFilter='receive'"
                 style="height:26px; padding:0 10px; font-size:11px; font-weight:800; border-radius:999px; border:1.5px solid; white-space:nowrap; flex-shrink:0; display:inline-flex; align-items:center; line-height:1;"
-                :style="memberFilter==='receive'?'background:#111827;color:#fff;border-color:#111827;':'background:#f9fafb;color:#6b7280;border-color:#e5e7eb;'">구함</button>
+                :style="memberFilter==='receive'?'background:#111827;color:#fff;border-color:#111827;':'background:#f9fafb;color:#6b7280;border-color:#e5e7eb;'">받기</button>
         <button @click="memberFilter='give'"
                 style="height:26px; padding:0 10px; font-size:11px; font-weight:800; border-radius:999px; border:1.5px solid; white-space:nowrap; flex-shrink:0; display:inline-flex; align-items:center; line-height:1;"
-                :style="memberFilter==='give'?'background:#111827;color:#fff;border-color:#111827;':'background:#f9fafb;color:#6b7280;border-color:#e5e7eb;'">선물가능</button>
+                :style="memberFilter==='give'?'background:#111827;color:#fff;border-color:#111827;':'background:#f9fafb;color:#6b7280;border-color:#e5e7eb;'">주기</button>
         <button @click="memberFilter='fav'"
                 style="height:26px; padding:0 10px; font-size:11px; font-weight:800; border-radius:999px; border:1.5px solid; white-space:nowrap; flex-shrink:0; display:inline-flex; align-items:center; line-height:1;"
                 :style="memberFilter==='fav'?'background:#111827;color:#fff;border-color:#111827;':'background:#f9fafb;color:#6b7280;border-color:#e5e7eb;'">⭐ 즐겨찾기</button>
@@ -565,8 +565,8 @@
                 {{ user.isTradeClosed ? '마감' : '교환 ' + (3-(user.dailyExchangeCount||0)) + '회 남음' }}
               </span>
               <span v-if="user.match.winwin" class="text-[9px] bg-red-100 text-red-600 font-black px-1.5 py-0.5 rounded-full">🔥추천</span>
-              <span v-else-if="user.match.receive" class="text-[9px] bg-green-100 text-green-700 font-black px-1.5 py-0.5 rounded-full">구함</span>
-              <span v-else-if="user.match.give" class="text-[9px] bg-blue-100 text-blue-700 font-black px-1.5 py-0.5 rounded-full">선물가능</span>
+              <span v-else-if="user.match.receive" class="text-[9px] bg-green-100 text-green-700 font-black px-1.5 py-0.5 rounded-full">받기</span>
+              <span v-else-if="user.match.give" class="text-[9px] bg-blue-100 text-blue-700 font-black px-1.5 py-0.5 rounded-full">주기</span>
             </div>
           </div>
           <button @click.stop="openDirectChat(user)" class="w-8 h-8 rounded-xl bg-pink-50 text-pink-400 flex items-center justify-center border border-pink-100 btn-press flex-none">
@@ -599,7 +599,7 @@
       </div>
 
       <div class="text-[10px] text-gray-400 bg-gray-50 rounded-xl p-2 mb-3">
-        체크1+2 = <b class="text-red-500">교환</b> · 체크1만 = <b class="text-blue-500">선물</b> · 체크2만 = <b class="text-green-600">구함</b>
+        체크1+2 = <b class="text-red-500">교환</b> · 체크1만 = <b class="text-blue-500">선물</b> · 체크2만 = <b class="text-green-600">받기</b>
       </div>
 
       <div v-if="isLoading" class="flex justify-center py-8"><div class="loader"></div></div>
@@ -640,7 +640,7 @@
           <div class="text-base font-black text-gray-800">
             <span v-if="dealModeLabel==='교환'">❤️ 교환</span>
             <span v-else-if="dealModeLabel==='선물'">🎁 선물</span>
-            <span v-else-if="dealModeLabel==='구함'">🔍 구함</span>
+            <span v-else-if="dealModeLabel==='받기'">🔍 받기</span>
             <span v-else>✅ 선택 필요</span>
             <span class="text-sm text-gray-400 font-bold"> / {{ compareTarget.nickname }}</span>
           </div>
@@ -661,9 +661,9 @@
           <div class="flex-1">
             <div class="text-xs font-black text-gray-800">② 내가 받을 스티커 <span class="text-[10px] text-gray-400">(내 0 & 상대 2장↑)</span></div>
           </div>
-          <span class="text-[10px] font-black px-2 py-1 rounded-full" :class="dealCheckReceive?'bg-green-100 text-green-700':'bg-gray-200 text-gray-400'">구함/교환</span>
+          <span class="text-[10px] font-black px-2 py-1 rounded-full" :class="dealCheckReceive?'bg-green-100 text-green-700':'bg-gray-200 text-gray-400'">받기/교환</span>
         </label>
-        <div class="text-[10px] text-gray-400 pt-1">✅ 1+2 체크 = 교환 / 1만 = 선물 / 2만 = 구함</div>
+        <div class="text-[10px] text-gray-400 pt-1">✅ 1+2 체크 = 교환 / 1만 = 선물 / 2만 = 받기</div>
       </div>
 
       <div class="space-y-2 mb-4">
@@ -1015,7 +1015,7 @@
               <b>{{ trade.from.nickname }}</b>이(가) <b>{{ trade.giveName }}</b> 선물
             </span>
             <span v-else>
-              <b>{{ trade.from.nickname }}</b>이(가) <b>{{ trade.receiveName }}</b> 구함
+              <b>{{ trade.from.nickname }}</b>이(가) <b>{{ trade.receiveName }}</b> 받기
             </span>
           </div>
           <div class="text-[10px] text-gray-400 mt-1">
@@ -1161,7 +1161,7 @@
           <span class="text-pink-400 flex-none font-black">•</span>
           <div class="text-xs text-gray-600 leading-snug">
             <b>멤버 → 비교 → 교환하기 → 📨 쪽지 전송</b>
-            <div class="mt-1 text-gray-400">체크1+2 = <b class="text-red-500">교환</b> · 체크1만 = <b class="text-blue-500">선물</b> · 체크2만 = <b class="text-green-600">구함</b></div>
+            <div class="mt-1 text-gray-400">체크1+2 = <b class="text-red-500">교환</b> · 체크1만 = <b class="text-blue-500">선물</b> · 체크2만 = <b class="text-green-600">받기</b></div>
           </div>
         </div>
         <div class="flex items-start gap-2">
@@ -1854,7 +1854,7 @@ createApp({
     const dealModeLabel = computed(() => {
       if (dealCheckGive.value&&dealCheckReceive.value) return '교환';
       if (dealCheckGive.value&&!dealCheckReceive.value) return '선물';
-      if (!dealCheckGive.value&&dealCheckReceive.value) return '구함';
+      if (!dealCheckGive.value&&dealCheckReceive.value) return '받기';
       return '선택 필요';
     });
 

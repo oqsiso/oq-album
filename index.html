@@ -105,12 +105,64 @@
   <div v-else class="flex flex-col h-screen bg-[#fdf2f8]">
 
     <!-- 상단바 -->
-    <div class="sticky top-0 bg-white z-20 border-b border-pink-100 shadow-sm flex-none">
+    <div class="sticky top-0 bg-white z-20 border-b border-pink-100 shadow-sm flex-none relative">
       <div class="flex items-center gap-2 px-3 pt-3 pb-1.5">
         <div class="flex items-center gap-1.5 flex-1 min-w-0">
-          <span class="bg-pink-100 text-pink-600 px-2 py-0.5 rounded-lg text-[11px] font-black flex-none">S{{ userData.server }}</span>
-          <span class="font-black text-gray-800 text-sm truncate">{{ userData.nickname }}님</span>
-          <span v-if="totalCount >= 81">👑</span>
+          <!-- 캐릭터 전환 버튼 -->
+          <button @click="showCharSwitcher = !showCharSwitcher"
+                  class="flex items-center gap-1.5 bg-gray-50 border border-gray-200 rounded-xl px-2 py-1 btn-press hover:bg-gray-100 transition">
+            <span class="bg-pink-100 text-pink-600 px-1.5 py-0.5 rounded-lg text-[10px] font-black">S{{ userData.server }}</span>
+            <span class="font-black text-gray-800 text-sm truncate max-w-[80px]">{{ userData.nickname }}</span>
+            <span v-if="totalCount >= 81" class="text-sm">👑</span>
+            <i class="fas fa-chevron-down text-gray-400 text-[9px] transition-transform" :class="showCharSwitcher ? 'rotate-180' : ''"></i>
+          </button>
+
+          <!-- 캐릭터 목록 드롭다운 -->
+          <div v-if="showCharSwitcher"
+               class="absolute top-full left-0 mt-1 bg-white border border-gray-200 rounded-2xl shadow-xl z-50 w-56 overflow-hidden"
+               style="top: 100%; left: 12px;">
+            <div class="p-2 space-y-1 max-h-64 overflow-y-auto hide-scroll">
+              <div class="text-[10px] font-black text-gray-400 px-2 py-1">내 캐릭터</div>
+
+              <!-- 저장된 캐릭터 목록 -->
+              <button v-for="char in savedChars" :key="char.docId"
+                      @click="switchChar(char)"
+                      class="w-full flex items-center gap-2 px-3 py-2 rounded-xl hover:bg-gray-50 transition btn-press text-left"
+                      :class="char.docId === currentDocId ? 'bg-pink-50 border border-pink-100' : ''">
+                <span class="bg-pink-100 text-pink-600 text-[10px] px-1.5 py-0.5 rounded font-black flex-none">S{{ char.server }}</span>
+                <span class="font-black text-sm text-gray-700 truncate flex-1">{{ char.nickname }}</span>
+                <i v-if="char.docId === currentDocId" class="fas fa-check text-pink-500 text-xs flex-none"></i>
+                <button v-else @click.stop="removeChar(char.docId)"
+                        class="text-gray-300 hover:text-red-400 flex-none">
+                  <i class="fas fa-xmark text-xs"></i>
+                </button>
+              </button>
+
+              <!-- 캐릭터 추가 -->
+              <div v-if="!showAddChar" class="pt-1 border-t border-gray-100">
+                <button @click="showAddChar = true"
+                        class="w-full flex items-center gap-2 px-3 py-2 rounded-xl hover:bg-gray-50 text-gray-500 text-sm font-black transition">
+                  <i class="fas fa-plus text-xs"></i> 캐릭터 추가
+                </button>
+              </div>
+
+              <!-- 캐릭터 추가 폼 -->
+              <div v-if="showAddChar" class="pt-1 border-t border-gray-100 space-y-1.5 p-1">
+                <input v-model="addCharForm.server" type="number" placeholder="서버번호"
+                       class="w-full p-2 border border-gray-200 rounded-xl text-xs focus:outline-none focus:border-pink-300">
+                <input v-model="addCharForm.nickname" type="text" placeholder="닉네임"
+                       class="w-full p-2 border border-gray-200 rounded-xl text-xs focus:outline-none focus:border-pink-300">
+                <input v-model="addCharForm.password" type="password" maxlength="4" placeholder="비밀번호 4자리"
+                       class="w-full p-2 border border-gray-200 rounded-xl text-xs focus:outline-none focus:border-pink-300">
+                <div class="flex gap-1">
+                  <button @click="addChar"
+                          class="flex-1 bg-pink-500 text-white py-2 rounded-xl text-xs font-black btn-press">추가</button>
+                  <button @click="showAddChar=false; addCharForm={server:'',nickname:'',password:''}"
+                          class="px-3 py-2 bg-gray-100 text-gray-500 rounded-xl text-xs font-black btn-press">취소</button>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
         <div class="flex items-center gap-1.5 flex-none">
           <button @click="openChat" class="relative w-9 h-9 rounded-xl bg-pink-50 text-pink-400 flex items-center justify-center border border-pink-100 btn-press">
@@ -960,6 +1012,106 @@ createApp({
     const showChatPopup = ref(false);
     const showRankingPopup = ref(false);
     const showHistoryPopup = ref(false);
+
+    // ─── 캐릭터 전환 상태 ────────────────────────────────────
+    const showCharSwitcher = ref(false);
+    const showAddChar = ref(false);
+    const addCharForm = ref({ server:'', nickname:'', password:'' });
+    const savedChars = ref([]);
+
+    const currentDocId = computed(() => myDocId.value);
+
+    const charStorageKey = 'oq_chars_v1';
+
+    const loadSavedChars = () => {
+      try {
+        const raw = localStorage.getItem(charStorageKey);
+        savedChars.value = raw ? JSON.parse(raw) : [];
+        // 현재 로그인 캐릭도 목록에 없으면 추가
+        if (userData.value) {
+          const docId = `S${userData.value.server}_${userData.value.nickname}`;
+          const exists = savedChars.value.find(c => c.docId === docId);
+          if (!exists) {
+            savedChars.value.unshift({
+              docId,
+              server: userData.value.server,
+              nickname: userData.value.nickname,
+              password: userData.value.password
+            });
+            localStorage.setItem(charStorageKey, JSON.stringify(savedChars.value));
+          }
+        }
+      } catch { savedChars.value = []; }
+    };
+
+    const saveSavedChars = () => {
+      localStorage.setItem(charStorageKey, JSON.stringify(savedChars.value));
+    };
+
+    const addChar = async () => {
+      const server = Number(addCharForm.value.server);
+      const nickname = (addCharForm.value.nickname || '').trim();
+      const password = (addCharForm.value.password || '').trim();
+      if (!server || !nickname || !password) { alert('모두 입력해주세요!'); return; }
+      if (!/^\d{4}$/.test(password)) { alert('비밀번호는 숫자 4자리!'); return; }
+
+      const docId = `S${server}_${nickname}`;
+      // 이미 있는지 확인
+      if (savedChars.value.find(c => c.docId === docId)) { alert('이미 등록된 캐릭터예요!'); return; }
+
+      // Firebase에서 확인
+      try {
+        const doc = await db.collection('users').doc(docId).get();
+        if (!doc.exists) { alert('존재하지 않는 캐릭터예요! 먼저 해당 캐릭으로 로그인해주세요.'); return; }
+        const data = doc.data();
+        if ((data.password || '') !== password) { alert('비밀번호가 틀렸어요!'); return; }
+
+        savedChars.value.push({ docId, server, nickname, password });
+        saveSavedChars();
+        addCharForm.value = { server:'', nickname:'', password:'' };
+        showAddChar.value = false;
+        alert(`S${server} ${nickname} 추가됐어요! ✅`);
+      } catch(e) { alert('오류: ' + (e.message||e)); }
+    };
+
+    const removeChar = (docId) => {
+      if (docId === currentDocId.value) { alert('현재 로그인 중인 캐릭터는 삭제할 수 없어요!'); return; }
+      savedChars.value = savedChars.value.filter(c => c.docId !== docId);
+      saveSavedChars();
+    };
+
+    const switchChar = async (char) => {
+      if (char.docId === currentDocId.value) { showCharSwitcher.value = false; return; }
+      showCharSwitcher.value = false;
+      isLoading.value = true;
+      try {
+        const doc = await db.collection('users').doc(char.docId).get();
+        if (!doc.exists) { alert('캐릭터 데이터를 찾을 수 없어요!'); return; }
+        const data = doc.data();
+        if (!Array.isArray(data.collection) || data.collection.length !== 81) data.collection = Array(81).fill(0);
+
+        // 기존 구독 해제
+        if (chatUnsubscribe) { chatUnsubscribe(); chatUnsubscribe = null; }
+        if (roomsUnsubscribe) { roomsUnsubscribe(); roomsUnsubscribe = null; }
+        if (resetTimer) clearInterval(resetTimer);
+
+        userData.value = data;
+        localStorage.setItem('oq_user_v4', JSON.stringify(data));
+        favSet.value = loadFavSet();
+
+        await checkAndResetDailyLimit();
+        await updateLastActive();
+        startDailyResetWatcher();
+        subscribeUnread();
+
+        // 현재 캐릭을 목록 맨 앞으로
+        savedChars.value = savedChars.value.filter(c => c.docId !== char.docId);
+        savedChars.value.unshift(char);
+        saveSavedChars();
+
+        currentView.value = 'dashboard';
+      } catch(e) { alert('전환 실패: ' + (e.message||e)); } finally { isLoading.value = false; }
+    };
 
     // ─── 관리자 전용 상태 ────────────────────────────────────
     const showAdminPopup = ref(false);
@@ -1906,6 +2058,7 @@ createApp({
         localStorage.setItem('oq_user_v4', JSON.stringify(finalData));
         favSet.value = loadFavSet();
         isLoggedIn.value = true;
+        loadSavedChars();
         await checkAndResetDailyLimit();
         await updateLastActive();
         startDailyResetWatcher();
@@ -1921,6 +2074,7 @@ createApp({
         userData.value = JSON.parse(saved);
         favSet.value = loadFavSet();
         isLoggedIn.value = true;
+        loadSavedChars();
         await checkAndResetDailyLimit();
         await updateLastActive();
         startDailyResetWatcher();
@@ -1981,6 +2135,9 @@ createApp({
       showRankingPopup, openRanking, rankingList,
       // 히스토리
       showHistoryPopup, openHistoryPopup, historyList, isHistoryLoading,
+      // 캐릭터 전환
+      showCharSwitcher, showAddChar, addCharForm, savedChars, currentDocId,
+      addChar, removeChar, switchChar,
       // 관리자
       showAdminPopup, adminTab, adminSearch, adminMembers, isAdminLoading, inactiveDays,
       openAdminPopup, loadAdminMembers, filteredAdminMembers,

@@ -695,93 +695,144 @@
     </div>
   </div>
 
-  <!-- ===== 쪽지/채팅 팝업 ===== -->
+ ===== 쪽지함 팝업 ===== -->
   <div v-if="showChatPopup" class="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-end justify-center z-50" @click.self="closeChatPopup">
     <div class="bg-white sheet w-full max-w-md shadow-2xl flex flex-col" style="height:85vh">
 
-      <!-- 채팅 헤더 -->
+      <!-- 헤더 -->
       <div class="p-4 border-b border-gray-100 flex-none">
-        <div class="flex items-center justify-between mb-2">
+        <div class="flex items-center justify-between">
           <div class="flex items-center gap-2">
-            <button v-if="chatTarget" @click="chatTarget=null; loadChatList()" class="w-7 h-7 rounded-full bg-gray-100 flex items-center justify-center text-gray-400 btn-press">
+            <button v-if="chatView !== 'list'" @click="chatView='list'; loadChatList()"
+                    class="w-7 h-7 rounded-full bg-gray-100 flex items-center justify-center text-gray-400 btn-press">
               <i class="fas fa-arrow-left text-xs"></i>
             </button>
             <div>
               <h3 class="text-base font-black text-gray-800">
-                {{ chatTarget ? `💬 S${chatTarget.server} ${chatTarget.nickname}` : '💬 쪽지함' }}
+                <span v-if="chatView==='list'">📨 쪽지함</span>
+                <span v-else-if="chatView==='read'">📩 {{ readingMsg ? readingMsg.otherNick : '' }}</span>
+                <span v-else>✏️ 새 쪽지</span>
               </h3>
-              <div v-if="!chatTarget" class="text-xs text-gray-400">{{ unreadCount > 0 ? `읽지 않은 메시지 ${unreadCount}개` : '새 메시지 없음' }}</div>
+              <div v-if="chatView==='list'" class="text-xs text-gray-400">
+                {{ unreadCount > 0 ? `읽지 않은 쪽지 ${unreadCount}개` : '새 쪽지 없음' }}
+              </div>
             </div>
           </div>
-          <button @click="closeChatPopup" class="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center text-gray-400 btn-press"><i class="fas fa-times text-sm"></i></button>
+          <div class="flex items-center gap-1.5">
+            <!-- 새 쪽지 쓰기 (목록에서만) -->
+            <button v-if="chatView==='list'" @click="chatView='write'; chatTarget=null; chatInput=''"
+                    class="text-[11px] bg-pink-500 text-white px-3 py-1.5 rounded-xl font-black btn-press flex items-center gap-1">
+              <i class="fas fa-pen text-[10px]"></i> 쓰기
+            </button>
+            <button @click="closeChatPopup" class="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center text-gray-400 btn-press">
+              <i class="fas fa-times text-sm"></i>
+            </button>
+          </div>
         </div>
       </div>
 
-      <!-- 쪽지함 목록 -->
-      <div v-if="!chatTarget" class="flex-1 overflow-y-auto hide-scroll p-4">
+      <!-- 쪽지 목록 -->
+      <div v-if="chatView==='list'" class="flex-1 overflow-y-auto hide-scroll">
         <div v-if="isChatLoading" class="flex justify-center py-10"><div class="loader"></div></div>
-        <div v-else-if="chatRooms.length===0" class="text-center text-gray-400 py-10 bg-gray-50 rounded-2xl text-xs">
-          <div class="text-3xl mb-2">💬</div>아직 쪽지가 없어요<br>멤버 목록에서 말을 걸어보세요!
+        <div v-else-if="chatRooms.length===0" class="flex flex-col items-center justify-center h-full text-gray-400 text-xs">
+          <div class="text-4xl mb-3">📭</div>
+          <div class="font-black text-gray-500 mb-1">쪽지가 없어요</div>
+          <div class="text-gray-400">멤버에서 상대를 찾아 쪽지를 보내보세요!</div>
         </div>
-        <div v-else class="space-y-2">
+        <div v-else class="divide-y divide-gray-100">
           <div v-for="room in chatRooms" :key="room.id"
-               class="flex items-center gap-2 p-3 rounded-2xl border transition"
-               :class="room.unread > 0 ? 'border-pink-200 bg-pink-50/50' : 'border-gray-100 bg-white'">
-            <!-- 아바타 + 내용 (탭하면 열기) -->
-            <div class="flex items-center gap-3 flex-1 min-w-0 cursor-pointer" @click="openChatRoom(room)">
-              <div class="w-10 h-10 rounded-full bg-pink-100 flex items-center justify-center font-black text-pink-500 text-sm flex-none">
-                {{ (room.otherNickname || '?')[0] }}
+               class="flex items-center px-4 py-3.5 hover:bg-gray-50 transition cursor-pointer"
+               :class="room.unread > 0 ? 'bg-pink-50/60' : ''"
+               @click="openMailRoom(room)">
+            <!-- 아바타 -->
+            <div class="w-10 h-10 rounded-full flex items-center justify-center font-black text-sm flex-none mr-3"
+                 :class="room.unread > 0 ? 'bg-pink-200 text-pink-700' : 'bg-gray-100 text-gray-500'">
+              {{ (room.otherNickname || '?')[0] }}
+            </div>
+            <!-- 내용 -->
+            <div class="flex-1 min-w-0">
+              <div class="flex items-center justify-between gap-2 mb-0.5">
+                <span class="font-black text-sm" :class="room.unread > 0 ? 'text-gray-900' : 'text-gray-700'">
+                  {{ room.otherNickname }}
+                </span>
+                <span class="text-[10px] text-gray-400 flex-none">{{ formatChatTime(room.lastAt) }}</span>
               </div>
-              <div class="flex-1 min-w-0">
-                <div class="flex items-center justify-between gap-1">
-                  <span class="font-black text-sm text-gray-800 truncate">{{ room.otherNickname }}</span>
-                  <span class="text-[10px] text-gray-400 flex-none">{{ formatChatTime(room.lastAt) }}</span>
-                </div>
-                <div class="flex items-center justify-between gap-1 mt-0.5">
-                  <span class="text-[11px] text-gray-500 truncate">{{ room.lastMsg }}</span>
-                  <span v-if="room.unread > 0" class="bg-pink-500 text-white text-[9px] font-black px-1.5 py-0.5 rounded-full flex-none">{{ room.unread }}</span>
-                </div>
+              <div class="flex items-center gap-2">
+                <span class="text-[11px] truncate" :class="room.unread > 0 ? 'text-gray-700 font-bold' : 'text-gray-400'">
+                  {{ room.lastMsg }}
+                </span>
+                <span v-if="room.unread > 0"
+                      class="bg-pink-500 text-white text-[9px] font-black px-1.5 py-0.5 rounded-full flex-none">
+                  {{ room.unread }}
+                </span>
               </div>
             </div>
-            <!-- 나가기 버튼 -->
+            <!-- 삭제 -->
             <button @click.stop="leaveChatRoom(room)"
-                    class="w-8 h-8 rounded-xl bg-gray-100 text-gray-400 flex items-center justify-center btn-press flex-none hover:bg-red-50 hover:text-red-400 border border-gray-200">
+                    class="w-7 h-7 rounded-lg bg-gray-100 text-gray-300 flex items-center justify-center btn-press flex-none ml-2 hover:text-red-400">
               <i class="fas fa-xmark text-xs"></i>
             </button>
           </div>
         </div>
       </div>
 
-      <!-- 1:1 채팅방 -->
-      <div v-if="chatTarget" class="flex-1 overflow-y-auto hide-scroll p-4 flex flex-col gap-2" ref="chatBodyRef">
+      <!-- 쪽지 읽기 -->
+      <div v-if="chatView==='read' && readingMsg" class="flex-1 overflow-y-auto hide-scroll p-4 flex flex-col gap-3">
+        <!-- 메시지들 -->
         <div v-if="isChatLoading" class="flex justify-center py-10"><div class="loader"></div></div>
         <div v-else-if="chatMessages.length===0" class="text-center text-gray-400 py-10 text-xs bg-gray-50 rounded-2xl">
-          첫 메시지를 보내보세요! 👋
+          아직 주고받은 쪽지가 없어요
         </div>
-        <div v-else v-for="msg in chatMessages" :key="msg.id" class="flex" :class="isMyMsg(msg) ? 'justify-end' : 'justify-start'">
-          <div class="max-w-[75%]">
-            <div v-if="!isMyMsg(msg)" class="text-[10px] text-gray-400 mb-0.5 ml-1">{{ msg.senderNick }}</div>
-            <div class="px-3 py-2 text-sm" :class="isMyMsg(msg) ? 'bubble-me' : 'bubble-other'">{{ msg.text }}</div>
-            <div class="text-[9px] text-gray-400 mt-0.5" :class="isMyMsg(msg) ? 'text-right mr-1' : 'ml-1'">{{ formatChatTime(msg.createdAt) }}</div>
+        <div v-else v-for="msg in chatMessages" :key="msg.id"
+             class="flex flex-col rounded-2xl border p-3.5"
+             :class="isMyMsg(msg) ? 'bg-pink-50 border-pink-100 items-end' : 'bg-white border-gray-100 items-start'">
+          <div class="flex items-center gap-2 mb-2 w-full"
+               :class="isMyMsg(msg) ? 'flex-row-reverse' : ''">
+            <div class="w-7 h-7 rounded-full flex items-center justify-center font-black text-xs flex-none"
+                 :class="isMyMsg(msg) ? 'bg-pink-200 text-pink-700' : 'bg-gray-100 text-gray-500'">
+              {{ (msg.senderNick || '?')[0] }}
+            </div>
+            <span class="font-black text-xs text-gray-600">{{ msg.senderNick }}</span>
+            <span class="text-[10px] text-gray-400 ml-auto">{{ formatChatTime(msg.createdAt) }}</span>
           </div>
+          <p class="text-sm text-gray-700 leading-relaxed w-full whitespace-pre-wrap"
+             :class="isMyMsg(msg) ? 'text-right' : ''">{{ msg.text }}</p>
         </div>
       </div>
 
-      <!-- 메시지 입력창 -->
-      <div v-if="chatTarget" class="p-3 border-t border-gray-100 flex gap-2 flex-none bg-white">
-        <input v-model="chatInput" type="text" placeholder="메시지 입력..."
-               @keyup.enter="sendMessage"
-               class="flex-1 py-2.5 px-4 bg-gray-50 border border-gray-200 rounded-full text-sm focus:outline-none focus:border-pink-300">
-        <button @click="sendMessage" :disabled="!chatInput.trim() || isChatSending"
-                class="w-10 h-10 bg-pink-500 text-white rounded-full flex items-center justify-center btn-press disabled:opacity-40">
-          <i class="fas fa-paper-plane text-sm"></i>
-        </button>
+      <!-- 답장/새쪽지 작성 -->
+      <div v-if="chatView==='read' || chatView==='write'"
+           class="border-t border-gray-100 p-3 flex-none bg-white">
+        <!-- 받는 사람 선택 (새 쪽지 쓸 때) -->
+        <div v-if="chatView==='write'" class="mb-2">
+          <div class="text-xs font-black text-gray-500 mb-1.5">받는 사람</div>
+          <select v-model="chatTarget" class="w-full p-2.5 border border-gray-200 rounded-xl text-sm bg-white focus:outline-none focus:border-pink-300">
+            <option :value="null">선택해주세요</option>
+            <option v-for="user in userList" :key="user.id" :value="user">
+              S{{ user.server }} {{ user.nickname }}
+            </option>
+          </select>
+        </div>
+        <!-- 입력창 -->
+        <div class="flex gap-2">
+          <textarea v-model="chatInput"
+                    :placeholder="chatView==='read' ? '답장 내용 입력...' : '쪽지 내용 입력...'"
+                    rows="3"
+                    class="flex-1 py-2.5 px-3 bg-gray-50 border border-gray-200 rounded-2xl text-sm focus:outline-none focus:border-pink-300 resize-none"></textarea>
+          <button @click="sendMessage" :disabled="!chatInput.trim() || isChatSending || (chatView==='write' && !chatTarget)"
+                  class="w-10 h-10 self-end bg-pink-500 text-white rounded-full flex items-center justify-center btn-press disabled:opacity-40 flex-none">
+            <i class="fas fa-paper-plane text-sm"></i>
+          </button>
+        </div>
+        <div class="text-[10px] text-gray-400 mt-1.5 text-center">
+          {{ chatView==='write' ? '멤버 목록에서 바로 쪽지 보내기도 가능해요' : '' }}
+        </div>
       </div>
 
     </div>
   </div>
 
-  <!-- ===== 랭킹 팝업 ===== -->
+    <!-- ===== 랭킹 팝업 ===== -->
   <div v-if="showRankingPopup" class="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-end justify-center z-50" @click.self="showRankingPopup=false">
     <div class="bg-white sheet w-full max-w-md p-5 max-h-[85vh] flex flex-col shadow-2xl">
       <div class="flex items-center justify-between mb-4">
@@ -1179,6 +1230,8 @@ createApp({
 
     // 쪽지/채팅
     const chatTarget = ref(null);
+    const chatView = ref('list');   // 'list' | 'read' | 'write'
+    const readingMsg = ref(null);   // 현재 읽는 대화방 정보
     const chatMessages = ref([]);
     const chatRooms = ref([]);
     const chatInput = ref('');
@@ -1790,6 +1843,8 @@ createApp({
 
     const openChat = async () => {
       chatTarget.value = null;
+      chatView.value = 'list';
+      readingMsg.value = null;
       showChatPopup.value = true;
       await loadChatList();
     };
@@ -1799,12 +1854,21 @@ createApp({
       showPopup.value = false;
       showComparePopup.value = false;
       chatTarget.value = user;
+      readingMsg.value = { otherNick: user.nickname };
+      chatView.value = 'read';
       showChatPopup.value = true;
       await loadChatMessages(user);
     };
 
     const openChatRoom = async room => {
       chatTarget.value = { id: room.otherId, nickname: room.otherNickname, server: '' };
+      await loadChatMessages({ id: room.otherId });
+    };
+
+    const openMailRoom = async room => {
+      chatTarget.value = { id: room.otherId, nickname: room.otherNickname, server: room.otherServer || '' };
+      readingMsg.value = { otherNick: room.otherNickname };
+      chatView.value = 'read';
       await loadChatMessages({ id: room.otherId });
     };
 
@@ -1855,6 +1919,12 @@ createApp({
     const sendMessage = async () => {
       const text = chatInput.value.trim();
       if (!text || isChatSending.value || !chatTarget.value) return;
+      // write 모드면 먼저 chatMessages 구독 시작
+      if (chatView.value === 'write') {
+        readingMsg.value = { otherNick: chatTarget.value.nickname };
+        await loadChatMessages(chatTarget.value);
+        chatView.value = 'read';
+      }
       isChatSending.value = true;
       chatInput.value = '';
       const roomId = getChatRoomId(myDocId.value, chatTarget.value.id);
@@ -1906,6 +1976,8 @@ createApp({
       showChatPopup.value = false;
       if (chatUnsubscribe) { chatUnsubscribe(); chatUnsubscribe=null; }
       chatTarget.value = null;
+      chatView.value = 'list';
+      readingMsg.value = null;
       chatMessages.value = [];
     };
 
@@ -2208,7 +2280,8 @@ createApp({
       // 쪽지
       showChatPopup, chatTarget, chatMessages, chatRooms, chatInput,
       isChatLoading, isChatSending, unreadCount, chatBodyRef,
-      openChat, openDirectChat, openChatRoom, sendMessage, closeChatPopup, isMyMsg, formatChatTime, leaveChatRoom,
+      openChat, openDirectChat, openChatRoom, openMailRoom, sendMessage, closeChatPopup, isMyMsg, formatChatTime, leaveChatRoom,
+      chatView, readingMsg,
       // 랭킹
       showRankingPopup, openRanking, rankingList,
       // 히스토리

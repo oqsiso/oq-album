@@ -1139,6 +1139,8 @@ createApp({
         saveSavedChars();
 
         currentView.value = 'dashboard';
+        // 전환 후 나머지 캐릭터 쪽지 재확인
+        setTimeout(() => fetchCharUnreads(), 1000);
       } catch(e) { alert('전환 실패: ' + (e.message||e)); } finally { isLoading.value = false; }
     };
 
@@ -1750,8 +1752,40 @@ createApp({
             let total = 0;
             snap.forEach(doc => { const d=doc.data(); total+=(d.unread||{})[myDocId.value]||0; });
             unreadCount.value = total;
-          }, () => {});
-      } catch {}
+          }, async () => {
+            // 인덱스 없을 때 fallback - 단순 get으로 대체
+            try {
+              const snap = await db.collection('chatRooms')
+                .where('members', 'array-contains', myDocId.value).get();
+              let total = 0;
+              snap.forEach(doc => { const d=doc.data(); total+=(d.unread||{})[myDocId.value]||0; });
+              unreadCount.value = total;
+            } catch {}
+          });
+      } catch {
+        // try/catch fallback
+        db.collection('chatRooms')
+          .where('members', 'array-contains', myDocId.value)
+          .get().then(snap => {
+            let total = 0;
+            snap.forEach(doc => { const d=doc.data(); total+=(d.unread||{})[myDocId.value]||0; });
+            unreadCount.value = total;
+          }).catch(() => {});
+      }
+    };
+
+    // 주기적으로 unread 갱신 (30초마다)
+    const startUnreadPolling = () => {
+      setInterval(async () => {
+        if (!isLoggedIn.value || !userData.value) return;
+        try {
+          const snap = await db.collection('chatRooms')
+            .where('members', 'array-contains', myDocId.value).get();
+          let total = 0;
+          snap.forEach(doc => { const d=doc.data(); total+=(d.unread||{})[myDocId.value]||0; });
+          unreadCount.value = total;
+        } catch {}
+      }, 30000);
     };
 
     const openChat = async () => {
@@ -2092,6 +2126,7 @@ createApp({
         await updateLastActive();
         startDailyResetWatcher();
         subscribeUnread();
+        setTimeout(() => fetchCharUnreads(), 1500);
       } catch(e) { alert('오류: '+(e.message||e)); } finally { isLoading.value=false; }
     };
 
@@ -2108,6 +2143,8 @@ createApp({
         await updateLastActive();
         startDailyResetWatcher();
         subscribeUnread();
+        // 로그인 직후 다른 캐릭터 쪽지 확인
+        setTimeout(() => fetchCharUnreads(), 1500);
       } catch {}
     };
 
@@ -2131,7 +2168,10 @@ createApp({
     const openHelp = () => showHelpPopup.value=true;
     const closeHelp = () => showHelpPopup.value=false;
 
-    onMounted(() => checkLogin());
+    onMounted(() => {
+      checkLogin();
+      startUnreadPolling();
+    });
     onBeforeUnmount(() => {
       if (resetTimer) clearInterval(resetTimer);
       if (holdTimer) clearTimeout(holdTimer);

@@ -521,27 +521,22 @@
         <button @click="showUserListPopup=false" class="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center text-gray-400 btn-press"><i class="fas fa-times text-sm"></i></button>
       </div>
 
-      <div class="flex gap-1.5 mb-3 overflow-x-auto hide-scroll items-center">
-        <button class="flex-none text-[11px] font-black px-3 rounded-full border transition-all whitespace-nowrap"
-                style="height:30px; line-height:1;"
-                :class="memberFilter==='all'?'bg-gray-900 text-white border-gray-900':'bg-white text-gray-500 border-gray-200'"
-                @click="memberFilter='all'">전체</button>
-        <button class="flex-none text-[11px] font-black px-3 rounded-full border transition-all whitespace-nowrap"
-                style="height:30px; line-height:1;"
-                :class="memberFilter==='winwin'?'bg-gray-900 text-white border-gray-900':'bg-white text-gray-500 border-gray-200'"
-                @click="memberFilter='winwin'">🔥 추천</button>
-        <button class="flex-none text-[11px] font-black px-3 rounded-full border transition-all whitespace-nowrap"
-                style="height:30px; line-height:1;"
-                :class="memberFilter==='receive'?'bg-gray-900 text-white border-gray-900':'bg-white text-gray-500 border-gray-200'"
-                @click="memberFilter='receive'">구함</button>
-        <button class="flex-none text-[11px] font-black px-3 rounded-full border transition-all whitespace-nowrap"
-                style="height:30px; line-height:1;"
-                :class="memberFilter==='give'?'bg-gray-900 text-white border-gray-900':'bg-white text-gray-500 border-gray-200'"
-                @click="memberFilter='give'">선물가능</button>
-        <button class="flex-none text-[11px] font-black px-3 rounded-full border transition-all whitespace-nowrap"
-                style="height:30px; line-height:1;"
-                :class="memberFilter==='fav'?'bg-gray-900 text-white border-gray-900':'bg-white text-gray-500 border-gray-200'"
-                @click="memberFilter='fav'">⭐ 즐겨찾기</button>
+      <div class="flex gap-1.5 mb-3 overflow-x-auto hide-scroll" style="align-items:center;">
+        <button @click="memberFilter='all'"
+                style="height:28px; padding: 0 12px; font-size:11px; font-weight:800; border-radius:999px; border:1.5px solid; white-space:nowrap; flex-shrink:0; display:inline-flex; align-items:center; justify-content:center;"
+                :style="memberFilter==='all' ? 'background:#111827; color:#fff; border-color:#111827;' : 'background:#fff; color:#6b7280; border-color:#e5e7eb;'">전체</button>
+        <button @click="memberFilter='winwin'"
+                style="height:28px; padding: 0 12px; font-size:11px; font-weight:800; border-radius:999px; border:1.5px solid; white-space:nowrap; flex-shrink:0; display:inline-flex; align-items:center; justify-content:center;"
+                :style="memberFilter==='winwin' ? 'background:#111827; color:#fff; border-color:#111827;' : 'background:#fff; color:#6b7280; border-color:#e5e7eb;'">🔥 추천</button>
+        <button @click="memberFilter='receive'"
+                style="height:28px; padding: 0 12px; font-size:11px; font-weight:800; border-radius:999px; border:1.5px solid; white-space:nowrap; flex-shrink:0; display:inline-flex; align-items:center; justify-content:center;"
+                :style="memberFilter==='receive' ? 'background:#111827; color:#fff; border-color:#111827;' : 'background:#fff; color:#6b7280; border-color:#e5e7eb;'">구함</button>
+        <button @click="memberFilter='give'"
+                style="height:28px; padding: 0 12px; font-size:11px; font-weight:800; border-radius:999px; border:1.5px solid; white-space:nowrap; flex-shrink:0; display:inline-flex; align-items:center; justify-content:center;"
+                :style="memberFilter==='give' ? 'background:#111827; color:#fff; border-color:#111827;' : 'background:#fff; color:#6b7280; border-color:#e5e7eb;'">선물가능</button>
+        <button @click="memberFilter='fav'"
+                style="height:28px; padding: 0 12px; font-size:11px; font-weight:800; border-radius:999px; border:1.5px solid; white-space:nowrap; flex-shrink:0; display:inline-flex; align-items:center; justify-content:center;"
+                :style="memberFilter==='fav' ? 'background:#111827; color:#fff; border-color:#111827;' : 'background:#fff; color:#6b7280; border-color:#e5e7eb;'">⭐ 즐겨찾기</button>
       </div>
 
       <div class="relative mb-3">
@@ -1095,6 +1090,59 @@
     </div>
   </div>
 
+  <!-- ===== 환영 팝업 (첫 로그인) ===== -->
+  <div v-if="showWelcomePopup" class="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+    <div class="bg-white rounded-2xl w-full max-w-sm shadow-2xl overflow-hidden fade-up">
+      <!-- 상단 핑크 헤더 -->
+      <div class="bg-gradient-to-br from-pink-400 to-pink-500 p-6 text-center">
+        <div class="text-4xl mb-2">👸</div>
+        <h3 class="text-lg font-black text-white">환영해요!</h3>
+        <p class="text-pink-100 text-xs mt-1">오피스퀸 스티커 교환소</p>
+      </div>
+
+      <!-- 내용 -->
+      <div class="p-5 space-y-4">
+        <div class="flex items-start gap-3">
+          <div class="w-8 h-8 rounded-xl bg-pink-100 text-pink-500 flex items-center justify-center font-black text-sm flex-none">1</div>
+          <div>
+            <div class="text-sm font-black text-gray-800 mb-0.5">스티커 입력하기</div>
+            <p class="text-xs text-gray-500 leading-snug">앨범 탭 → 스티커 칸 탭하면 +1<br>지금 갖고 있는 스티커를 입력해요!</p>
+          </div>
+        </div>
+        <div class="flex items-start gap-3">
+          <div class="w-8 h-8 rounded-xl bg-pink-100 text-pink-500 flex items-center justify-center font-black text-sm flex-none">2</div>
+          <div>
+            <div class="text-sm font-black text-gray-800 mb-0.5">교환 상대 찾기</div>
+            <p class="text-xs text-gray-500 leading-snug">멤버 목록에서 교환 가능한<br>상대를 자동으로 찾아드려요!</p>
+          </div>
+        </div>
+        <div class="flex items-start gap-3">
+          <div class="w-8 h-8 rounded-xl bg-pink-100 text-pink-500 flex items-center justify-center font-black text-sm flex-none">3</div>
+          <div>
+            <div class="text-sm font-black text-gray-800 mb-0.5">쪽지로 교환 제안</div>
+            <p class="text-xs text-gray-500 leading-snug">앱 안에서 바로 쪽지를 보내고<br>교환을 진행해요!</p>
+          </div>
+        </div>
+
+        <div class="bg-amber-50 border border-amber-200 rounded-xl p-3 text-center">
+          <p class="text-xs text-amber-700 font-black">💡 먼저 스티커를 입력해야<br>교환 상대를 찾을 수 있어요!</p>
+        </div>
+      </div>
+
+      <!-- 버튼 -->
+      <div class="px-5 pb-5">
+        <button @click="closeWelcomePopup"
+                class="w-full py-3.5 bg-pink-500 text-white rounded-2xl font-black text-sm btn-press">
+          지금 스티커 입력하러 가기 →
+        </button>
+        <button @click="showWelcomePopup=false"
+                class="w-full py-2 text-gray-400 text-xs font-black mt-1 btn-press">
+          나중에 할게요
+        </button>
+      </div>
+    </div>
+  </div>
+
   <!-- ===== 도움말 팝업 ===== -->
   <div v-if="showHelpPopup" class="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4" @click.self="closeHelp">
     <div class="bg-white rounded-2xl w-full max-w-sm p-6 shadow-2xl max-h-[90vh] overflow-y-auto hide-scroll">
@@ -1390,6 +1438,7 @@ createApp({
     // ─── 관리자 전용 상태 ────────────────────────────────────
     const showAdminPopup = ref(false);
     const showTradeAdjust = ref(false);
+    const showWelcomePopup = ref(false);
     const adminTab = ref('members');
     const adminSearch = ref('');
     const adminMembers = ref([]);
@@ -2479,6 +2528,12 @@ createApp({
         startDailyResetWatcher();
         subscribeUnread();
         setTimeout(() => fetchCharUnreads(), 1500);
+
+        // 처음 가입한 사람이면 환영 팝업
+        const isNewUser = !doc.exists;
+        if (isNewUser) {
+          setTimeout(() => { showWelcomePopup.value = true; }, 500);
+        }
       } catch(e) { alert('오류: '+(e.message||e)); } finally { isLoading.value=false; }
     };
 
@@ -2517,6 +2572,12 @@ createApp({
     // 캐릭터 드롭다운 열릴 때 N 뱃지 갱신
     watch(showCharSwitcher, (v) => { if (v) fetchCharUnreads(); });
 
+    const closeWelcomePopup = () => {
+      showWelcomePopup.value = false;
+      // 첫 앨범으로 안내
+      currentView.value = 'dashboard';
+    };
+
     const openHelp = () => showHelpPopup.value=true;
     const closeHelp = () => showHelpPopup.value=false;
 
@@ -2535,6 +2596,7 @@ createApp({
       isLoggedIn, isLoading, loginForm, handleLogin, logout,
       userData, myDocId,
       showHelpPopup, openHelp, closeHelp,
+      showWelcomePopup, closeWelcomePopup,
       currentView, currentAlbumIdx, currentAlbumStickers,
       openAlbum, prevAlbum, nextAlbum,
       updateCount, onStickerTap, onStickerHoldStart, onStickerHoldEnd,

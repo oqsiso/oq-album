@@ -515,7 +515,7 @@
 
   <!-- ===== 멤버 팝업 ===== -->
   <div v-if="showUserListPopup" class="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-end justify-center z-50" @click.self="showUserListPopup=false">
-    <div class="bg-white sheet w-full max-w-md p-5 max-h-[88vh] flex flex-col shadow-2xl">
+    <div class="bg-white sheet w-full max-w-md px-5 pt-4 pb-5 max-h-[88vh] flex flex-col shadow-2xl">
       <div class="flex items-center justify-between mb-3">
         <h3 class="text-base font-black text-gray-800">👥 활동 멤버 <span class="text-pink-500">{{ filteredUserList.length }}명</span></h3>
         <button @click="showUserListPopup=false" class="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center text-gray-400 btn-press"><i class="fas fa-times text-sm"></i></button>
@@ -599,7 +599,7 @@
       </div>
 
       <div class="text-[10px] text-gray-400 bg-gray-50 rounded-xl p-2 mb-3">
-        체크1+2 = <b class="text-red-500">교환</b> · 체크1만 = <b class="text-blue-500">선물</b> · 체크2만 = <b class="text-green-600">받기</b>
+        체크1+2 = <b class="text-red-500">교환</b> · 체크1만 = <b class="text-blue-500">주기</b> · 체크2만 = <b class="text-green-600">받기</b>
       </div>
 
       <div v-if="isLoading" class="flex justify-center py-8"><div class="loader"></div></div>
@@ -639,7 +639,7 @@
           <div class="text-xs text-gray-400 mb-0.5">교환하기</div>
           <div class="text-base font-black text-gray-800">
             <span v-if="dealModeLabel==='교환'">❤️ 교환</span>
-            <span v-else-if="dealModeLabel==='선물'">🎁 선물</span>
+            <span v-else-if="dealModeLabel==='주기'">🎁 주기</span>
             <span v-else-if="dealModeLabel==='받기'">🔍 받기</span>
             <span v-else>✅ 선택 필요</span>
             <span class="text-sm text-gray-400 font-bold"> / {{ compareTarget.nickname }}</span>
@@ -654,7 +654,7 @@
           <div class="flex-1">
             <div class="text-xs font-black text-gray-800">① 내가 줄 스티커 <span class="text-[10px] text-gray-400">(내 2장↑ & 상대 0)</span></div>
           </div>
-          <span class="text-[10px] font-black px-2 py-1 rounded-full" :class="dealCheckGive?'bg-blue-100 text-blue-600':'bg-gray-200 text-gray-400'">선물/교환</span>
+          <span class="text-[10px] font-black px-2 py-1 rounded-full" :class="dealCheckGive?'bg-blue-100 text-blue-600':'bg-gray-200 text-gray-400'">주기/교환</span>
         </label>
         <label class="flex items-center gap-3 cursor-pointer">
           <input type="checkbox" v-model="dealCheckReceive" class="w-5 h-5 accent-pink-500">
@@ -663,7 +663,7 @@
           </div>
           <span class="text-[10px] font-black px-2 py-1 rounded-full" :class="dealCheckReceive?'bg-green-100 text-green-700':'bg-gray-200 text-gray-400'">받기/교환</span>
         </label>
-        <div class="text-[10px] text-gray-400 pt-1">✅ 1+2 체크 = 교환 / 1만 = 선물 / 2만 = 받기</div>
+        <div class="text-[10px] text-gray-400 pt-1">✅ 1+2 체크 = 교환 / 1만 = 주기 / 2만 = 받기</div>
       </div>
 
       <div class="space-y-2 mb-4">
@@ -998,11 +998,11 @@
       <div v-else class="overflow-y-auto flex-1 hide-scroll space-y-2">
         <div v-for="trade in historyList" :key="trade.id"
              class="border rounded-2xl p-3"
-             :class="trade.typeLabel==='교환'?'border-red-100 bg-red-50':trade.typeLabel==='선물'?'border-blue-100 bg-blue-50':'border-green-100 bg-green-50'">
+             :class="trade.typeLabel==='교환'?'border-red-100 bg-red-50':trade.typeLabel==='주기'?'border-blue-100 bg-blue-50':'border-green-100 bg-green-50'">
           <div class="flex items-center justify-between mb-1.5">
             <span class="text-xs font-black"
-                  :class="trade.typeLabel==='교환'?'text-red-500':trade.typeLabel==='선물'?'text-blue-500':'text-green-600'">
-              {{ trade.typeLabel==='교환'?'❤️':trade.typeLabel==='선물'?'🎁':'🔍' }} {{ trade.typeLabel }}
+                  :class="trade.typeLabel==='교환'?'text-red-500':trade.typeLabel==='주기'?'text-blue-500':'text-green-600'">
+              {{ trade.typeLabel==='교환'?'❤️':trade.typeLabel==='주기'?'🎁':'🔍' }} {{ trade.typeLabel }}
             </span>
             <span class="text-[10px] text-gray-400">{{ trade.date }}</span>
           </div>
@@ -1011,8 +1011,8 @@
               <b>{{ trade.from.nickname }}</b> → <b>{{ trade.giveName }}</b><br>
               <b>{{ trade.to.nickname }}</b> → <b>{{ trade.receiveName }}</b>
             </span>
-            <span v-else-if="trade.typeLabel==='선물'">
-              <b>{{ trade.from.nickname }}</b>이(가) <b>{{ trade.giveName }}</b> 선물
+            <span v-else-if="trade.typeLabel==='주기'">
+              <b>{{ trade.from.nickname }}</b>이(가) <b>{{ trade.giveName }}</b> 주기
             </span>
             <span v-else>
               <b>{{ trade.from.nickname }}</b>이(가) <b>{{ trade.receiveName }}</b> 받기
@@ -1161,7 +1161,7 @@
           <span class="text-pink-400 flex-none font-black">•</span>
           <div class="text-xs text-gray-600 leading-snug">
             <b>멤버 → 비교 → 교환하기 → 📨 쪽지 전송</b>
-            <div class="mt-1 text-gray-400">체크1+2 = <b class="text-red-500">교환</b> · 체크1만 = <b class="text-blue-500">선물</b> · 체크2만 = <b class="text-green-600">받기</b></div>
+            <div class="mt-1 text-gray-400">체크1+2 = <b class="text-red-500">교환</b> · 체크1만 = <b class="text-blue-500">주기</b> · 체크2만 = <b class="text-green-600">받기</b></div>
           </div>
         </div>
         <div class="flex items-start gap-2">
@@ -1853,7 +1853,7 @@ createApp({
     // ─── 교환하기 ─────────────────────────────────────────
     const dealModeLabel = computed(() => {
       if (dealCheckGive.value&&dealCheckReceive.value) return '교환';
-      if (dealCheckGive.value&&!dealCheckReceive.value) return '선물';
+      if (dealCheckGive.value&&!dealCheckReceive.value) return '주기';
       if (!dealCheckGive.value&&dealCheckReceive.value) return '받기';
       return '선택 필요';
     });
@@ -1888,7 +1888,7 @@ createApp({
       if (dealCheckGive.value&&dealCheckReceive.value)
         text=`[오피스퀸] S${tS} ${tN}님! S${myS} ${myN}입니다.\n제가 [${gN}] 드리고,\n저는 [${rN}] 받을게요!\n교환 가능하실까요?`;
       else if (dealCheckGive.value)
-        text=`[오피스퀸] S${tS} ${tN}님! S${myS} ${myN}입니다.\n[${gN}] 여유분이 있어서 선물로 드릴게요!`;
+        text=`[오피스퀸] S${tS} ${tN}님! S${myS} ${myN}입니다.\n[${gN}] 여유분이 있어서 드릴게요!`;
       else
         text=`[오피스퀸] S${tS} ${tN}님! S${myS} ${myN}입니다.\n[${rN}] 여유분 있으시면 주실 수 있을까요?`;
 
@@ -1910,7 +1910,7 @@ createApp({
       if (dealCheckGive.value&&dealCheckReceive.value)
         text=`[오피스퀸] S${tS} ${tN}님! S${myS} ${myN}입니다.\n제가 [${gN}] 드리고,\n저는 [${rN}] 받을게요!\n교환 가능하실까요?`;
       else if (dealCheckGive.value)
-        text=`[오피스퀸] S${tS} ${tN}님! S${myS} ${myN}입니다.\n[${gN}] 여유분이 있어서 선물로 드릴게요!`;
+        text=`[오피스퀸] S${tS} ${tN}님! S${myS} ${myN}입니다.\n[${gN}] 여유분이 있어서 드릴게요!`;
       else
         text=`[오피스퀸] S${tS} ${tN}님! S${myS} ${myN}입니다.\n[${rN}] 여유분 있으시면 주실 수 있을까요?`;
 

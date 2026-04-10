@@ -521,12 +521,27 @@
         <button @click="showUserListPopup=false" class="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center text-gray-400 btn-press"><i class="fas fa-times text-sm"></i></button>
       </div>
 
-      <div class="flex gap-1.5 mb-3 overflow-x-auto hide-scroll">
-        <button class="tab-btn flex-none" :class="memberFilter==='all'?'tab-on':'tab-off'" @click="memberFilter='all'">전체</button>
-        <button class="tab-btn flex-none" :class="memberFilter==='winwin'?'tab-on':'tab-off'" @click="memberFilter='winwin'">🔥추천</button>
-        <button class="tab-btn flex-none" :class="memberFilter==='receive'?'tab-on':'tab-off'" @click="memberFilter='receive'">구함</button>
-        <button class="tab-btn flex-none" :class="memberFilter==='give'?'tab-on':'tab-off'" @click="memberFilter='give'">선물가능</button>
-        <button class="tab-btn flex-none" :class="memberFilter==='fav'?'tab-on':'tab-off'" @click="memberFilter='fav'">⭐즐겨찾기</button>
+      <div class="flex gap-1.5 mb-3 overflow-x-auto hide-scroll items-center">
+        <button class="flex-none text-[11px] font-black px-3 rounded-full border transition-all whitespace-nowrap"
+                style="height:30px; line-height:1;"
+                :class="memberFilter==='all'?'bg-gray-900 text-white border-gray-900':'bg-white text-gray-500 border-gray-200'"
+                @click="memberFilter='all'">전체</button>
+        <button class="flex-none text-[11px] font-black px-3 rounded-full border transition-all whitespace-nowrap"
+                style="height:30px; line-height:1;"
+                :class="memberFilter==='winwin'?'bg-gray-900 text-white border-gray-900':'bg-white text-gray-500 border-gray-200'"
+                @click="memberFilter='winwin'">🔥 추천</button>
+        <button class="flex-none text-[11px] font-black px-3 rounded-full border transition-all whitespace-nowrap"
+                style="height:30px; line-height:1;"
+                :class="memberFilter==='receive'?'bg-gray-900 text-white border-gray-900':'bg-white text-gray-500 border-gray-200'"
+                @click="memberFilter='receive'">구함</button>
+        <button class="flex-none text-[11px] font-black px-3 rounded-full border transition-all whitespace-nowrap"
+                style="height:30px; line-height:1;"
+                :class="memberFilter==='give'?'bg-gray-900 text-white border-gray-900':'bg-white text-gray-500 border-gray-200'"
+                @click="memberFilter='give'">선물가능</button>
+        <button class="flex-none text-[11px] font-black px-3 rounded-full border transition-all whitespace-nowrap"
+                style="height:30px; line-height:1;"
+                :class="memberFilter==='fav'?'bg-gray-900 text-white border-gray-900':'bg-white text-gray-500 border-gray-200'"
+                @click="memberFilter='fav'">⭐ 즐겨찾기</button>
       </div>
 
       <div class="relative mb-3">

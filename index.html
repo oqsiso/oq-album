@@ -1150,6 +1150,9 @@ createApp({
             noticeTitle.value = title;
             noticeBody.value = body;
             noticeDismissed.value = false;
+            // 관리자 입력창에도 동기화
+            adminNoticeTitle.value = title;
+            adminNoticeBody.value = body;
           }
         }
       } catch {}
@@ -1475,6 +1478,17 @@ createApp({
           const d = doc.data();
           if (Array.isArray(d.albumNames)&&d.albumNames.length===9) appConfig.value.albumNames = d.albumNames;
           if (Array.isArray(d.albumCovers)&&d.albumCovers.length===9) appConfig.value.albumCovers = d.albumCovers;
+          // 공지사항도 같이 불러오기
+          if (d.noticeTitle) {
+            noticeTitle.value = d.noticeTitle;
+            noticeBody.value = d.noticeBody || '';
+            noticeDismissed.value = false;
+            adminNoticeTitle.value = d.noticeTitle;
+            adminNoticeBody.value = d.noticeBody || '';
+          } else {
+            noticeTitle.value = '';
+            noticeBody.value = '';
+          }
         }
       } catch {}
     };
@@ -2205,6 +2219,9 @@ createApp({
     const openAdminPopup = async () => {
       adminTab.value = 'members';
       adminSearch.value = '';
+      // 기존 공지 내용 불러오기
+      adminNoticeTitle.value = noticeTitle.value || '';
+      adminNoticeBody.value = noticeBody.value || '';
       showAdminPopup.value = true;
       await loadAdminMembers();
     };
@@ -2365,7 +2382,6 @@ createApp({
         favSet.value = loadFavSet();
         isLoggedIn.value = true;
         await loadSavedChars();
-        await loadNotice();
         await checkAndResetDailyLimit();
         await updateLastActive();
         startDailyResetWatcher();

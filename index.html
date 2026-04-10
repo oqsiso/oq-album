@@ -1817,11 +1817,13 @@ createApp({
       const roomId = getChatRoomId(myDocId.value, targetUser.id);
 
       try {
-        // 읽음 처리
+        // 읽음 처리 (동적 필드명 점 문제 회피)
+        const readUpdate = {};
+        readUpdate['unread.' + myDocId.value] = 0;
         await db.collection('chatRooms').doc(roomId).set({
-          members: [myDocId.value, targetUser.id],
-          [`unread.${myDocId.value}`]: 0
+          members: [myDocId.value, targetUser.id]
         }, { merge: true });
+        await db.collection('chatRooms').doc(roomId).update(readUpdate);
 
         // 실시간 구독
         chatUnsubscribe = db.collection('chatRooms').doc(roomId)
@@ -1859,13 +1861,17 @@ createApp({
       try {
         const now = firebase.firestore.FieldValue.serverTimestamp();
         const roomRef = db.collection('chatRooms').doc(roomId);
+        // unread는 update로 별도 처리 (set에서 동적 필드명 점(.) 문제 회피)
         await roomRef.set({
           members: [myDocId.value, chatTarget.value.id],
           lastMsg: text,
-          lastAt: now,
-          [`unread.${chatTarget.value.id}`]: firebase.firestore.FieldValue.increment(1),
-          [`unread.${myDocId.value}`]: 0
+          lastAt: now
         }, { merge: true });
+        // unread 카운트 별도 update
+        const unreadUpdate = {};
+        unreadUpdate['unread.' + chatTarget.value.id] = firebase.firestore.FieldValue.increment(1);
+        unreadUpdate['unread.' + myDocId.value] = 0;
+        await roomRef.update(unreadUpdate);
         await roomRef.collection('messages').add({
           text, senderId: myDocId.value,
           senderNick: userData.value.nickname,

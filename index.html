@@ -206,6 +206,43 @@
       </div>
     </div>
 
+    <!-- 공지사항 배너 -->
+    <div v-if="noticeTitle && !noticeDismissed"
+         class="flex-none bg-amber-50 border-b border-amber-200 px-3 py-2 flex items-center gap-2 cursor-pointer"
+         @click="showNoticePopup = true">
+      <i class="fas fa-bullhorn text-amber-500 text-xs flex-none pulse"></i>
+      <p class="text-xs font-black text-amber-700 flex-1 truncate">{{ noticeTitle }}</p>
+      <span class="text-[10px] text-amber-500 font-black flex-none mr-1">자세히 ›</span>
+      <button @click.stop="noticeDismissed = true"
+              class="text-amber-400 hover:text-amber-600 flex-none btn-press w-6 h-6 flex items-center justify-center">
+        <i class="fas fa-times text-xs"></i>
+      </button>
+    </div>
+
+    <!-- 공지사항 팝업 -->
+    <div v-if="showNoticePopup" class="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4" @click.self="showNoticePopup=false">
+      <div class="bg-white rounded-2xl w-full max-w-sm shadow-2xl overflow-hidden">
+        <div class="bg-amber-400 px-5 py-4 flex items-center justify-between">
+          <div class="flex items-center gap-2">
+            <i class="fas fa-bullhorn text-white"></i>
+            <h3 class="text-base font-black text-white">{{ noticeTitle }}</h3>
+          </div>
+          <button @click="showNoticePopup=false" class="w-7 h-7 rounded-full bg-white/20 flex items-center justify-center text-white btn-press">
+            <i class="fas fa-times text-xs"></i>
+          </button>
+        </div>
+        <div class="p-5">
+          <pre class="text-sm text-gray-700 leading-relaxed whitespace-pre-wrap font-sans">{{ noticeBody }}</pre>
+        </div>
+        <div class="px-5 pb-5">
+          <button @click="showNoticePopup=false"
+                  class="w-full py-3 bg-amber-400 text-white rounded-2xl font-black text-sm btn-press">
+            확인
+          </button>
+        </div>
+      </div>
+    </div>
+
     <!-- 본문 -->
     <div class="flex-1 overflow-y-auto hide-scroll p-3 pb-6">
 
@@ -415,6 +452,32 @@
                     class="w-full py-2.5 bg-red-500 text-white rounded-xl font-black text-sm btn-press flex items-center justify-center gap-2">
               <i class="fas fa-rotate-left"></i> 모든 유저 스티커 초기화
             </button>
+          </div>
+
+          <!-- 공지사항 작성 -->
+          <div class="border border-amber-200 rounded-2xl p-4 bg-amber-50">
+            <div class="flex items-center gap-3 mb-3">
+              <div class="w-9 h-9 rounded-xl bg-amber-100 text-amber-500 flex items-center justify-center flex-none"><i class="fas fa-bullhorn text-sm"></i></div>
+              <div>
+                <div class="text-sm font-black text-amber-700">공지사항 작성</div>
+                <div class="text-[11px] text-amber-600 mt-0.5">모든 유저 상단 배너에 표시돼요</div>
+              </div>
+            </div>
+            <input v-model="adminNoticeTitle" type="text" placeholder="제목 (예: 스티커 오픈 일정)"
+                   class="w-full p-2.5 border border-amber-200 rounded-xl text-sm bg-white focus:outline-none mb-2">
+            <textarea v-model="adminNoticeBody" rows="5"
+                      placeholder="내용 입력 (줄바꿈 그대로 표시돼요)&#10;예)&#10;4/14 (화)&#10;연애8, 마음7&#10;4/17 (금)&#10;행운아4,5"
+                      class="w-full p-2.5 border border-amber-200 rounded-xl text-sm bg-white focus:outline-none resize-none mb-2"></textarea>
+            <div class="flex gap-2">
+              <button @click="saveNotice"
+                      class="flex-1 py-2.5 bg-amber-500 text-white rounded-xl font-black text-sm btn-press">
+                <i class="fas fa-bullhorn mr-1"></i> 공지 등록
+              </button>
+              <button @click="adminNoticeTitle=''; adminNoticeBody=''; saveNotice()"
+                      class="px-4 py-2.5 bg-gray-200 text-gray-600 rounded-xl font-black text-sm btn-press">
+                삭제
+              </button>
+            </div>
           </div>
         </div>
         <!-- 앨범 설정 탭 -->
@@ -1069,6 +1132,37 @@ createApp({
     const showChatPopup = ref(false);
     const showRankingPopup = ref(false);
     const showHistoryPopup = ref(false);
+
+    // ─── 공지사항 ──────────────────────────────────────────
+    const noticeTitle = ref('');
+    const noticeBody = ref('');
+    const noticeDismissed = ref(false);
+    const showNoticePopup = ref(false);
+
+    const loadNotice = async () => {
+      try {
+        const doc = await db.collection('config').doc('service_info').get();
+        if (doc.exists) {
+          const d = doc.data();
+          const title = d.noticeTitle || '';
+          const body = d.noticeBody || '';
+          if (title) {
+            const lastSeen = localStorage.getItem('oq_notice_seen');
+            if (lastSeen !== title + body) {
+              noticeTitle.value = title;
+              noticeBody.value = body;
+              noticeDismissed.value = false;
+            }
+          }
+        }
+      } catch {}
+    };
+
+    watch(noticeDismissed, (v) => {
+      if (v && noticeTitle.value) {
+        localStorage.setItem('oq_notice_seen', noticeTitle.value + noticeBody.value);
+      }
+    });
 
     // ─── 캐릭터 전환 상태 ────────────────────────────────────
     const showCharSwitcher = ref(false);
@@ -2089,6 +2183,31 @@ createApp({
       } finally { isHistoryLoading.value=false; }
     };
 
+    // ─── 공지사항 저장 ────────────────────────────────────────
+    const adminNoticeTitle = ref('');
+    const adminNoticeBody = ref('');
+
+    const saveNotice = async () => {
+      if (!canEditAlbums.value) return;
+      try {
+        const title = adminNoticeTitle.value.trim();
+        const body = adminNoticeBody.value.trim();
+        await db.collection('config').doc('service_info').set(
+          { noticeTitle: title, noticeBody: body },
+          { merge: true }
+        );
+        noticeTitle.value = title;
+        noticeBody.value = body;
+        noticeDismissed.value = false;
+        localStorage.removeItem('oq_notice_seen');
+        if (!title) {
+          alert('공지가 삭제됐어요!');
+        } else {
+          alert('공지 등록 완료! ✅\n모든 유저 배너에 표시돼요.');
+        }
+      } catch(e) { alert('실패: ' + (e.message||e)); }
+    };
+
     // ─── 관리자 기능 ─────────────────────────────────────────
     const openAdminPopup = async () => {
       adminTab.value = 'members';
@@ -2253,6 +2372,7 @@ createApp({
         favSet.value = loadFavSet();
         isLoggedIn.value = true;
         await loadSavedChars();
+        await loadNotice();
         await checkAndResetDailyLimit();
         await updateLastActive();
         startDailyResetWatcher();
@@ -2342,6 +2462,9 @@ createApp({
       // 캐릭터 전환
       showCharSwitcher, showAddChar, addCharForm, savedChars, currentDocId, charUnreadCounts,
       addChar, removeChar, switchChar,
+      // 공지사항
+      noticeTitle, noticeBody, noticeDismissed, showNoticePopup,
+      adminNoticeTitle, adminNoticeBody, saveNotice,
       // 관리자
       showAdminPopup, adminTab, adminSearch, adminMembers, isAdminLoading, inactiveDays,
       openAdminPopup, loadAdminMembers, filteredAdminMembers,

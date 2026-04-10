@@ -562,7 +562,7 @@
           <div class="flex items-center gap-2 flex-wrap">
             <h3 class="text-base font-black text-gray-800">S{{ compareTarget.server }} {{ compareTarget.nickname }}</h3>
             <button @click="openDirectChat(compareTarget)" class="text-[11px] bg-pink-500 text-white px-2.5 py-1.5 rounded-full font-black btn-press">📨 쪽지</button>
-            <button @click="openDealBuilder" class="text-[11px] bg-gray-900 text-white px-2.5 py-1.5 rounded-full font-black btn-press">거래 만들기</button>
+            <button @click="openDealBuilder" class="text-[11px] bg-gray-900 text-white px-2.5 py-1.5 rounded-full font-black btn-press">교환하기</button>
           </div>
         </div>
         <button @click="showComparePopup=false" class="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center text-gray-400 btn-press"><i class="fas fa-times text-sm"></i></button>
@@ -601,12 +601,12 @@
     </div>
   </div>
 
-  <!-- ===== 거래 만들기 ===== -->
+  <!-- ===== 교환하기 ===== -->
   <div v-if="showDealBuilder" class="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-end justify-center z-50" @click.self="closeDealBuilder">
     <div class="bg-white sheet w-full max-w-md p-5 shadow-2xl max-h-[90vh] overflow-y-auto hide-scroll">
       <div class="flex items-center justify-between mb-4">
         <div>
-          <div class="text-xs text-gray-400 mb-0.5">거래 1건 만들기</div>
+          <div class="text-xs text-gray-400 mb-0.5">교환하기</div>
           <div class="text-base font-black text-gray-800">
             <span v-if="dealModeLabel==='교환'">❤️ 교환</span>
             <span v-else-if="dealModeLabel==='선물'">🎁 선물</span>
@@ -657,22 +657,22 @@
       <div class="bg-pink-50 border border-pink-100 rounded-2xl p-3 mb-3">
         <div class="text-[11px] font-black text-pink-600 mb-2">💬 문구 복사 후 바로 쪽지 보내기</div>
         <button @click="copyAndChat"
-                class="w-full py-2.5 bg-pink-500 text-white rounded-xl font-black text-sm btn-press flex items-center justify-center gap-2">
-          <i class="fas fa-comment-dots"></i> 문구 복사 + 쪽지창 열기
+                class="w-full py-2.5 bg-sky-400 text-white rounded-xl font-black text-sm btn-press flex items-center justify-center gap-2">
+          <i class="fas fa-envelope"></i> 문구 복사 + 쪽지창 열기
         </button>
         <p class="text-[10px] text-pink-300 mt-1.5 text-center">복사 후 쪽지창에서 붙여넣기 하세요!</p>
       </div>
 
       <div class="flex gap-2">
-        <button @click="copyDealBuilderText" class="flex-1 bg-gray-100 text-gray-700 py-3 rounded-2xl font-black btn-press border border-gray-200 text-sm">
+        <button @click="copyDealBuilderText" class="flex-1 bg-sky-50 text-sky-600 py-3 rounded-2xl font-black btn-press border border-sky-200 text-sm">
           <i class="far fa-copy mr-1"></i>문구만 복사
         </button>
-        <button @click="confirmDeal" :disabled="isLoading" class="flex-1 bg-gray-900 text-white py-3 rounded-2xl font-black btn-press text-sm" :class="isLoading?'opacity-50':''">
-          <i class="fas fa-check mr-1"></i>거래 기록
+        <button @click="confirmDeal" :disabled="isLoading" class="flex-1 bg-sky-500 text-white py-3 rounded-2xl font-black btn-press text-sm shadow-sm" :class="isLoading?'opacity-50':''">
+          <i class="fas fa-check mr-1"></i>교환 기록
         </button>
       </div>
       <div class="bg-amber-50 border border-amber-100 rounded-xl p-2.5 mt-3">
-        <p class="text-[10px] text-amber-700 font-black text-center">⚠️ 반드시 <b>게임에서 먼저 교환</b>하고 "거래 기록"을 누르세요!</p>
+        <p class="text-[10px] text-amber-700 font-black text-center">⚠️ 반드시 <b>게임에서 먼저 교환</b>하고 "교환 기록"을 누르세요!</p>
       </div>
     </div>
   </div>
@@ -1027,7 +1027,7 @@
         </div>
         <div class="flex items-start gap-2">
           <span class="text-pink-400 flex-none font-black">•</span>
-          <p class="text-xs text-gray-600 leading-snug"><b>멤버 → 비교 → 거래 만들기 → 📨 쪽지 전송</b></p>
+          <p class="text-xs text-gray-600 leading-snug"><b>멤버 → 비교 → 교환하기 → 📨 쪽지 전송</b></p>
         </div>
         <div class="flex items-start gap-2">
           <span class="text-pink-400 flex-none font-black">•</span>
@@ -1698,7 +1698,7 @@ createApp({
       showComparePopup.value = true;
     };
 
-    // ─── 거래 만들기 ─────────────────────────────────────────
+    // ─── 교환하기 ─────────────────────────────────────────
     const dealModeLabel = computed(() => {
       if (dealCheckGive.value&&dealCheckReceive.value) return '교환';
       if (dealCheckGive.value&&!dealCheckReceive.value) return '선물';
@@ -1766,7 +1766,7 @@ createApp({
       try {
         await navigator.clipboard.writeText(text);
       } catch(e) {}
-      // 거래만들기 닫고 쪽지창 열기
+      // 교환하기 닫고 쪽지창 열기
       showDealBuilder.value = false;
       await openDirectChat(compareTarget.value);
     };
@@ -1845,11 +1845,11 @@ createApp({
         });
 
         localStorage.setItem('oq_user_v4', JSON.stringify(userData.value));
-        alert(`거래 기록 완료! (오늘 ${tradeCount.value}/3회)`);
+        alert(`교환 기록 완료! (오늘 ${tradeCount.value}/3회)`);
         buildCompare(compareTarget.value);
         if (showUserListPopup.value) await fetchUsersAndShowList();
         closeDealBuilder();
-      } catch(e) { alert('거래 실패: '+(e.message||e)); } finally { isLoading.value=false; }
+      } catch(e) { alert('교환 실패: '+(e.message||e)); } finally { isLoading.value=false; }
     };
 
     // ─── 쪽지/채팅 ───────────────────────────────────────────

@@ -545,7 +545,7 @@
               <span class="bg-pink-100 text-pink-600 text-[10px] px-1.5 py-0.5 rounded-lg font-black">S{{ user.server }}</span>
               <span class="font-black text-sm text-gray-800 truncate group-hover:text-pink-600">{{ user.nickname }}</span>
               <i v-if="user.totalCount >= 81" class="fas fa-crown text-amber-400 text-xs"></i>
-              <span v-if="user.isTradeClosed" class="text-[9px] bg-red-100 text-red-500 px-1.5 py-0.5 rounded-full font-black">마감</span>
+
             </div>
             <div class="flex items-center gap-1.5 flex-wrap">
               <span class="text-[9px] text-gray-400">{{ getActiveText(user.lastActive) }}</span>
@@ -758,7 +758,7 @@
             <div class="flex items-center gap-1.5 flex-wrap">
               <span class="bg-pink-100 text-pink-600 text-[10px] px-1.5 py-0.5 rounded-lg font-black">S{{ user.server }}</span>
               <span class="font-black text-gray-700 text-sm">{{ user.nickname }}</span>
-              <span v-if="user.isTradeClosed" class="text-[9px] bg-red-100 text-red-500 font-black px-1.5 py-0.5 rounded-full">마감</span>
+
             </div>
             <div class="flex gap-1.5">
               <button @click="openDirectChat(user)" class="text-[10px] bg-pink-500 text-white px-2 py-1 rounded-lg btn-press font-black">📨</button>

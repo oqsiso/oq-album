@@ -132,6 +132,10 @@
                   <span class="bg-pink-100 text-pink-600 text-[10px] px-1.5 py-0.5 rounded font-black flex-none">S{{ char.server }}</span>
                   <span class="font-black text-sm text-gray-700 truncate">{{ char.nickname }}</span>
                   <i v-if="char.docId === currentDocId" class="fas fa-check text-pink-400 text-xs ml-auto flex-none"></i>
+                  <span v-if="char.docId !== currentDocId && charUnreadCounts[char.docId] > 0"
+                        class="ml-auto bg-red-500 text-white text-[9px] font-black px-1.5 py-0.5 rounded-full flex-none pulse">
+                    N
+                  </span>
                 </div>
                 <span v-if="char.docId !== currentDocId"
                       @click.stop="removeChar(char.docId)"
@@ -1017,6 +1021,7 @@ createApp({
 
     // ─── 캐릭터 전환 상태 ────────────────────────────────────
     const showCharSwitcher = ref(false);
+    const charUnreadCounts = ref({});
     const showAddChar = ref(false);
     const addCharForm = ref({ server:'', nickname:'', password:'' });
     const savedChars = ref([]);
@@ -1080,6 +1085,28 @@ createApp({
       if (docId === currentDocId.value) { alert('현재 로그인 중인 캐릭터는 삭제할 수 없어요!'); return; }
       savedChars.value = savedChars.value.filter(c => c.docId !== docId);
       saveSavedChars();
+    };
+
+    // 캐릭터별 읽지 않은 쪽지 수 가져오기
+    const fetchCharUnreads = async () => {
+      if (!savedChars.value || savedChars.value.length === 0) return;
+      try {
+        const counts = {};
+        for (const char of savedChars.value) {
+          if (char.docId === currentDocId.value) continue;
+          // 해당 캐릭터의 chatRooms에서 unread 합산
+          const snap = await db.collection('chatRooms')
+            .where('members', 'array-contains', char.docId)
+            .get();
+          let total = 0;
+          snap.forEach(doc => {
+            const d = doc.data();
+            total += (d.unread || {})[char.docId] || 0;
+          });
+          counts[char.docId] = total;
+        }
+        charUnreadCounts.value = counts;
+      } catch(e) {}
     };
 
     const switchChar = async (char) => {
@@ -2098,6 +2125,9 @@ createApp({
         .forEach(r=>r.value=false);
     };
 
+    // 캐릭터 드롭다운 열릴 때 N 뱃지 갱신
+    watch(showCharSwitcher, (v) => { if (v) fetchCharUnreads(); });
+
     const openHelp = () => showHelpPopup.value=true;
     const closeHelp = () => showHelpPopup.value=false;
 
@@ -2138,7 +2168,7 @@ createApp({
       // 히스토리
       showHistoryPopup, openHistoryPopup, historyList, isHistoryLoading,
       // 캐릭터 전환
-      showCharSwitcher, showAddChar, addCharForm, savedChars, currentDocId,
+      showCharSwitcher, showAddChar, addCharForm, savedChars, currentDocId, charUnreadCounts,
       addChar, removeChar, switchChar,
       // 관리자
       showAdminPopup, adminTab, adminSearch, adminMembers, isAdminLoading, inactiveDays,

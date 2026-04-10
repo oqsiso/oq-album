@@ -125,18 +125,20 @@
               <div class="text-[10px] font-black text-gray-400 px-2 py-1">내 캐릭터</div>
 
               <!-- 저장된 캐릭터 목록 -->
-              <button v-for="char in savedChars" :key="char.docId"
-                      @click="switchChar(char)"
-                      class="w-full flex items-center gap-2 px-3 py-2 rounded-xl hover:bg-gray-50 transition btn-press text-left"
-                      :class="char.docId === currentDocId ? 'bg-pink-50 border border-pink-100' : ''">
-                <span class="bg-pink-100 text-pink-600 text-[10px] px-1.5 py-0.5 rounded font-black flex-none">S{{ char.server }}</span>
-                <span class="font-black text-sm text-gray-700 truncate flex-1">{{ char.nickname }}</span>
-                <i v-if="char.docId === currentDocId" class="fas fa-check text-pink-500 text-xs flex-none"></i>
-                <button v-else @click.stop="removeChar(char.docId)"
-                        class="text-gray-300 hover:text-red-400 flex-none">
+              <div v-for="char in savedChars" :key="char.docId"
+                   class="flex items-center gap-1 px-2 py-2 rounded-xl transition"
+                   :class="char.docId === currentDocId ? 'bg-pink-50 border border-pink-100' : 'hover:bg-gray-50'">
+                <div class="flex items-center gap-2 flex-1 min-w-0" @click="switchChar(char)">
+                  <span class="bg-pink-100 text-pink-600 text-[10px] px-1.5 py-0.5 rounded font-black flex-none">S{{ char.server }}</span>
+                  <span class="font-black text-sm text-gray-700 truncate">{{ char.nickname }}</span>
+                  <i v-if="char.docId === currentDocId" class="fas fa-check text-pink-400 text-xs ml-auto flex-none"></i>
+                </div>
+                <span v-if="char.docId !== currentDocId"
+                      @click.stop="removeChar(char.docId)"
+                      class="text-gray-300 hover:text-red-400 cursor-pointer px-1 flex-none">
                   <i class="fas fa-xmark text-xs"></i>
-                </button>
-              </button>
+                </span>
+              </div>
 
               <!-- 캐릭터 추가 -->
               <div v-if="!showAddChar" class="pt-1 border-t border-gray-100">

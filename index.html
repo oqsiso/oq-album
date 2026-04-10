@@ -1147,22 +1147,16 @@ createApp({
           const title = d.noticeTitle || '';
           const body = d.noticeBody || '';
           if (title) {
-            const lastSeen = localStorage.getItem('oq_notice_seen');
-            if (lastSeen !== title + body) {
-              noticeTitle.value = title;
-              noticeBody.value = body;
-              noticeDismissed.value = false;
-            }
+            noticeTitle.value = title;
+            noticeBody.value = body;
+            noticeDismissed.value = false;
           }
         }
       } catch {}
     };
 
-    watch(noticeDismissed, (v) => {
-      if (v && noticeTitle.value) {
-        localStorage.setItem('oq_notice_seen', noticeTitle.value + noticeBody.value);
-      }
-    });
+    // X 버튼으로 닫으면 세션 동안만 숨김 (새로고침하면 다시 보임)
+    // 영구적으로 숨기지 않음
 
     // ─── 캐릭터 전환 상태 ────────────────────────────────────
     const showCharSwitcher = ref(false);
@@ -2199,7 +2193,6 @@ createApp({
         noticeTitle.value = title;
         noticeBody.value = body;
         noticeDismissed.value = false;
-        localStorage.removeItem('oq_notice_seen');
         if (!title) {
           alert('공지가 삭제됐어요!');
         } else {

@@ -863,6 +863,22 @@
         </div>
       </div>
 
+      <!-- 교환 기록 대기 배너 -->
+      <div v-if="pendingDeal && chatView==='read' && chatTarget && pendingDeal.target && chatTarget.id === pendingDeal.target.id"
+           class="flex-none bg-sky-50 border-t border-sky-200 px-4 py-3">
+        <div class="text-[11px] text-sky-600 font-black mb-2">
+          📨 쪽지 보냈나요? 게임에서 교환 후 기록하세요!
+        </div>
+        <button @click="confirmDealFromChat"
+                class="w-full py-2.5 bg-sky-500 text-white rounded-xl font-black text-sm btn-press flex items-center justify-center gap-2">
+          <i class="fas fa-check"></i> ✅ 교환 기록하기
+        </button>
+        <button @click="pendingDeal = null"
+                class="w-full mt-1.5 py-1.5 text-sky-400 text-xs font-black btn-press">
+          나중에 할게요
+        </button>
+      </div>
+
       <!-- 답장/새쪽지 작성 -->
       <div v-if="chatView==='read' || chatView==='write'"
            class="border-t border-gray-100 p-3 flex-none bg-white">
@@ -1334,6 +1350,7 @@ createApp({
 
     // 쪽지/채팅
     const chatTarget = ref(null);
+    const pendingDeal = ref(null);  // 쪽지 보낸 후 교환 기록 대기
     const chatView = ref('list');   // 'list' | 'read' | 'write'
     const readingMsg = ref(null);   // 현재 읽는 대화방 정보
     const chatMessages = ref([]);
@@ -1762,13 +1779,37 @@ createApp({
       else
         text=`[오피스퀸] S${tS} ${tN}님! S${myS} ${myN}입니다.\n[${rN}] 여유분 있으시면 주실 수 있을까요?`;
 
+      // 현재 교환 정보 저장 (쪽지 보낸 후 교환 기록용)
+      pendingDeal.value = {
+        target: { ...compareTarget.value },
+        checkGive: dealCheckGive.value,
+        checkReceive: dealCheckReceive.value,
+        giveIndex: dealGiveIndex.value,
+        receiveIndex: dealReceiveIndex.value,
+        modeLabel: dealModeLabel.value
+      };
+
       // 클립보드 복사 후 쪽지창 열기
-      try {
-        await navigator.clipboard.writeText(text);
-      } catch(e) {}
+      try { await navigator.clipboard.writeText(text); } catch(e) {}
       // 교환하기 닫고 쪽지창 열기
       showDealBuilder.value = false;
       await openDirectChat(compareTarget.value);
+    };
+
+    // 쪽지창에서 바로 교환 기록
+    const confirmDealFromChat = async () => {
+      if (!pendingDeal.value) return;
+      const pd = pendingDeal.value;
+      // 교환하기 상태 복원
+      compareTarget.value = pd.target;
+      dealCheckGive.value = pd.checkGive;
+      dealCheckReceive.value = pd.checkReceive;
+      dealGiveIndex.value = pd.giveIndex;
+      dealReceiveIndex.value = pd.receiveIndex;
+      // 쪽지창 닫고 교환 기록 실행
+      closeChatPopup();
+      await confirmDeal();
+      pendingDeal.value = null;
     };
 
     const confirmDeal = async () => {
@@ -2416,7 +2457,7 @@ createApp({
       openCompare, compareTarget, compareResult,
       showDealBuilder, openDealBuilder, closeDealBuilder,
       dealCheckGive, dealCheckReceive, dealModeLabel, dealGiveIndex, dealReceiveIndex,
-      copyDealBuilderText, confirmDeal, copyAndChat,
+      copyDealBuilderText, confirmDeal, copyAndChat, confirmDealFromChat, pendingDeal,
       getActiveText, getActiveColor,
       appConfig, canEditAlbums, showAlbumSettingsPopup, saveAppConfig,
       // 쪽지

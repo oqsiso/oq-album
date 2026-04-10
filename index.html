@@ -172,7 +172,7 @@
         </div>
         <div class="flex items-center gap-1.5 flex-none">
           <button @click="openChat" class="relative w-9 h-9 rounded-xl bg-pink-50 text-pink-400 flex items-center justify-center border border-pink-100 btn-press">
-            <i class="fas fa-comment-dots text-sm"></i>
+            <i class="fas fa-envelope text-sm"></i>
             <span v-if="unreadCount > 0" class="notif-badge pulse">{{ unreadCount > 9 ? '9+' : unreadCount }}</span>
           </button>
           <button @click="resetMyStickers" class="text-[11px] bg-gray-100 text-gray-600 px-2.5 py-2 rounded-xl font-black border border-gray-200 btn-press">초기화</button>
@@ -477,7 +477,7 @@
             </div>
           </div>
           <button @click.stop="openDirectChat(user)" class="w-8 h-8 rounded-xl bg-pink-50 text-pink-400 flex items-center justify-center border border-pink-100 btn-press flex-none">
-            <i class="fas fa-comment text-xs"></i>
+            <i class="fas fa-envelope text-xs"></i>
           </button>
           <button @click.stop="toggleFavorite(user.id)" class="w-8 h-8 rounded-xl flex items-center justify-center border border-gray-100 btn-press flex-none">
             <i class="fas fa-star text-sm" :class="isFavorite(user.id)?'text-amber-400':'text-gray-200'"></i>
@@ -498,7 +498,7 @@
           <div class="text-xs text-gray-400 mb-0.5">나 vs 상대방</div>
           <div class="flex items-center gap-2 flex-wrap">
             <h3 class="text-base font-black text-gray-800">S{{ compareTarget.server }} {{ compareTarget.nickname }}</h3>
-            <button @click="openDirectChat(compareTarget)" class="text-[11px] bg-pink-500 text-white px-2.5 py-1.5 rounded-full font-black btn-press">💬 쪽지</button>
+            <button @click="openDirectChat(compareTarget)" class="text-[11px] bg-pink-500 text-white px-2.5 py-1.5 rounded-full font-black btn-press">📨 쪽지</button>
             <button @click="openDealBuilder" class="text-[11px] bg-gray-900 text-white px-2.5 py-1.5 rounded-full font-black btn-press">거래 만들기</button>
           </div>
         </div>
@@ -678,7 +678,7 @@
               <span v-if="user.isTradeClosed" class="text-[9px] bg-red-100 text-red-500 font-black px-1.5 py-0.5 rounded-full">마감</span>
             </div>
             <div class="flex gap-1.5">
-              <button @click="openDirectChat(user)" class="text-[10px] bg-pink-500 text-white px-2 py-1 rounded-lg btn-press font-black">💬</button>
+              <button @click="openDirectChat(user)" class="text-[10px] bg-pink-500 text-white px-2 py-1 rounded-lg btn-press font-black">📨</button>
               <button @click="openCompare(user)" class="text-[10px] bg-gray-800 text-white px-2 py-1 rounded-lg btn-press font-black">비교</button>
             </div>
           </div>
@@ -1081,29 +1081,56 @@ createApp({
 
     const charStorageKey = 'oq_chars_v1';
 
-    const loadSavedChars = () => {
+    // Firebase에서 내 캐릭터 목록 불러오기
+    const loadSavedChars = async () => {
+      if (!userData.value) return;
       try {
-        const raw = localStorage.getItem(charStorageKey);
-        savedChars.value = raw ? JSON.parse(raw) : [];
-        // 현재 로그인 캐릭도 목록에 없으면 추가
-        if (userData.value) {
-          const docId = `S${userData.value.server}_${userData.value.nickname}`;
-          const exists = savedChars.value.find(c => c.docId === docId);
-          if (!exists) {
-            savedChars.value.unshift({
-              docId,
-              server: userData.value.server,
-              nickname: userData.value.nickname,
-              password: userData.value.password
-            });
-            localStorage.setItem(charStorageKey, JSON.stringify(savedChars.value));
-          }
+        const docId = myDocId.value;
+        // 현재 캐릭터 기준으로 Firebase에서 linked chars 불러오기
+        const doc = await db.collection('linkedChars').doc(docId).get();
+        let chars = doc.exists ? (doc.data().chars || []) : [];
+
+        // 현재 캐릭터가 목록에 없으면 추가
+        const exists = chars.find(c => c.docId === docId);
+        if (!exists) {
+          chars.unshift({
+            docId,
+            server: userData.value.server,
+            nickname: userData.value.nickname,
+            password: userData.value.password
+          });
+          await db.collection('linkedChars').doc(docId).set({ chars }, { merge: true });
         }
-      } catch { savedChars.value = []; }
+        savedChars.value = chars;
+      } catch {
+        // Firebase 실패 시 localStorage 폴백
+        try {
+          const raw = localStorage.getItem(charStorageKey);
+          savedChars.value = raw ? JSON.parse(raw) : [];
+          if (userData.value) {
+            const docId = myDocId.value;
+            const exists = savedChars.value.find(c => c.docId === docId);
+            if (!exists) {
+              savedChars.value.unshift({
+                docId,
+                server: userData.value.server,
+                nickname: userData.value.nickname,
+                password: userData.value.password
+              });
+            }
+          }
+        } catch { savedChars.value = []; }
+      }
     };
 
-    const saveSavedChars = () => {
-      localStorage.setItem(charStorageKey, JSON.stringify(savedChars.value));
+    const saveSavedChars = async () => {
+      // Firebase에 저장 (모든 기기에서 동기화)
+      try {
+        await db.collection('linkedChars').doc(myDocId.value).set({ chars: savedChars.value }, { merge: true });
+      } catch {
+        // 실패 시 localStorage 폴백
+        localStorage.setItem(charStorageKey, JSON.stringify(savedChars.value));
+      }
     };
 
     const addChar = async () => {
@@ -1111,31 +1138,29 @@ createApp({
       const nickname = (addCharForm.value.nickname || '').trim();
       const password = (addCharForm.value.password || '').trim();
       if (!server || !nickname || !password) { alert('모두 입력해주세요!'); return; }
-      if (!/^\d{4}$/.test(password)) { alert('비밀번호는 숫자 4자리!'); return; }
+      if (!/^[0-9]{4}$/.test(password)) { alert('비밀번호는 숫자 4자리!'); return; }
 
-      const docId = `S${server}_${nickname}`;
-      // 이미 있는지 확인
+      const docId = 'S' + server + '_' + nickname;
       if (savedChars.value.find(c => c.docId === docId)) { alert('이미 등록된 캐릭터예요!'); return; }
 
-      // Firebase에서 확인
       try {
         const doc = await db.collection('users').doc(docId).get();
-        if (!doc.exists) { alert('존재하지 않는 캐릭터예요! 먼저 해당 캐릭으로 로그인해주세요.'); return; }
+        if (!doc.exists) { alert('존재하지 않는 캐릭터예요!\n먼저 해당 캐릭으로 한 번 로그인해주세요.'); return; }
         const data = doc.data();
         if ((data.password || '') !== password) { alert('비밀번호가 틀렸어요!'); return; }
 
         savedChars.value.push({ docId, server, nickname, password });
-        saveSavedChars();
+        await saveSavedChars();
         addCharForm.value = { server:'', nickname:'', password:'' };
         showAddChar.value = false;
-        alert(`S${server} ${nickname} 추가됐어요! ✅`);
+        alert('S' + server + ' ' + nickname + ' 추가됐어요! ✅\n이제 모든 기기에서 보여요 😊');
       } catch(e) { alert('오류: ' + (e.message||e)); }
     };
 
-    const removeChar = (docId) => {
+    const removeChar = async (docId) => {
       if (docId === currentDocId.value) { alert('현재 로그인 중인 캐릭터는 삭제할 수 없어요!'); return; }
       savedChars.value = savedChars.value.filter(c => c.docId !== docId);
-      saveSavedChars();
+      await saveSavedChars();
     };
 
     // 캐릭터별 읽지 않은 쪽지 수 가져오기
@@ -1187,7 +1212,7 @@ createApp({
         // 현재 캐릭을 목록 맨 앞으로
         savedChars.value = savedChars.value.filter(c => c.docId !== char.docId);
         savedChars.value.unshift(char);
-        saveSavedChars();
+        await saveSavedChars();
 
         currentView.value = 'dashboard';
         // 전환 후 나머지 캐릭터 쪽지 재확인
@@ -2199,7 +2224,7 @@ createApp({
         localStorage.setItem('oq_user_v4', JSON.stringify(finalData));
         favSet.value = loadFavSet();
         isLoggedIn.value = true;
-        loadSavedChars();
+        await loadSavedChars();
         await checkAndResetDailyLimit();
         await updateLastActive();
         startDailyResetWatcher();
@@ -2216,7 +2241,7 @@ createApp({
         userData.value = JSON.parse(saved);
         favSet.value = loadFavSet();
         isLoggedIn.value = true;
-        loadSavedChars();
+        await loadSavedChars();
         await checkAndResetDailyLimit();
         await updateLastActive();
         startDailyResetWatcher();

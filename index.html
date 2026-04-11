@@ -1244,10 +1244,12 @@ createApp({
       return 'bg-gray-300';
     };
 
-    const stickerNameByIndex = absIdx => {
+    const stickerNameByIndex = (absIdx, short=false) => {
       const aIdx = Math.floor(absIdx/9);
       const sIdx = (absIdx%9)+1;
-      return `${appConfig.value.albumNames[aIdx]||`앨범${aIdx+1}`} - 스티커${sIdx}`;
+      const albumName = appConfig.value.albumNames[aIdx]||`앨범${aIdx+1}`;
+      if (short) return `${albumName} ${sIdx}번`;
+      return `${albumName} - ${sIdx}번`;
     };
 
     const formatChatTime = ts => {
@@ -1452,13 +1454,13 @@ createApp({
 
     const postCheckedNeeds = () => {
       if (checkedNeeds.value.size === 0) return;
-      const lines = [];
+      const names = [];
       checkedNeeds.value.forEach(idx => {
-        lines.push(stickerNameByIndex(idx) + ' 구해요!');
+        names.push(stickerNameByIndex(idx, true));
       });
       needsTab.value = 'board';
       showBoardWrite.value = true;
-      boardInput.value = lines.join('\n');
+      boardInput.value = names.join(', ') + ' 구해요!';
       checkedNeeds.value = new Set();
       loadBoard();
     };
@@ -1483,7 +1485,7 @@ createApp({
     const postToBoard = (item) => {
       needsTab.value = 'board';
       showBoardWrite.value = true;
-      boardInput.value = `${item.name} 구해요!`;
+      boardInput.value = `${stickerNameByIndex(item.index, true)} 구해요!`;
       loadBoard();
     };
 

@@ -302,9 +302,9 @@
             <!-- 스티커 번호 + 상태 표시 영역 -->
             <div class="relative flex flex-col items-center justify-center py-4 cursor-pointer select-none"
                  :class="count >= 2 ? 'bg-pink-50' : count === 1 ? 'bg-blue-50' : 'bg-gray-50'"
-                 @click="updateCount(i, 1)"
+                 @click="onStickerClick(i)"
                  @mousedown="onStickerHoldStart(i)" @mouseup="onStickerHoldEnd" @mouseleave="onStickerHoldEnd"
-                 @touchstart="onStickerHoldStart(i)" @touchend="onStickerHoldEnd" @touchcancel="onStickerHoldEnd">
+                 @touchstart="onStickerHoldStart(i)" @touchend="onStickerTouchEnd(i)" @touchcancel="onStickerHoldEnd">
 
               <!-- 스티커 번호 -->
               <span class="text-2xl font-black leading-none"
@@ -1738,6 +1738,22 @@ createApp({
     const onStickerHoldEnd = () => {
       if (holdTimer) { clearTimeout(holdTimer); holdTimer = null; }
     };
+    // 모바일 터치 끝 - holdTriggered면 click 이벤트 막기
+    const onStickerTouchEnd = i => {
+      onStickerHoldEnd();
+      if (holdTriggered) {
+        holdTriggered = false;
+        return; // -1 이미 됐으니 여기서 종료
+      }
+      updateCount(i, 1); // 짧게 탭하면 +1
+    };
+    // PC 클릭 (마우스)
+    const onStickerClick = i => {
+      // 모바일에서는 touchend가 처리하므로 마우스 클릭만 처리
+      if (holdTriggered) { holdTriggered = false; return; }
+      // 터치 기기면 무시 (touchend에서 이미 처리됨)
+      updateCount(i, 1);
+    };
     const onStickerTap = i => {
       if (holdTriggered) { holdTriggered = false; return; }
       updateCount(i, 1);
@@ -2666,7 +2682,7 @@ createApp({
       showWelcomePopup, closeWelcomePopup, tutorialStep,
       currentView, currentAlbumIdx, currentAlbumStickers,
       openAlbum, prevAlbum, nextAlbum,
-      updateCount, onStickerTap, onStickerHoldStart, onStickerHoldEnd,
+      updateCount, onStickerTap, onStickerHoldStart, onStickerHoldEnd, onStickerTouchEnd, onStickerClick,
       getAlbumCount, totalCount, totalProgress,
       tradeCount, resetMyStickers, adjustTradeCount, showTradeAdjust,
       showPopup, showUserListPopup, showComparePopup,

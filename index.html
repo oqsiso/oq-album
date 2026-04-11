@@ -519,12 +519,18 @@
   <div v-if="showComparePopup" class="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-end justify-center z-50" @click.self="showComparePopup=false">
     <div class="bg-white sheet w-full max-w-md p-5 max-h-[85vh] overflow-y-auto hide-scroll shadow-2xl">
       <div class="flex items-center justify-between mb-3">
-        <div>
-          <div class="text-xs text-gray-400 mb-0.5">나 vs 상대방</div>
-          <div class="flex items-center gap-2 flex-wrap">
-            <h3 class="text-base font-black text-gray-800">S{{ compareTarget.server }} {{ compareTarget.nickname }}</h3>
-            <button @click="openDirectChat(compareTarget)" class="text-[11px] bg-pink-500 text-white px-2.5 py-1.5 rounded-full font-black btn-press">📨 쪽지</button>
-            <button @click="openDealBuilder" class="text-[11px] bg-gray-900 text-white px-2.5 py-1.5 rounded-full font-black btn-press">교환하기</button>
+        <div class="flex items-center gap-2">
+          <button v-if="compareFromMember" @click="showComparePopup=false; showUserListPopup=true; compareFromMember=false"
+                  class="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center text-gray-400 btn-press">
+            <i class="fas fa-chevron-left text-xs"></i>
+          </button>
+          <div>
+            <div class="text-xs text-gray-400 mb-0.5">나 vs 상대방</div>
+            <div class="flex items-center gap-2 flex-wrap">
+              <h3 class="text-base font-black text-gray-800">S{{ compareTarget.server }} {{ compareTarget.nickname }}</h3>
+              <button @click="openDirectChat(compareTarget)" class="text-[11px] bg-pink-500 text-white px-2.5 py-1.5 rounded-full font-black btn-press">📨 쪽지</button>
+              <button @click="openDealBuilder" class="text-[11px] bg-gray-900 text-white px-2.5 py-1.5 rounded-full font-black btn-press">교환하기</button>
+            </div>
           </div>
         </div>
         <button @click="showComparePopup=false" class="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center text-gray-400 btn-press"><i class="fas fa-times text-sm"></i></button>
@@ -1173,6 +1179,7 @@ createApp({
     const needsKeyword = ref('');
     const checkedNeeds = ref(new Set());
     const showNeedsWasOpen = ref(false);
+    const compareFromMember = ref(false);
     const needsTab = ref('my');
     const boardPosts = ref([]);
     const boardLoading = ref(false);
@@ -1655,6 +1662,7 @@ createApp({
       showPopup.value = false;
       buildCompare(targetUser);
       showComparePopup.value = true;
+      compareFromMember.value = true;
     };
 
     const dealModeLabel = computed(() => {
@@ -2308,7 +2316,7 @@ createApp({
       showPopup, showUserListPopup, showComparePopup,
       showNeedsPopup, openNeedsPopup, needsKeyword, needsListFiltered, needsLoading,
       needsTab, boardPosts, boardLoading, boardInput, showBoardWrite, loadBoard, submitBoard, deleteBoard, postToBoard, postAllNeeds, postCheckedNeeds, openCompareFromBoard,
-      checkedNeeds, toggleNeedsCheck, showNeedsWasOpen,
+      checkedNeeds, toggleNeedsCheck, showNeedsWasOpen, compareFromMember,
       openExchangeByAbsoluteIndex, exchangeList, popupStickerName,
       openMemberPopup, filteredUserList, searchKeyword, memberFilter,
       toggleFavorite, isFavorite,

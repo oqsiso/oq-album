@@ -304,7 +304,7 @@
                  :class="count >= 2 ? 'bg-pink-50' : count === 1 ? 'bg-blue-50' : 'bg-gray-50'"
                  @click="updateCount(i, 1)"
                  @mousedown="onStickerHoldStart(i)" @mouseup="onStickerHoldEnd" @mouseleave="onStickerHoldEnd"
-                 @touchstart.prevent="onStickerHoldStart(i)" @touchend="onStickerHoldEnd" @touchcancel="onStickerHoldEnd">
+                 @touchstart="onStickerHoldStart(i)" @touchend="onStickerHoldEnd" @touchcancel="onStickerHoldEnd">
 
               <!-- 스티커 번호 -->
               <span class="text-2xl font-black leading-none"
@@ -1734,8 +1734,6 @@ createApp({
       holdTimer = setTimeout(() => {
         holdTriggered = true;
         updateCount(i, -1);
-        // 진동 피드백 (모바일)
-        if (navigator.vibrate) navigator.vibrate(30);
       }, 500);
     };
     const onStickerHoldEnd = () => {

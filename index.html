@@ -689,7 +689,7 @@
                 <div class="font-black text-gray-800 text-sm truncate flex-1 cursor-pointer">{{ item.name }}</div>
                 <span class="text-[10px] px-2 py-1 rounded-full font-black flex-none cursor-pointer"
                       :class="item.owners>0?'bg-green-100 text-green-700 hover:bg-green-200':'bg-gray-100 text-gray-400'"
-                      @click.stop="if(item.owners>0) openExchangeByAbsoluteIndex(item.index)">
+                      @click.stop="item.owners>0 ? openExchangeByAbsoluteIndex(item.index) : null">
                   보유자 {{ item.owners }}명
                 </span>
               </div>

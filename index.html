@@ -549,7 +549,7 @@
         <div v-if="isLoading" class="flex justify-center py-10"><div class="loader"></div></div>
         <div v-else v-for="user in filteredUserList" :key="user.id"
              class="border border-gray-100 p-3 rounded-2xl flex items-center gap-2 hover:bg-pink-50 transition group">
-          <div class="w-2 h-2 rounded-full flex-none" :class="getActiveColor(user.lastActive)"></div>
+          <div class="w-2 h-2 rounded-full flex-none" :class="getActiveColor(user.lastUpdated)"></div>
           <div class="flex-1 min-w-0 cursor-pointer" @click="openCompare(user)">
             <div class="flex items-center gap-1.5 mb-0.5 flex-wrap">
               <span class="bg-pink-100 text-pink-600 text-[10px] px-1.5 py-0.5 rounded-lg font-black">S{{ user.server }}</span>
@@ -558,7 +558,7 @@
 
             </div>
             <div class="flex items-center gap-1.5 flex-wrap">
-              <span class="text-[9px] text-gray-400">{{ getActiveText(user.lastActive) }}</span>
+              <span class="text-[9px] text-gray-400">{{ getActiveText(user.lastUpdated) }} 업데이트</span>
               <span class="text-[10px] px-1.5 rounded-full" :class="user.totalCount>=40?'bg-pink-100 text-pink-600 font-black':'bg-gray-100 text-gray-500'">{{ user.totalCount }}/81</span>
               <span class="text-[9px] font-black px-1.5 py-0.5 rounded-full"
                     :class="user.isTradeClosed ? 'bg-red-100 text-red-500' : 'bg-emerald-100 text-emerald-600'">
@@ -1796,7 +1796,7 @@ createApp({
           if (total<=0) return;
           users.push({
             id:doc.id, server:u.server, nickname:u.nickname, collection:col,
-            lastActive:u.lastActive, totalCount:total,
+            lastActive:u.lastActive, lastUpdated:u.lastUpdated, totalCount:total,
             dailyExchangeCount:u.dailyExchangeCount||0, dailyExchangeDate:u.dailyExchangeDate||'',
             isTradeClosed:isUserTradeClosed(u), match:computeMatchFlags(u)
           });

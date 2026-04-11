@@ -493,7 +493,7 @@
             </div>
             <!-- 2줄: 시간 + 수집률 + 교환횟수 -->
             <div class="flex items-center gap-1.5">
-              <span class="text-[9px] text-gray-400 flex-none">{{ getActiveText(user.lastUpdated) }}</span>
+              <span class="text-[9px] text-gray-400 flex-none">{{ getActiveText(user.lastUpdated) }} 업데이트</span>
               <span class="text-[10px] px-1.5 rounded-full flex-none" :class="user.totalCount>=40?'bg-pink-100 text-pink-600 font-black':'bg-gray-100 text-gray-500'">{{ user.totalCount }}/81</span>
               <span class="text-[9px] font-black px-1.5 py-0.5 rounded-full flex-none"
                     :class="user.isTradeClosed ? 'bg-red-100 text-red-500' : 'bg-emerald-100 text-emerald-600'">

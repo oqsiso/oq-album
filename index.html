@@ -756,9 +756,15 @@
   <div v-if="showPopup" class="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-end justify-center z-50" @click.self="showPopup=false">
     <div class="bg-white sheet w-full max-w-md p-5 max-h-[85vh] overflow-y-auto hide-scroll shadow-2xl">
       <div class="flex items-center justify-between mb-3">
-        <div>
-          <h3 class="text-base font-black text-gray-800">교환 도우미</h3>
-          <p class="text-xs text-pink-500 font-black mt-0.5">{{ popupStickerName }} 보유자</p>
+        <div class="flex items-center gap-2">
+          <button v-if="showNeedsWasOpen" @click="showPopup=false; showNeedsPopup=true; showNeedsWasOpen=false"
+                  class="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center text-gray-400 btn-press">
+            <i class="fas fa-chevron-left text-xs"></i>
+          </button>
+          <div>
+            <h3 class="text-base font-black text-gray-800">교환 도우미</h3>
+            <p class="text-xs text-pink-500 font-black mt-0.5">{{ popupStickerName }} 보유자</p>
+          </div>
         </div>
         <button @click="showPopup=false" class="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center text-gray-400 btn-press"><i class="fas fa-times text-sm"></i></button>
       </div>
@@ -1166,6 +1172,7 @@ createApp({
     const memberFilter = ref('all');
     const needsKeyword = ref('');
     const checkedNeeds = ref(new Set());
+    const showNeedsWasOpen = ref(false);
     const needsTab = ref('my');
     const boardPosts = ref([]);
     const boardLoading = ref(false);
@@ -1545,6 +1552,7 @@ createApp({
 
     const openExchangeByAbsoluteIndex = async absIdx => {
       showNeedsPopup.value = false;
+      showNeedsWasOpen.value = true;
       showPopup.value = true;
       exchangeList.value = [];
       isLoading.value = true;
@@ -2300,7 +2308,7 @@ createApp({
       showPopup, showUserListPopup, showComparePopup,
       showNeedsPopup, openNeedsPopup, needsKeyword, needsListFiltered, needsLoading,
       needsTab, boardPosts, boardLoading, boardInput, showBoardWrite, loadBoard, submitBoard, deleteBoard, postToBoard, postAllNeeds, postCheckedNeeds, openCompareFromBoard,
-      checkedNeeds, toggleNeedsCheck,
+      checkedNeeds, toggleNeedsCheck, showNeedsWasOpen,
       openExchangeByAbsoluteIndex, exchangeList, popupStickerName,
       openMemberPopup, filteredUserList, searchKeyword, memberFilter,
       toggleFavorite, isFavorite,

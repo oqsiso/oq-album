@@ -304,7 +304,7 @@
                  :class="count >= 2 ? 'bg-pink-50' : count === 1 ? 'bg-blue-50' : 'bg-gray-50'"
                  @click="updateCount(i, 1)"
                  @mousedown="onStickerHoldStart(i)" @mouseup="onStickerHoldEnd" @mouseleave="onStickerHoldEnd"
-                 @touchstart.passive="onStickerHoldStart(i)" @touchend="onStickerHoldEnd" @touchcancel="onStickerHoldEnd">
+                 @touchstart.prevent="onStickerHoldStart(i)" @touchend="onStickerHoldEnd" @touchcancel="onStickerHoldEnd">
 
               <!-- 스티커 번호 -->
               <span class="text-2xl font-black leading-none"
@@ -1091,48 +1091,114 @@
   </div>
 
   <!-- ===== 환영 팝업 (첫 로그인) ===== -->
+  <!-- ===== 튜토리얼 팝업 ===== -->
   <div v-if="showWelcomePopup" class="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
     <div class="bg-white rounded-2xl w-full max-w-sm shadow-2xl overflow-hidden fade-up">
-      <!-- 내용 -->
-      <div class="p-6">
-        <h3 class="text-xl font-black text-gray-900 mb-1">환영해요! 👋</h3>
-        <p class="text-sm text-gray-400 mb-6">스티커 교환소 사용법을 알려드릴게요</p>
 
-        <div class="space-y-4 mb-6">
-          <div class="flex items-start gap-3">
-            <div class="w-7 h-7 rounded-full bg-gray-100 text-gray-500 flex items-center justify-center font-black text-xs flex-none">1</div>
-            <div>
-              <div class="text-sm font-black text-gray-800 mb-0.5">스티커 입력하기</div>
-              <p class="text-xs text-gray-400 leading-snug">앨범 탭 → 스티커 칸 탭하면 +1<br>갖고 있는 스티커를 입력해요</p>
-            </div>
+      <!-- 슬라이드 영역 -->
+      <div class="relative overflow-hidden" style="min-height:320px;">
+
+        <!-- 슬라이드 1: 환영 -->
+        <div v-if="tutorialStep===0" class="p-6 fade-up">
+          <div class="text-center mb-6">
+            <div class="text-5xl mb-3">👸</div>
+            <h3 class="text-xl font-black text-gray-900 mb-2">환영해요!</h3>
+            <p class="text-sm text-gray-400">오피스퀸 스티커 교환소예요<br>딱 3단계만 알면 바로 쓸 수 있어요!</p>
           </div>
-          <div class="flex items-start gap-3">
-            <div class="w-7 h-7 rounded-full bg-gray-100 text-gray-500 flex items-center justify-center font-black text-xs flex-none">2</div>
-            <div>
-              <div class="text-sm font-black text-gray-800 mb-0.5">교환 상대 찾기</div>
-              <p class="text-xs text-gray-400 leading-snug">멤버에서 교환 가능한 상대를<br>자동으로 찾아드려요</p>
+          <div class="bg-gray-50 rounded-2xl p-4 space-y-3">
+            <div class="flex items-center gap-3">
+              <span class="text-lg">1️⃣</span>
+              <span class="text-sm font-black text-gray-700">스티커 입력</span>
             </div>
-          </div>
-          <div class="flex items-start gap-3">
-            <div class="w-7 h-7 rounded-full bg-gray-100 text-gray-500 flex items-center justify-center font-black text-xs flex-none">3</div>
-            <div>
-              <div class="text-sm font-black text-gray-800 mb-0.5">쪽지로 교환 제안</div>
-              <p class="text-xs text-gray-400 leading-snug">앱 안에서 바로 쪽지 보내고<br>교환 진행해요</p>
+            <div class="flex items-center gap-3">
+              <span class="text-lg">2️⃣</span>
+              <span class="text-sm font-black text-gray-700">교환 상대 찾기</span>
+            </div>
+            <div class="flex items-center gap-3">
+              <span class="text-lg">3️⃣</span>
+              <span class="text-sm font-black text-gray-700">쪽지로 교환 제안</span>
             </div>
           </div>
         </div>
 
-        <div class="bg-gray-50 rounded-xl p-3 text-center mb-5">
-          <p class="text-xs text-gray-500">스티커를 먼저 입력해야 교환 상대를 찾을 수 있어요!</p>
+        <!-- 슬라이드 2: 스티커 입력 -->
+        <div v-if="tutorialStep===1" class="p-6 fade-up">
+          <div class="w-12 h-12 rounded-2xl bg-pink-100 flex items-center justify-center text-2xl mb-4">📋</div>
+          <div class="text-xs font-black text-pink-500 mb-1">STEP 1</div>
+          <h3 class="text-lg font-black text-gray-900 mb-2">스티커를 입력해요</h3>
+          <p class="text-sm text-gray-400 leading-relaxed mb-4">앨범을 탭하면 스티커 9칸이 나와요.<br>갖고 있는 스티커 칸을 탭하면 +1!</p>
+          <div class="bg-gray-50 rounded-2xl p-4 space-y-2.5">
+            <div class="flex items-start gap-2">
+              <span class="text-pink-400 font-black flex-none">•</span>
+              <p class="text-xs text-gray-600">탭 = +1 · 길게 누르기 = -1</p>
+            </div>
+            <div class="flex items-start gap-2">
+              <span class="text-pink-400 font-black flex-none">•</span>
+              <p class="text-xs text-gray-600">2장 이상이면 교환 가능!</p>
+            </div>
+            <div class="flex items-start gap-2">
+              <span class="text-pink-400 font-black flex-none">•</span>
+              <p class="text-xs text-gray-600">0장인 스티커 = 내가 구하는 것</p>
+            </div>
+          </div>
         </div>
 
-        <button @click="closeWelcomePopup"
+        <!-- 슬라이드 3: 교환 상대 찾기 -->
+        <div v-if="tutorialStep===2" class="p-6 fade-up">
+          <div class="w-12 h-12 rounded-2xl bg-blue-100 flex items-center justify-center text-2xl mb-4">👥</div>
+          <div class="text-xs font-black text-blue-500 mb-1">STEP 2</div>
+          <h3 class="text-lg font-black text-gray-900 mb-2">교환 상대를 찾아요</h3>
+          <p class="text-sm text-gray-400 leading-relaxed mb-4">멤버 버튼을 누르면 교환 가능한<br>상대를 자동으로 찾아드려요!</p>
+          <div class="bg-gray-50 rounded-2xl p-4 space-y-2.5">
+            <div class="flex items-start gap-2">
+              <span class="text-blue-400 font-black flex-none">•</span>
+              <p class="text-xs text-gray-600">🔥추천 = 서로 교환 가능한 상대</p>
+            </div>
+            <div class="flex items-start gap-2">
+              <span class="text-blue-400 font-black flex-none">•</span>
+              <p class="text-xs text-gray-600">상대 탭 → 비교 → 교환하기</p>
+            </div>
+            <div class="flex items-start gap-2">
+              <span class="text-blue-400 font-black flex-none">•</span>
+              <p class="text-xs text-gray-600">하루 교환 3회 제한 있어요</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- 슬라이드 4: 쪽지 -->
+        <div v-if="tutorialStep===3" class="p-6 fade-up">
+          <div class="w-12 h-12 rounded-2xl bg-emerald-100 flex items-center justify-center text-2xl mb-4">📨</div>
+          <div class="text-xs font-black text-emerald-500 mb-1">STEP 3</div>
+          <h3 class="text-lg font-black text-gray-900 mb-2">쪽지로 교환 제안해요</h3>
+          <p class="text-sm text-gray-400 leading-relaxed mb-4">교환하기에서 문구 복사 + 쪽지 보내기!<br>게임에서 교환 후 교환 기록을 눌러주세요.</p>
+          <div class="bg-amber-50 border border-amber-200 rounded-2xl p-3 text-center">
+            <p class="text-xs text-amber-700 font-black">⚠️ 반드시 게임에서 먼저 교환하고<br>앱에서 기록하세요!</p>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- 하단 인디케이터 + 버튼 -->
+      <div class="px-6 pb-6">
+        <!-- 점 인디케이터 -->
+        <div class="flex justify-center gap-1.5 mb-4">
+          <div v-for="i in 4" :key="i"
+               class="rounded-full transition-all"
+               :style="tutorialStep===i-1 ? 'width:20px;height:6px;background:#111827;' : 'width:6px;height:6px;background:#e5e7eb;'"></div>
+        </div>
+
+        <!-- 버튼 -->
+        <button v-if="tutorialStep < 3" @click="tutorialStep++"
                 class="w-full py-3.5 bg-gray-900 text-white rounded-2xl font-black text-sm btn-press">
-          지금 입력하러 가기 →
+          다음 →
+        </button>
+        <button v-else @click="closeWelcomePopup"
+                class="w-full py-3.5 bg-gray-900 text-white rounded-2xl font-black text-sm btn-press">
+          시작하기! 🎉
         </button>
         <button @click="showWelcomePopup=false"
                 class="w-full py-2 text-gray-400 text-xs font-black mt-1 btn-press">
-          나중에 할게요
+          건너뛰기
         </button>
       </div>
     </div>
@@ -1434,6 +1500,7 @@ createApp({
     const showAdminPopup = ref(false);
     const showTradeAdjust = ref(false);
     const showWelcomePopup = ref(false);
+    const tutorialStep = ref(0);
     const adminTab = ref('members');
     const adminSearch = ref('');
     const adminMembers = ref([]);
@@ -1664,9 +1731,16 @@ createApp({
     const onStickerHoldStart = i => {
       holdTriggered = false;
       if (holdTimer) clearTimeout(holdTimer);
-      holdTimer = setTimeout(() => { holdTriggered = true; updateCount(i,-1); }, 450);
+      holdTimer = setTimeout(() => {
+        holdTriggered = true;
+        updateCount(i, -1);
+        // 진동 피드백 (모바일)
+        if (navigator.vibrate) navigator.vibrate(30);
+      }, 500);
     };
-    const onStickerHoldEnd = () => { if (holdTimer) clearTimeout(holdTimer); holdTimer = null; };
+    const onStickerHoldEnd = () => {
+      if (holdTimer) { clearTimeout(holdTimer); holdTimer = null; }
+    };
     const onStickerTap = i => {
       if (holdTriggered) { holdTriggered = false; return; }
       updateCount(i, 1);
@@ -2524,9 +2598,10 @@ createApp({
         subscribeUnread();
         setTimeout(() => fetchCharUnreads(), 1500);
 
-        // 처음 가입한 사람이면 환영 팝업
+        // 처음 가입한 사람이면 튜토리얼 팝업
         const isNewUser = !doc.exists;
         if (isNewUser) {
+          tutorialStep.value = 0;
           setTimeout(() => { showWelcomePopup.value = true; }, 500);
         }
       } catch(e) { alert('오류: '+(e.message||e)); } finally { isLoading.value=false; }
@@ -2569,7 +2644,7 @@ createApp({
 
     const closeWelcomePopup = () => {
       showWelcomePopup.value = false;
-      // 첫 앨범으로 안내
+      tutorialStep.value = 0;
       currentView.value = 'dashboard';
     };
 
@@ -2591,7 +2666,7 @@ createApp({
       isLoggedIn, isLoading, loginForm, handleLogin, logout,
       userData, myDocId,
       showHelpPopup, openHelp, closeHelp,
-      showWelcomePopup, closeWelcomePopup,
+      showWelcomePopup, closeWelcomePopup, tutorialStep,
       currentView, currentAlbumIdx, currentAlbumStickers,
       openAlbum, prevAlbum, nextAlbum,
       updateCount, onStickerTap, onStickerHoldStart, onStickerHoldEnd,

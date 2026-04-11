@@ -71,67 +71,50 @@
 
   <!-- ===== 로그인 ===== -->
   <div v-if="!isLoggedIn" class="flex flex-col min-h-screen bg-white relative overflow-hidden">
-
-    <!-- 상단 핑크 물결 배경 -->
     <div class="absolute top-0 left-0 right-0 h-64 bg-gradient-to-br from-pink-100 to-pink-50 rounded-b-[60px]"></div>
-
-    <!-- 물음표 버튼 -->
     <div class="relative z-10 flex justify-end p-5">
       <button @click="openHelp" class="w-9 h-9 rounded-full bg-white shadow-sm flex items-center justify-center text-pink-400 btn-press border border-pink-100">
         <i class="fas fa-question text-sm"></i>
       </button>
     </div>
-
-    <!-- 로고 영역 -->
     <div class="relative z-10 px-8 pt-4 pb-10 fade-up">
       <div class="text-[11px] font-black text-pink-400 tracking-widest mb-3">OFFICE QUEEN</div>
       <h1 class="text-4xl font-black text-gray-900 leading-tight">스티커<br>교환소</h1>
       <p class="text-sm text-gray-400 mt-3">서버번호와 닉네임으로 시작하세요</p>
     </div>
-
-    <!-- 입력 폼 카드 -->
     <div class="relative z-10 flex-1 px-6 fade-up">
       <div class="bg-white rounded-3xl shadow-lg border border-pink-100 p-6 space-y-4">
         <div>
           <label class="text-xs font-black text-gray-500 mb-1.5 block">서버 번호</label>
-          <input v-model="loginForm.server" type="number" placeholder="예) 67"
-                 @keyup.enter="handleLogin"
+          <input v-model="loginForm.server" type="number" placeholder="예) 67" @keyup.enter="handleLogin"
                  class="w-full px-4 py-3.5 border border-gray-200 rounded-2xl bg-gray-50 focus:outline-none focus:border-pink-300 focus:bg-white text-sm font-bold transition">
         </div>
         <div>
           <label class="text-xs font-black text-gray-500 mb-1.5 block">닉네임</label>
-          <input v-model="loginForm.nickname" type="text" placeholder="게임 닉네임 입력"
-                 @keyup.enter="handleLogin"
+          <input v-model="loginForm.nickname" type="text" placeholder="게임 닉네임 입력" @keyup.enter="handleLogin"
                  class="w-full px-4 py-3.5 border border-gray-200 rounded-2xl bg-gray-50 focus:outline-none focus:border-pink-300 focus:bg-white text-sm font-bold transition">
         </div>
         <div>
           <label class="text-xs font-black text-gray-500 mb-1.5 block">비밀번호</label>
-          <input v-model="loginForm.password" type="password" maxlength="4" placeholder="숫자 4자리"
-                 @keyup.enter="handleLogin"
+          <input v-model="loginForm.password" type="password" maxlength="4" placeholder="숫자 4자리" @keyup.enter="handleLogin"
                  class="w-full px-4 py-3.5 border border-gray-200 rounded-2xl bg-gray-50 focus:outline-none focus:border-pink-300 focus:bg-white text-sm font-bold transition">
         </div>
-
         <button @click="handleLogin" :disabled="isLoading"
                 class="w-full bg-pink-500 text-white py-4 rounded-2xl font-black text-base flex justify-center items-center gap-2 btn-press shadow-md mt-2">
           <div v-if="isLoading" class="loader border-white/30 border-t-white w-5 h-5 border-2"></div>
           <span>{{ isLoading ? '로딩 중...' : '시작하기 →' }}</span>
         </button>
       </div>
-
       <p class="text-xs text-gray-400 text-center mt-4">처음이면 자동으로 가입돼요</p>
     </div>
-
     <div class="h-10"></div>
   </div>
 
-    <!-- ===== 메인 ===== -->
+  <!-- ===== 메인 ===== -->
   <div v-else class="flex flex-col h-screen bg-[#fdf2f8]">
-
-    <!-- 상단바 -->
     <div class="sticky top-0 bg-white z-20 border-b border-pink-100 shadow-sm flex-none relative">
       <div class="flex items-center gap-2 px-3 pt-3 pb-1.5">
         <div class="flex items-center gap-1.5 flex-1 min-w-0">
-          <!-- 캐릭터 전환 버튼 -->
           <button @click="showCharSwitcher = !showCharSwitcher"
                   class="flex items-center gap-1.5 bg-gray-50 border border-gray-200 rounded-xl px-2 py-1 btn-press hover:bg-gray-100 transition">
             <span class="bg-pink-100 text-pink-600 px-1.5 py-0.5 rounded-lg text-[10px] font-black">S{{ userData.server }}</span>
@@ -139,15 +122,11 @@
             <span v-if="totalCount >= 81" class="text-sm">👑</span>
             <i class="fas fa-chevron-down text-gray-400 text-[9px] transition-transform" :class="showCharSwitcher ? 'rotate-180' : ''"></i>
           </button>
-
-          <!-- 캐릭터 목록 드롭다운 -->
           <div v-if="showCharSwitcher"
                class="absolute top-full left-0 mt-1 bg-white border border-gray-200 rounded-2xl shadow-xl z-50 w-56 overflow-hidden"
                style="top: 100%; left: 12px;">
             <div class="p-2 space-y-1 max-h-64 overflow-y-auto hide-scroll">
               <div class="text-[10px] font-black text-gray-400 px-2 py-1">내 캐릭터</div>
-
-              <!-- 저장된 캐릭터 목록 -->
               <div v-for="char in savedChars" :key="char.docId"
                    class="flex items-center gap-1 px-2 py-2 rounded-xl transition"
                    :class="char.docId === currentDocId ? 'bg-pink-50 border border-pink-100' : 'hover:bg-gray-50'">
@@ -156,26 +135,19 @@
                   <span class="font-black text-sm text-gray-700 truncate">{{ char.nickname }}</span>
                   <i v-if="char.docId === currentDocId" class="fas fa-check text-pink-400 text-xs ml-auto flex-none"></i>
                   <span v-if="char.docId !== currentDocId && charUnreadCounts[char.docId] > 0"
-                        class="ml-auto bg-red-500 text-white text-[9px] font-black px-1.5 py-0.5 rounded-full flex-none pulse">
-                    N
-                  </span>
+                        class="ml-auto bg-red-500 text-white text-[9px] font-black px-1.5 py-0.5 rounded-full flex-none pulse">N</span>
                 </div>
-                <span v-if="char.docId !== currentDocId"
-                      @click.stop="removeChar(char.docId)"
+                <span v-if="char.docId !== currentDocId" @click.stop="removeChar(char.docId)"
                       class="text-gray-300 hover:text-red-400 cursor-pointer px-1 flex-none">
                   <i class="fas fa-xmark text-xs"></i>
                 </span>
               </div>
-
-              <!-- 캐릭터 추가 -->
               <div v-if="!showAddChar" class="pt-1 border-t border-gray-100">
                 <button @click="showAddChar = true"
                         class="w-full flex items-center gap-2 px-3 py-2 rounded-xl hover:bg-gray-50 text-gray-500 text-sm font-black transition">
                   <i class="fas fa-plus text-xs"></i> 캐릭터 추가
                 </button>
               </div>
-
-              <!-- 캐릭터 추가 폼 -->
               <div v-if="showAddChar" class="pt-1 border-t border-gray-100 space-y-1.5 p-1">
                 <input v-model="addCharForm.server" type="number" placeholder="서버번호"
                        class="w-full p-2 border border-gray-200 rounded-xl text-xs focus:outline-none focus:border-pink-300">
@@ -184,8 +156,7 @@
                 <input v-model="addCharForm.password" type="password" maxlength="4" placeholder="비밀번호 4자리"
                        class="w-full p-2 border border-gray-200 rounded-xl text-xs focus:outline-none focus:border-pink-300">
                 <div class="flex gap-1">
-                  <button @click="addChar"
-                          class="flex-1 bg-pink-500 text-white py-2 rounded-xl text-xs font-black btn-press">추가</button>
+                  <button @click="addChar" class="flex-1 bg-pink-500 text-white py-2 rounded-xl text-xs font-black btn-press">추가</button>
                   <button @click="showAddChar=false; addCharForm={server:'',nickname:'',password:''}"
                           class="px-3 py-2 bg-gray-100 text-gray-500 rounded-xl text-xs font-black btn-press">취소</button>
                 </div>
@@ -204,7 +175,6 @@
           </button>
         </div>
       </div>
-
       <div class="flex items-center gap-1.5 px-3 pb-2 overflow-x-auto hide-scroll">
         <div class="text-[11px] font-black flex-none" :class="tradeCount >= 3 ? 'text-red-500' : 'text-emerald-600'">
           <i class="fas fa-repeat mr-0.5"></i>
@@ -218,11 +188,9 @@
           <button @click="logout" class="text-xs text-gray-400 border border-gray-200 px-2.5 py-1.5 rounded-xl btn-press bg-white">나가기</button>
         </div>
       </div>
-
       <div class="px-3 pb-2.5">
         <div class="relative w-full h-6 bg-gray-100 rounded-full overflow-hidden border border-pink-100">
-          <div class="absolute top-0 left-0 h-full bg-gradient-to-r from-pink-400 via-purple-400 to-indigo-400 gauge-fill"
-               :style="{ width: totalProgress + '%' }"></div>
+          <div class="absolute top-0 left-0 h-full bg-gradient-to-r from-pink-400 via-purple-400 to-indigo-400 gauge-fill" :style="{ width: totalProgress + '%' }"></div>
           <div class="absolute inset-0 flex items-center justify-center text-[10px] font-black text-white drop-shadow z-10">
             전체 수집률 {{ totalCount }}/81 ({{ totalProgress }}%)
           </div>
@@ -237,8 +205,7 @@
       <i class="fas fa-bullhorn text-amber-500 text-xs flex-none pulse"></i>
       <p class="text-xs font-black text-amber-700 flex-1 truncate">{{ noticeTitle }}</p>
       <span class="text-[10px] text-amber-500 font-black flex-none mr-1">자세히 ›</span>
-      <button @click.stop="noticeDismissed = true"
-              class="text-amber-400 hover:text-amber-600 flex-none btn-press w-6 h-6 flex items-center justify-center">
+      <button @click.stop="noticeDismissed = true" class="text-amber-400 hover:text-amber-600 flex-none btn-press w-6 h-6 flex items-center justify-center">
         <i class="fas fa-times text-xs"></i>
       </button>
     </div>
@@ -259,26 +226,20 @@
           <pre class="text-sm text-gray-700 leading-relaxed whitespace-pre-wrap font-sans">{{ noticeBody }}</pre>
         </div>
         <div class="px-5 pb-5">
-          <button @click="showNoticePopup=false"
-                  class="w-full py-3 bg-amber-400 text-white rounded-2xl font-black text-sm btn-press">
-            확인
-          </button>
+          <button @click="showNoticePopup=false" class="w-full py-3 bg-amber-400 text-white rounded-2xl font-black text-sm btn-press">확인</button>
         </div>
       </div>
     </div>
 
     <!-- 본문 -->
     <div class="flex-1 overflow-y-auto hide-scroll p-3 pb-6">
-
       <!-- 대시보드 -->
       <div v-if="currentView === 'dashboard'" class="grid grid-cols-3 gap-2.5">
-        <div v-for="(album, idx) in appConfig.albumNames" :key="idx"
-             @click="openAlbum(idx)"
+        <div v-for="(album, idx) in appConfig.albumNames" :key="idx" @click="openAlbum(idx)"
              class="album-card bg-white rounded-2xl p-2.5 border border-pink-100 shadow-sm cursor-pointer flex flex-col items-center">
           <div class="w-16 h-16 rounded-xl overflow-hidden mb-1.5 relative flex items-center justify-center bg-white border-2"
                :class="getAlbumCount(idx) === 9 ? 'border-emerald-400' : 'border-gray-200'">
-            <img v-if="appConfig.albumCovers && appConfig.albumCovers[idx]"
-                 :src="appConfig.albumCovers[idx]" class="w-full h-full object-cover">
+            <img v-if="appConfig.albumCovers && appConfig.albumCovers[idx]" :src="appConfig.albumCovers[idx]" class="w-full h-full object-cover">
             <div v-if="getAlbumCount(idx) === 9" class="absolute inset-0 bg-emerald-500/80 flex items-center justify-center">
               <i class="fas fa-check text-white text-2xl drop-shadow"></i>
             </div>
@@ -301,79 +262,50 @@
           </div>
           <button @click="nextAlbum" class="w-8 h-8 rounded-xl bg-pink-50 text-pink-400 flex items-center justify-center btn-press border border-pink-100"><i class="fas fa-chevron-right text-xs"></i></button>
         </div>
-
         <div class="grid grid-cols-3 gap-2">
           <div v-for="(count, i) in currentAlbumStickers" :key="i"
                class="bg-white rounded-2xl border shadow-sm flex flex-col overflow-hidden"
                :class="count >= 2 ? 'border-pink-300' : count === 1 ? 'border-blue-200' : 'border-gray-100'">
-
-            <!-- 스티커 번호 + 상태 표시 영역 -->
             <div class="relative flex flex-col items-center justify-center py-4 cursor-pointer select-none"
                  :class="count >= 2 ? 'bg-pink-50' : count === 1 ? 'bg-blue-50' : 'bg-gray-50'"
                  @click="onStickerClick(i)"
                  @mousedown="onStickerHoldStart(i)" @mouseup="onStickerHoldEnd" @mouseleave="onStickerHoldEnd"
                  @touchstart="onStickerHoldStart(i)" @touchend="onStickerTouchEnd(i)" @touchcancel="onStickerHoldEnd">
-
-              <!-- 스티커 번호 -->
               <span class="text-2xl font-black leading-none"
-                    :class="count >= 2 ? 'text-pink-400' : count === 1 ? 'text-blue-400' : 'text-gray-200'">
-                {{ i + 1 }}
-              </span>
-
-              <!-- 상태 텍스트 -->
+                    :class="count >= 2 ? 'text-pink-400' : count === 1 ? 'text-blue-400' : 'text-gray-200'">{{ i + 1 }}</span>
               <span class="text-[10px] font-black mt-1"
                     :class="count >= 2 ? 'text-pink-500' : count === 1 ? 'text-blue-400' : 'text-gray-300'">
                 {{ count >= 2 ? '교환가능' : count === 1 ? '보유중' : '없음' }}
               </span>
-
-              <!-- 탭=+1 힌트 (처음 한 번만) -->
               <div class="absolute top-1 right-1 text-[8px] text-gray-300 font-black">탭+1</div>
-
-              <!-- 여유분 뱃지 -->
-              <div v-if="count >= 2"
-                   class="absolute top-1 left-1 bg-pink-500 text-white text-[8px] font-black px-1.5 py-0.5 rounded-full">
-                x{{ count }}
-              </div>
+              <div v-if="count >= 2" class="absolute top-1 left-1 bg-pink-500 text-white text-[8px] font-black px-1.5 py-0.5 rounded-full">x{{ count }}</div>
             </div>
-
-            <!-- 하단 컨트롤 바 -->
             <div class="flex items-center border-t"
                  :class="count >= 2 ? 'border-pink-100 bg-pink-50/50' : count === 1 ? 'border-blue-100 bg-blue-50/30' : 'border-gray-100 bg-white'">
-              <button @click="updateCount(i,-1)"
-                      class="flex-none w-9 h-9 flex items-center justify-center text-gray-400 hover:text-gray-600 btn-press font-black text-lg border-r border-gray-100">
-                −
-              </button>
-              <span class="flex-1 text-center text-sm font-black"
-                    :class="count > 0 ? 'text-gray-700' : 'text-gray-300'">
-                {{ count }}개
-              </span>
+              <button @click="updateCount(i,-1)" class="flex-none w-9 h-9 flex items-center justify-center text-gray-400 hover:text-gray-600 btn-press font-black text-lg border-r border-gray-100">−</button>
+              <span class="flex-1 text-center text-sm font-black" :class="count > 0 ? 'text-gray-700' : 'text-gray-300'">{{ count }}개</span>
               <button @click="openExchangeByAbsoluteIndex(currentAlbumIdx * 9 + i)"
                       class="flex-none w-9 h-9 flex items-center justify-center btn-press border-l border-gray-100"
                       :class="count === 0 ? 'text-pink-400 hover:text-pink-600' : 'text-gray-300 hover:text-gray-400'">
                 <i class="fas fa-search text-xs"></i>
               </button>
             </div>
-
           </div>
         </div>
-
         <button @click="currentView='dashboard'" class="mt-4 w-full py-3 bg-gray-800 text-white rounded-2xl font-black text-sm btn-press flex items-center justify-center gap-2">
           <i class="fas fa-th-large"></i> 앨범 목록으로
         </button>
       </div>
-
     </div>
   </div>
 
-  <!-- ===== 시소 전용 FAB (관리자 패널) ===== -->
-  <button v-if="isLoggedIn && canEditAlbums && currentView === 'dashboard'"
-          @click="openAdminPopup"
+  <!-- FAB -->
+  <button v-if="isLoggedIn && canEditAlbums && currentView === 'dashboard'" @click="openAdminPopup"
           class="fixed right-4 bottom-4 z-40 bg-gray-900 text-white w-14 h-14 rounded-full flex items-center justify-center btn-press shadow-xl">
     <i class="fas fa-gear text-xl"></i>
   </button>
 
-
-  <!-- ===== 관리자 패널 (시소 전용) ===== -->
+  <!-- ===== 관리자 패널 ===== -->
   <div v-if="showAdminPopup" class="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-end justify-center z-50" @click.self="showAdminPopup=false">
     <div class="bg-white sheet w-full max-w-md shadow-2xl max-h-[92vh] overflow-y-auto hide-scroll">
       <div class="p-5">
@@ -395,7 +327,6 @@
           <button class="tab-btn flex-1 text-center" :class="adminTab==='cleanup'?'tab-on':'tab-off'" @click="adminTab='cleanup'">🧹 정리</button>
           <button class="tab-btn flex-1 text-center" :class="adminTab==='album'?'tab-on':'tab-off'" @click="adminTab='album'">📁 앨범</button>
         </div>
-        <!-- 멤버 관리 탭 -->
         <div v-if="adminTab==='members'">
           <div class="relative mb-3">
             <i class="fas fa-search absolute left-3.5 top-3.5 text-gray-300 text-xs"></i>
@@ -427,7 +358,6 @@
             </div>
           </div>
         </div>
-        <!-- 일괄 정리 탭 -->
         <div v-if="adminTab==='cleanup'" class="space-y-3">
           <div class="border border-gray-200 rounded-2xl p-4">
             <div class="flex items-center gap-3 mb-3">
@@ -477,8 +407,6 @@
               <i class="fas fa-rotate-left"></i> 모든 유저 스티커 초기화
             </button>
           </div>
-
-          <!-- 공지사항 작성 -->
           <div class="border border-amber-200 rounded-2xl p-4 bg-amber-50">
             <div class="flex items-center gap-3 mb-3">
               <div class="w-9 h-9 rounded-xl bg-amber-100 text-amber-500 flex items-center justify-center flex-none"><i class="fas fa-bullhorn text-sm"></i></div>
@@ -493,18 +421,14 @@
                       placeholder="내용 입력 (줄바꿈 그대로 표시돼요)&#10;예)&#10;4/14 (화)&#10;연애8, 마음7&#10;4/17 (금)&#10;행운아4,5"
                       class="w-full p-2.5 border border-amber-200 rounded-xl text-sm bg-white focus:outline-none resize-none mb-2"></textarea>
             <div class="flex gap-2">
-              <button @click="saveNotice"
-                      class="flex-1 py-2.5 bg-amber-500 text-white rounded-xl font-black text-sm btn-press">
+              <button @click="saveNotice" class="flex-1 py-2.5 bg-amber-500 text-white rounded-xl font-black text-sm btn-press">
                 <i class="fas fa-bullhorn mr-1"></i> 공지 등록
               </button>
               <button @click="adminNoticeTitle=''; adminNoticeBody=''; saveNotice()"
-                      class="px-4 py-2.5 bg-gray-200 text-gray-600 rounded-xl font-black text-sm btn-press">
-                삭제
-              </button>
+                      class="px-4 py-2.5 bg-gray-200 text-gray-600 rounded-xl font-black text-sm btn-press">삭제</button>
             </div>
           </div>
         </div>
-        <!-- 앨범 설정 탭 -->
         <div v-if="adminTab==='album'">
           <div class="space-y-3 mb-4">
             <div v-for="(name, idx) in appConfig.albumNames" :key="idx" class="border border-gray-100 p-3 rounded-2xl">
@@ -559,22 +483,22 @@
              class="border border-gray-100 p-3 rounded-2xl flex items-center gap-2 hover:bg-pink-50 transition group">
           <div class="w-2 h-2 rounded-full flex-none" :class="getActiveColor(user.lastUpdated)"></div>
           <div class="flex-1 min-w-0 cursor-pointer" @click="openCompare(user)">
-            <div class="flex items-center gap-1.5 mb-0.5 flex-wrap">
-              <span class="bg-pink-100 text-pink-600 text-[10px] px-1.5 py-0.5 rounded-lg font-black">S{{ user.server }}</span>
+            <!-- 1줄: 서버 + 닉네임 + 매칭뱃지 -->
+            <div class="flex items-center gap-1.5 mb-0.5">
+              <span class="bg-pink-100 text-pink-600 text-[10px] px-1.5 py-0.5 rounded-lg font-black flex-none">S{{ user.server }}</span>
               <span class="font-black text-sm text-gray-800 truncate group-hover:text-pink-600">{{ user.nickname }}</span>
-              <i v-if="user.totalCount >= 81" class="fas fa-crown text-amber-400 text-xs"></i>
-
+              <span v-if="user.match.winwin" class="text-[9px] bg-red-100 text-red-600 font-black px-1.5 py-0.5 rounded-full flex-none">🔥추천</span>
+              <span v-else-if="user.match.receive" class="text-[9px] bg-green-100 text-green-700 font-black px-1.5 py-0.5 rounded-full flex-none">받기</span>
+              <span v-else-if="user.match.give" class="text-[9px] bg-blue-100 text-blue-700 font-black px-1.5 py-0.5 rounded-full flex-none">주기</span>
             </div>
-            <div class="flex items-center gap-1.5 flex-wrap">
-              <span class="text-[9px] text-gray-400">{{ getActiveText(user.lastUpdated) }} 업데이트</span>
-              <span class="text-[10px] px-1.5 rounded-full" :class="user.totalCount>=40?'bg-pink-100 text-pink-600 font-black':'bg-gray-100 text-gray-500'">{{ user.totalCount }}/81</span>
-              <span class="text-[9px] font-black px-1.5 py-0.5 rounded-full"
+            <!-- 2줄: 시간 + 수집률 + 교환횟수 -->
+            <div class="flex items-center gap-1.5">
+              <span class="text-[9px] text-gray-400 flex-none">{{ getActiveText(user.lastUpdated) }}</span>
+              <span class="text-[10px] px-1.5 rounded-full flex-none" :class="user.totalCount>=40?'bg-pink-100 text-pink-600 font-black':'bg-gray-100 text-gray-500'">{{ user.totalCount }}/81</span>
+              <span class="text-[9px] font-black px-1.5 py-0.5 rounded-full flex-none"
                     :class="user.isTradeClosed ? 'bg-red-100 text-red-500' : 'bg-emerald-100 text-emerald-600'">
-                {{ user.isTradeClosed ? '마감' : '교환 ' + (3-(user.dailyExchangeCount||0)) + '회 남음' }}
+                {{ user.isTradeClosed ? '마감' : (3-(user.dailyExchangeCount||0)) + '회 남음' }}
               </span>
-              <span v-if="user.match.winwin" class="text-[9px] bg-red-100 text-red-600 font-black px-1.5 py-0.5 rounded-full">🔥추천</span>
-              <span v-else-if="user.match.receive" class="text-[9px] bg-green-100 text-green-700 font-black px-1.5 py-0.5 rounded-full">받기</span>
-              <span v-else-if="user.match.give" class="text-[9px] bg-blue-100 text-blue-700 font-black px-1.5 py-0.5 rounded-full">주기</span>
             </div>
           </div>
           <button @click.stop="openDirectChat(user)" class="w-8 h-8 rounded-xl bg-pink-50 text-pink-400 flex items-center justify-center border border-pink-100 btn-press flex-none">
@@ -605,11 +529,9 @@
         </div>
         <button @click="showComparePopup=false" class="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center text-gray-400 btn-press"><i class="fas fa-times text-sm"></i></button>
       </div>
-
       <div class="text-[10px] text-gray-400 bg-gray-50 rounded-xl p-2 mb-3">
         체크1+2 = <b class="text-red-500">교환</b> · 체크1만 = <b class="text-blue-500">주기</b> · 체크2만 = <b class="text-green-600">받기</b>
       </div>
-
       <div v-if="isLoading" class="flex justify-center py-8"><div class="loader"></div></div>
       <div v-else class="space-y-3">
         <div class="bg-red-50 p-3 rounded-2xl border border-red-100">
@@ -655,25 +577,19 @@
         </div>
         <button @click="closeDealBuilder" class="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center text-gray-400 btn-press"><i class="fas fa-times text-sm"></i></button>
       </div>
-
       <div class="bg-gray-50 rounded-2xl p-3 mb-3 space-y-2 border border-gray-100">
         <label class="flex items-center gap-3 cursor-pointer">
           <input type="checkbox" v-model="dealCheckGive" class="w-5 h-5 accent-pink-500">
-          <div class="flex-1">
-            <div class="text-xs font-black text-gray-800">① 내가 줄 스티커 <span class="text-[10px] text-gray-400">(내 2장↑ & 상대 0)</span></div>
-          </div>
+          <div class="flex-1"><div class="text-xs font-black text-gray-800">① 내가 줄 스티커 <span class="text-[10px] text-gray-400">(내 2장↑ & 상대 0)</span></div></div>
           <span class="text-[10px] font-black px-2 py-1 rounded-full" :class="dealCheckGive?'bg-blue-100 text-blue-600':'bg-gray-200 text-gray-400'">주기/교환</span>
         </label>
         <label class="flex items-center gap-3 cursor-pointer">
           <input type="checkbox" v-model="dealCheckReceive" class="w-5 h-5 accent-pink-500">
-          <div class="flex-1">
-            <div class="text-xs font-black text-gray-800">② 내가 받을 스티커 <span class="text-[10px] text-gray-400">(내 0 & 상대 2장↑)</span></div>
-          </div>
+          <div class="flex-1"><div class="text-xs font-black text-gray-800">② 내가 받을 스티커 <span class="text-[10px] text-gray-400">(내 0 & 상대 2장↑)</span></div></div>
           <span class="text-[10px] font-black px-2 py-1 rounded-full" :class="dealCheckReceive?'bg-green-100 text-green-700':'bg-gray-200 text-gray-400'">받기/교환</span>
         </label>
         <div class="text-[10px] text-gray-400 pt-1">✅ 1+2 체크 = 교환 / 1만 = 주기 / 2만 = 받기</div>
       </div>
-
       <div class="space-y-2 mb-4">
         <div v-if="dealCheckGive" class="bg-blue-50 border border-blue-100 rounded-2xl p-3">
           <div class="text-xs font-black text-blue-600 mb-2">📤 내가 줄 스티커</div>
@@ -690,17 +606,13 @@
           </select>
         </div>
       </div>
-
-      <!-- 쪽지 빠른 보내기 -->
       <div class="bg-pink-50 border border-pink-100 rounded-2xl p-3 mb-3">
         <div class="text-[11px] font-black text-pink-600 mb-2">💬 문구 복사 후 바로 쪽지 보내기</div>
-        <button @click="copyAndChat"
-                class="w-full py-2.5 bg-sky-400 text-white rounded-xl font-black text-sm btn-press flex items-center justify-center gap-2">
+        <button @click="copyAndChat" class="w-full py-2.5 bg-sky-400 text-white rounded-xl font-black text-sm btn-press flex items-center justify-center gap-2">
           <i class="fas fa-envelope"></i> 문구 복사 + 쪽지창 열기
         </button>
         <p class="text-[10px] text-pink-300 mt-1.5 text-center">복사 후 쪽지창에서 붙여넣기 하세요!</p>
       </div>
-
       <div class="flex gap-2">
         <button @click="copyDealBuilderText" class="flex-1 bg-sky-50 text-sky-600 py-3 rounded-2xl font-black btn-press border border-sky-200 text-sm">
           <i class="far fa-copy mr-1"></i>문구만 복사
@@ -725,28 +637,23 @@
         </div>
         <button @click="showNeedsPopup=false" class="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center text-gray-400 btn-press"><i class="fas fa-times text-sm"></i></button>
       </div>
-
       <div class="relative mb-3">
         <i class="fas fa-search absolute left-3.5 top-3.5 text-gray-300 text-xs"></i>
         <input v-model="needsKeyword" type="text" placeholder="앨범명/번호 검색"
                class="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-2xl text-sm bg-gray-50 focus:outline-none focus:border-pink-200">
       </div>
-
       <div class="overflow-y-auto flex-1 hide-scroll">
         <div v-if="needsLoading" class="flex justify-center py-10"><div class="loader"></div></div>
         <div v-else-if="needsListFiltered.length===0" class="text-center text-gray-400 py-10 bg-gray-50 rounded-2xl text-xs">
           {{ needsKeyword ? '검색 결과 없음' : '구해요가 없어요! 다 모으셨나요? 🎉' }}
         </div>
         <div v-else class="space-y-2">
-          <button v-for="item in needsListFiltered" :key="item.index"
-                  @click="openExchangeByAbsoluteIndex(item.index)"
+          <button v-for="item in needsListFiltered" :key="item.index" @click="openExchangeByAbsoluteIndex(item.index)"
                   class="w-full text-left border border-gray-100 p-3 rounded-2xl hover:bg-pink-50 hover:border-pink-100 transition btn-press">
             <div class="flex items-center justify-between gap-2">
               <div class="font-black text-gray-800 text-sm truncate">{{ item.name }}</div>
               <span class="text-[10px] px-2 py-1 rounded-full font-black flex-none"
-                    :class="item.owners>0?'bg-green-100 text-green-700':'bg-gray-100 text-gray-400'">
-                보유자 {{ item.owners }}명
-              </span>
+                    :class="item.owners>0?'bg-green-100 text-green-700':'bg-gray-100 text-gray-400'">보유자 {{ item.owners }}명</span>
             </div>
             <div class="text-[10px] text-gray-400 mt-0.5">탭하면 보유자 찾기</div>
           </button>
@@ -765,7 +672,6 @@
         </div>
         <button @click="showPopup=false" class="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center text-gray-400 btn-press"><i class="fas fa-times text-sm"></i></button>
       </div>
-
       <div v-if="isLoading" class="flex justify-center py-10"><div class="loader"></div></div>
       <div v-else-if="exchangeList.length===0" class="text-center py-10 text-gray-400 bg-gray-50 rounded-2xl text-xs">
         <div class="text-2xl mb-2">😭</div>여유분 있는 멤버가 없어요
@@ -776,7 +682,6 @@
             <div class="flex items-center gap-1.5 flex-wrap">
               <span class="bg-pink-100 text-pink-600 text-[10px] px-1.5 py-0.5 rounded-lg font-black">S{{ user.server }}</span>
               <span class="font-black text-gray-700 text-sm">{{ user.nickname }}</span>
-
             </div>
             <div class="flex gap-1.5">
               <button @click="openDirectChat(user)" class="text-[10px] bg-pink-500 text-white px-2 py-1 rounded-lg btn-press font-black">📨</button>
@@ -796,11 +701,9 @@
     </div>
   </div>
 
-<!-- ===== 쪽지함 팝업 ===== -->
+  <!-- ===== 쪽지함 팝업 ===== -->
   <div v-if="showChatPopup" class="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-end justify-center z-50" @click.self="closeChatPopup">
     <div class="bg-white sheet w-full max-w-md shadow-2xl flex flex-col" style="height:85vh">
-
-      <!-- 헤더 -->
       <div class="p-4 border-b border-gray-100 flex-none">
         <div class="flex items-center justify-between">
           <div class="flex items-center gap-2">
@@ -820,7 +723,6 @@
             </div>
           </div>
           <div class="flex items-center gap-1.5">
-            <!-- 새 쪽지 쓰기 (목록에서만) -->
             <button v-if="chatView==='list'" @click="chatView='write'; chatTarget=null; chatInput=''"
                     class="text-[11px] bg-pink-500 text-white px-3 py-1.5 rounded-xl font-black btn-press flex items-center gap-1">
               <i class="fas fa-pen text-[10px]"></i> 쓰기
@@ -831,8 +733,6 @@
           </div>
         </div>
       </div>
-
-      <!-- 쪽지 목록 -->
       <div v-if="chatView==='list'" class="flex-1 overflow-y-auto hide-scroll">
         <div v-if="isChatLoading" class="flex justify-center py-10"><div class="loader"></div></div>
         <div v-else-if="chatRooms.length===0" class="flex flex-col items-center justify-center h-full text-gray-400 text-xs">
@@ -843,52 +743,34 @@
         <div v-else class="divide-y divide-gray-100">
           <div v-for="room in chatRooms" :key="room.id"
                class="flex items-center px-4 py-3.5 hover:bg-gray-50 transition cursor-pointer"
-               :class="room.unread > 0 ? 'bg-pink-50/60' : ''"
-               @click="openMailRoom(room)">
-            <!-- 아바타 -->
+               :class="room.unread > 0 ? 'bg-pink-50/60' : ''" @click="openMailRoom(room)">
             <div class="w-10 h-10 rounded-full flex items-center justify-center font-black text-sm flex-none mr-3"
                  :class="room.unread > 0 ? 'bg-pink-200 text-pink-700' : 'bg-gray-100 text-gray-500'">
               {{ (room.otherNickname || '?')[0] }}
             </div>
-            <!-- 내용 -->
             <div class="flex-1 min-w-0">
               <div class="flex items-center justify-between gap-2 mb-0.5">
-                <span class="font-black text-sm" :class="room.unread > 0 ? 'text-gray-900' : 'text-gray-700'">
-                  {{ room.otherNickname }}
-                </span>
+                <span class="font-black text-sm" :class="room.unread > 0 ? 'text-gray-900' : 'text-gray-700'">{{ room.otherNickname }}</span>
                 <span class="text-[10px] text-gray-400 flex-none">{{ formatChatTime(room.lastAt) }}</span>
               </div>
               <div class="flex items-center gap-2">
-                <span class="text-[11px] truncate" :class="room.unread > 0 ? 'text-gray-700 font-bold' : 'text-gray-400'">
-                  {{ room.lastMsg }}
-                </span>
-                <span v-if="room.unread > 0"
-                      class="bg-pink-500 text-white text-[9px] font-black px-1.5 py-0.5 rounded-full flex-none">
-                  {{ room.unread }}
-                </span>
+                <span class="text-[11px] truncate" :class="room.unread > 0 ? 'text-gray-700 font-bold' : 'text-gray-400'">{{ room.lastMsg }}</span>
+                <span v-if="room.unread > 0" class="bg-pink-500 text-white text-[9px] font-black px-1.5 py-0.5 rounded-full flex-none">{{ room.unread }}</span>
               </div>
             </div>
-            <!-- 삭제 -->
-            <button @click.stop="leaveChatRoom(room)"
-                    class="w-7 h-7 rounded-lg bg-gray-100 text-gray-300 flex items-center justify-center btn-press flex-none ml-2 hover:text-red-400">
+            <button @click.stop="leaveChatRoom(room)" class="w-7 h-7 rounded-lg bg-gray-100 text-gray-300 flex items-center justify-center btn-press flex-none ml-2 hover:text-red-400">
               <i class="fas fa-xmark text-xs"></i>
             </button>
           </div>
         </div>
       </div>
-
-      <!-- 쪽지 읽기 -->
       <div v-if="chatView==='read' && readingMsg" class="flex-1 overflow-y-auto hide-scroll p-4 flex flex-col gap-3">
-        <!-- 메시지들 -->
         <div v-if="isChatLoading" class="flex justify-center py-10"><div class="loader"></div></div>
-        <div v-else-if="chatMessages.length===0" class="text-center text-gray-400 py-10 text-xs bg-gray-50 rounded-2xl">
-          아직 주고받은 쪽지가 없어요
-        </div>
+        <div v-else-if="chatMessages.length===0" class="text-center text-gray-400 py-10 text-xs bg-gray-50 rounded-2xl">아직 주고받은 쪽지가 없어요</div>
         <div v-else v-for="msg in chatMessages" :key="msg.id"
              class="flex flex-col rounded-2xl border p-3.5"
              :class="isMyMsg(msg) ? 'bg-pink-50 border-pink-100 items-end' : 'bg-white border-gray-100 items-start'">
-          <div class="flex items-center gap-2 mb-2 w-full"
-               :class="isMyMsg(msg) ? 'flex-row-reverse' : ''">
+          <div class="flex items-center gap-2 mb-2 w-full" :class="isMyMsg(msg) ? 'flex-row-reverse' : ''">
             <div class="w-7 h-7 rounded-full flex items-center justify-center font-black text-xs flex-none"
                  :class="isMyMsg(msg) ? 'bg-pink-200 text-pink-700' : 'bg-gray-100 text-gray-500'">
               {{ (msg.senderNick || '?')[0] }}
@@ -896,67 +778,45 @@
             <span class="font-black text-xs text-gray-600">{{ msg.senderNick }}</span>
             <span class="text-[10px] text-gray-400 ml-auto">{{ formatChatTime(msg.createdAt) }}</span>
           </div>
-          <p class="text-sm text-gray-700 leading-relaxed w-full whitespace-pre-wrap"
-             :class="isMyMsg(msg) ? 'text-right' : ''">{{ msg.text }}</p>
+          <p class="text-sm text-gray-700 leading-relaxed w-full whitespace-pre-wrap" :class="isMyMsg(msg) ? 'text-right' : ''">{{ msg.text }}</p>
         </div>
       </div>
-
-      <!-- 교환 기록 대기 배너 -->
       <div v-if="pendingDeal && chatView==='read' && chatTarget && pendingDeal.target && chatTarget.id === pendingDeal.target.id"
            class="flex-none bg-sky-50 border-t border-sky-200 px-4 py-3">
-        <div class="text-[11px] text-sky-600 font-black mb-2">
-          📨 쪽지 보냈나요? 게임에서 교환 후 기록하세요!
-        </div>
-        <button @click="confirmDealFromChat"
-                class="w-full py-2.5 bg-sky-500 text-white rounded-xl font-black text-sm btn-press flex items-center justify-center gap-2">
+        <div class="text-[11px] text-sky-600 font-black mb-2">📨 쪽지 보냈나요? 게임에서 교환 후 기록하세요!</div>
+        <button @click="confirmDealFromChat" class="w-full py-2.5 bg-sky-500 text-white rounded-xl font-black text-sm btn-press flex items-center justify-center gap-2">
           <i class="fas fa-check"></i> ✅ 교환 기록하기
         </button>
-        <button @click="pendingDeal = null"
-                class="w-full mt-1.5 py-1.5 text-sky-400 text-xs font-black btn-press">
-          나중에 할게요
-        </button>
+        <button @click="pendingDeal = null" class="w-full mt-1.5 py-1.5 text-sky-400 text-xs font-black btn-press">나중에 할게요</button>
       </div>
-
-      <!-- 답장/새쪽지 작성 -->
-      <div v-if="chatView==='read' || chatView==='write'"
-           class="border-t border-gray-100 p-3 flex-none bg-white">
-        <!-- 받는 사람 선택 (새 쪽지 쓸 때) -->
+      <div v-if="chatView==='read' || chatView==='write'" class="border-t border-gray-100 p-3 flex-none bg-white">
         <div v-if="chatView==='write'" class="mb-2">
           <div class="text-xs font-black text-gray-500 mb-1.5">받는 사람</div>
           <select v-model="chatTarget" class="w-full p-2.5 border border-gray-200 rounded-xl text-sm bg-white focus:outline-none focus:border-pink-300">
             <option :value="null">선택해주세요</option>
-            <option v-for="user in userList" :key="user.id" :value="user">
-              S{{ user.server }} {{ user.nickname }}
-            </option>
+            <option v-for="user in userList" :key="user.id" :value="user">S{{ user.server }} {{ user.nickname }}</option>
           </select>
         </div>
-        <!-- 입력창 -->
         <div class="flex gap-2">
-          <textarea v-model="chatInput"
-                    :placeholder="chatView==='read' ? '답장 내용 입력...' : '쪽지 내용 입력...'"
-                    rows="3"
+          <textarea v-model="chatInput" :placeholder="chatView==='read' ? '답장 내용 입력...' : '쪽지 내용 입력...'" rows="3"
                     class="flex-1 py-2.5 px-3 bg-gray-50 border border-gray-200 rounded-2xl text-sm focus:outline-none focus:border-pink-300 resize-none"></textarea>
           <button @click="sendMessage" :disabled="!chatInput.trim() || isChatSending || (chatView==='write' && !chatTarget)"
                   class="w-10 h-10 self-end bg-pink-500 text-white rounded-full flex items-center justify-center btn-press disabled:opacity-40 flex-none">
             <i class="fas fa-paper-plane text-sm"></i>
           </button>
         </div>
-        <div class="text-[10px] text-gray-400 mt-1.5 text-center">
-          {{ chatView==='write' ? '멤버 목록에서 바로 쪽지 보내기도 가능해요' : '' }}
-        </div>
+        <div class="text-[10px] text-gray-400 mt-1.5 text-center">{{ chatView==='write' ? '멤버 목록에서 바로 쪽지 보내기도 가능해요' : '' }}</div>
       </div>
-
     </div>
   </div>
 
-    <!-- ===== 랭킹 팝업 ===== -->
+  <!-- ===== 랭킹 팝업 ===== -->
   <div v-if="showRankingPopup" class="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-end justify-center z-50" @click.self="showRankingPopup=false">
     <div class="bg-white sheet w-full max-w-md p-5 max-h-[85vh] flex flex-col shadow-2xl">
       <div class="flex items-center justify-between mb-4">
         <h3 class="text-base font-black text-gray-800">🏆 수집률 랭킹</h3>
         <button @click="showRankingPopup=false" class="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center text-gray-400 btn-press"><i class="fas fa-times text-sm"></i></button>
       </div>
-
       <div v-if="isLoading" class="flex justify-center py-10"><div class="loader"></div></div>
       <div v-else class="overflow-y-auto flex-1 hide-scroll space-y-2">
         <div v-for="(user, idx) in rankingList" :key="user.id"
@@ -969,9 +829,7 @@
           <div class="flex-1 min-w-0">
             <div class="flex items-center gap-1.5">
               <span class="bg-pink-100 text-pink-600 text-[10px] px-1.5 py-0.5 rounded font-black">S{{ user.server }}</span>
-              <span class="font-black text-sm truncate" :class="user.isMe?'text-pink-600':'text-gray-800'">
-                {{ user.nickname }}{{ user.isMe ? ' (나)' : '' }}
-              </span>
+              <span class="font-black text-sm truncate" :class="user.isMe?'text-pink-600':'text-gray-800'">{{ user.nickname }}{{ user.isMe ? ' (나)' : '' }}</span>
               <i v-if="user.totalCount>=81" class="fas fa-crown text-amber-400 text-xs"></i>
             </div>
             <div class="mt-1 w-full h-2 bg-gray-100 rounded-full overflow-hidden">
@@ -998,33 +856,23 @@
         </div>
         <button @click="showHistoryPopup=false" class="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center text-gray-400 btn-press"><i class="fas fa-times text-sm"></i></button>
       </div>
-
       <div v-if="isHistoryLoading" class="flex justify-center py-10"><div class="loader"></div></div>
       <div v-else-if="historyList.length===0" class="text-center text-gray-400 py-10 bg-gray-50 rounded-2xl text-xs">
         <div class="text-3xl mb-2">📋</div>아직 교환 기록이 없어요
       </div>
       <div v-else class="overflow-y-auto flex-1 hide-scroll space-y-2">
-        <div v-for="trade in historyList" :key="trade.id"
-             class="border rounded-2xl p-3"
+        <div v-for="trade in historyList" :key="trade.id" class="border rounded-2xl p-3"
              :class="trade.typeLabel==='교환'?'border-red-100 bg-red-50':trade.typeLabel==='주기'?'border-blue-100 bg-blue-50':'border-green-100 bg-green-50'">
           <div class="flex items-center justify-between mb-1.5">
-            <span class="text-xs font-black"
-                  :class="trade.typeLabel==='교환'?'text-red-500':trade.typeLabel==='주기'?'text-blue-500':'text-green-600'">
+            <span class="text-xs font-black" :class="trade.typeLabel==='교환'?'text-red-500':trade.typeLabel==='주기'?'text-blue-500':'text-green-600'">
               {{ trade.typeLabel==='교환'?'❤️':trade.typeLabel==='주기'?'🎁':'🔍' }} {{ trade.typeLabel }}
             </span>
             <span class="text-[10px] text-gray-400">{{ trade.date }}</span>
           </div>
           <div class="text-xs text-gray-700">
-            <span v-if="trade.typeLabel==='교환'">
-              <b>{{ trade.from.nickname }}</b> → <b>{{ trade.giveName }}</b><br>
-              <b>{{ trade.to.nickname }}</b> → <b>{{ trade.receiveName }}</b>
-            </span>
-            <span v-else-if="trade.typeLabel==='주기'">
-              <b>{{ trade.from.nickname }}</b>이(가) <b>{{ trade.giveName }}</b> 주기
-            </span>
-            <span v-else>
-              <b>{{ trade.from.nickname }}</b>이(가) <b>{{ trade.receiveName }}</b> 받기
-            </span>
+            <span v-if="trade.typeLabel==='교환'"><b>{{ trade.from.nickname }}</b> → <b>{{ trade.giveName }}</b><br><b>{{ trade.to.nickname }}</b> → <b>{{ trade.receiveName }}</b></span>
+            <span v-else-if="trade.typeLabel==='주기'"><b>{{ trade.from.nickname }}</b>이(가) <b>{{ trade.giveName }}</b> 주기</span>
+            <span v-else><b>{{ trade.from.nickname }}</b>이(가) <b>{{ trade.receiveName }}</b> 받기</span>
           </div>
           <div class="text-[10px] text-gray-400 mt-1">
             상대: S{{ trade.from.id === myDocId ? trade.to.server : trade.from.server }}
@@ -1035,78 +883,36 @@
     </div>
   </div>
 
-  <!-- ===== 설정 팝업 (시소 전용) ===== -->
-  <div v-if="showAlbumSettingsPopup" class="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4" @click.self="showAlbumSettingsPopup=false">
-    <div class="bg-white rounded-2xl w-full max-w-lg p-6 max-h-[90vh] overflow-y-auto hide-scroll shadow-2xl">
-      <div class="flex justify-between items-center mb-4">
-        <h2 class="text-base font-black text-gray-800">⚙️ 앨범 이름/커버 설정</h2>
-        <button @click="showAlbumSettingsPopup=false" class="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center text-gray-400 btn-press"><i class="fas fa-times text-sm"></i></button>
-      </div>
-      <div class="space-y-3">
-        <div v-for="(name, idx) in appConfig.albumNames" :key="idx" class="border border-gray-100 p-3 rounded-2xl">
-          <label class="text-xs font-black text-gray-600 mb-1.5 block">앨범 {{ idx+1 }}</label>
-          <div class="space-y-1.5">
-            <input v-model="appConfig.albumNames[idx]" type="text" placeholder="앨범 이름" class="w-full p-2 border border-gray-200 rounded-xl text-sm">
-            <input v-model="appConfig.albumCovers[idx]" type="text" placeholder="커버 이미지 URL (선택)" class="w-full p-2 border border-gray-200 rounded-xl text-sm text-gray-400">
-          </div>
-        </div>
-      </div>
-      <div class="mt-4 flex gap-2">
-        <button @click="saveAppConfig" class="flex-1 bg-pink-500 text-white py-3 rounded-2xl font-black btn-press text-sm">저장</button>
-        <button @click="showAlbumSettingsPopup=false" class="px-4 py-3 bg-gray-100 text-gray-700 rounded-2xl font-black btn-press text-sm">닫기</button>
-      </div>
-    </div>
-  </div>
-
   <!-- ===== 교환 횟수 조정 팝업 ===== -->
   <div v-if="showTradeAdjust" class="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4" @click.self="showTradeAdjust=false">
     <div class="bg-white rounded-2xl w-72 p-6 shadow-2xl">
       <div class="flex items-center justify-between mb-4">
         <h3 class="text-base font-black text-gray-800">교환 횟수 조정</h3>
-        <button @click="showTradeAdjust=false" class="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center text-gray-400 btn-press">
-          <i class="fas fa-times text-sm"></i>
-        </button>
+        <button @click="showTradeAdjust=false" class="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center text-gray-400 btn-press"><i class="fas fa-times text-sm"></i></button>
       </div>
-
       <p class="text-xs text-gray-400 mb-4 text-center">게임에서 직접 교환했을 때 수동으로 조정하세요</p>
-
       <div class="flex items-center justify-center gap-6 mb-6">
         <button @click="adjustTradeCount(-1)" :disabled="tradeCount <= 0"
-                class="w-12 h-12 rounded-2xl bg-gray-100 text-gray-600 flex items-center justify-center text-2xl font-black btn-press disabled:opacity-30">
-          −
-        </button>
+                class="w-12 h-12 rounded-2xl bg-gray-100 text-gray-600 flex items-center justify-center text-2xl font-black btn-press disabled:opacity-30">−</button>
         <div class="text-center">
           <div class="text-4xl font-black text-gray-800">{{ tradeCount }}</div>
           <div class="text-xs text-gray-400 mt-1">/ 3회</div>
         </div>
         <button @click="adjustTradeCount(1)" :disabled="tradeCount >= 3"
-                class="w-12 h-12 rounded-2xl bg-sky-500 text-white flex items-center justify-center text-2xl font-black btn-press disabled:opacity-30">
-          +
-        </button>
+                class="w-12 h-12 rounded-2xl bg-sky-500 text-white flex items-center justify-center text-2xl font-black btn-press disabled:opacity-30">+</button>
       </div>
-
       <div class="w-full bg-gray-100 rounded-full h-2 mb-5">
-        <div class="bg-gradient-to-r from-sky-400 to-purple-400 h-2 rounded-full gauge-fill"
-             :style="{width: (tradeCount/3*100)+'%'}"></div>
+        <div class="bg-gradient-to-r from-sky-400 to-purple-400 h-2 rounded-full gauge-fill" :style="{width: (tradeCount/3*100)+'%'}"></div>
       </div>
-
-      <button @click="showTradeAdjust=false"
-              class="w-full py-3 bg-gray-800 text-white rounded-2xl font-black text-sm btn-press">
-        확인
-      </button>
+      <button @click="showTradeAdjust=false" class="w-full py-3 bg-gray-800 text-white rounded-2xl font-black text-sm btn-press">확인</button>
       <p class="text-[10px] text-gray-400 text-center mt-2">매일 오전 8시 자동 초기화</p>
     </div>
   </div>
 
-  <!-- ===== 환영 팝업 (첫 로그인) ===== -->
   <!-- ===== 튜토리얼 팝업 ===== -->
   <div v-if="showWelcomePopup" class="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
     <div class="bg-white rounded-2xl w-full max-w-sm shadow-2xl overflow-hidden fade-up">
-
-      <!-- 슬라이드 영역 -->
       <div class="relative overflow-hidden" style="min-height:320px;">
-
-        <!-- 슬라이드 1: 환영 -->
         <div v-if="tutorialStep===0" class="p-6 fade-up">
           <div class="text-center mb-6">
             <h3 class="text-xl font-black text-gray-900 mb-2">환영해요!</h3>
@@ -1127,8 +933,6 @@
             </div>
           </div>
         </div>
-
-        <!-- 슬라이드 2: 스티커 입력 -->
         <div v-if="tutorialStep===1" class="p-6 fade-up">
           <div class="text-xs font-black text-pink-500 mb-1">STEP 1</div>
           <h3 class="text-lg font-black text-gray-900 mb-2">스티커를 입력해요</h3>
@@ -1138,43 +942,21 @@
             <p class="text-xs text-pink-400 mt-0.5">교환할 때마다 자동으로 수량이 바뀌어요</p>
           </div>
           <div class="bg-gray-50 rounded-2xl p-4 space-y-2.5">
-            <div class="flex items-start gap-2">
-              <span class="text-pink-400 font-black flex-none">•</span>
-              <p class="text-xs text-gray-600">탭 = +1 · − 버튼 = -1</p>
-            </div>
-            <div class="flex items-start gap-2">
-              <span class="text-pink-400 font-black flex-none">•</span>
-              <p class="text-xs text-gray-600">2장 이상이면 교환 가능!</p>
-            </div>
-            <div class="flex items-start gap-2">
-              <span class="text-pink-400 font-black flex-none">•</span>
-              <p class="text-xs text-gray-600">0장인 스티커 = 내가 구하는 것</p>
-            </div>
+            <div class="flex items-start gap-2"><span class="text-pink-400 font-black flex-none">•</span><p class="text-xs text-gray-600">탭 = +1 · − 버튼 = -1</p></div>
+            <div class="flex items-start gap-2"><span class="text-pink-400 font-black flex-none">•</span><p class="text-xs text-gray-600">2장 이상이면 교환 가능!</p></div>
+            <div class="flex items-start gap-2"><span class="text-pink-400 font-black flex-none">•</span><p class="text-xs text-gray-600">0장인 스티커 = 내가 구하는 것</p></div>
           </div>
         </div>
-
-        <!-- 슬라이드 3: 교환 상대 찾기 -->
         <div v-if="tutorialStep===2" class="p-6 fade-up">
           <div class="text-xs font-black text-blue-500 mb-1">STEP 2</div>
           <h3 class="text-lg font-black text-gray-900 mb-2">교환 상대를 찾아요</h3>
           <p class="text-sm text-gray-400 leading-relaxed mb-4">멤버 버튼을 누르면 교환 가능한<br>상대를 자동으로 찾아드려요!</p>
           <div class="bg-gray-50 rounded-2xl p-4 space-y-2.5">
-            <div class="flex items-start gap-2">
-              <span class="text-blue-400 font-black flex-none">•</span>
-              <p class="text-xs text-gray-600">🔥추천 = 서로 교환 가능한 상대</p>
-            </div>
-            <div class="flex items-start gap-2">
-              <span class="text-blue-400 font-black flex-none">•</span>
-              <p class="text-xs text-gray-600">상대 탭 → 비교 → 교환하기</p>
-            </div>
-            <div class="flex items-start gap-2">
-              <span class="text-blue-400 font-black flex-none">•</span>
-              <p class="text-xs text-gray-600">하루 교환 3회 제한 있어요</p>
-            </div>
+            <div class="flex items-start gap-2"><span class="text-blue-400 font-black flex-none">•</span><p class="text-xs text-gray-600">🔥추천 = 서로 교환 가능한 상대</p></div>
+            <div class="flex items-start gap-2"><span class="text-blue-400 font-black flex-none">•</span><p class="text-xs text-gray-600">상대 탭 → 비교 → 교환하기</p></div>
+            <div class="flex items-start gap-2"><span class="text-blue-400 font-black flex-none">•</span><p class="text-xs text-gray-600">하루 교환 3회 제한 있어요</p></div>
           </div>
         </div>
-
-        <!-- 슬라이드 4: 쪽지 -->
         <div v-if="tutorialStep===3" class="p-6 fade-up">
           <div class="text-xs font-black text-emerald-500 mb-1">STEP 3</div>
           <h3 class="text-lg font-black text-gray-900 mb-2">쪽지로 교환 제안해요</h3>
@@ -1183,31 +965,15 @@
             <p class="text-xs text-amber-700 font-black">⚠️ 반드시 게임에서 먼저 교환하고<br>앱에서 기록하세요!</p>
           </div>
         </div>
-
       </div>
-
-      <!-- 하단 인디케이터 + 버튼 -->
       <div class="px-6 pb-6">
-        <!-- 점 인디케이터 -->
         <div class="flex justify-center gap-1.5 mb-4">
-          <div v-for="i in 4" :key="i"
-               class="rounded-full transition-all"
+          <div v-for="i in 4" :key="i" class="rounded-full transition-all"
                :style="tutorialStep===i-1 ? 'width:20px;height:6px;background:#111827;' : 'width:6px;height:6px;background:#e5e7eb;'"></div>
         </div>
-
-        <!-- 버튼 -->
-        <button v-if="tutorialStep < 3" @click="tutorialStep++"
-                class="w-full py-3.5 bg-gray-900 text-white rounded-2xl font-black text-sm btn-press">
-          다음 →
-        </button>
-        <button v-else @click="closeWelcomePopup"
-                class="w-full py-3.5 bg-gray-900 text-white rounded-2xl font-black text-sm btn-press">
-          시작하기!
-        </button>
-        <button @click="showWelcomePopup=false"
-                class="w-full py-2 text-gray-400 text-xs font-black mt-1 btn-press">
-          건너뛰기
-        </button>
+        <button v-if="tutorialStep < 3" @click="tutorialStep++" class="w-full py-3.5 bg-gray-900 text-white rounded-2xl font-black text-sm btn-press">다음 →</button>
+        <button v-else @click="closeWelcomePopup" class="w-full py-3.5 bg-gray-900 text-white rounded-2xl font-black text-sm btn-press">시작하기!</button>
+        <button @click="showWelcomePopup=false" class="w-full py-2 text-gray-400 text-xs font-black mt-1 btn-press">건너뛰기</button>
       </div>
     </div>
   </div>
@@ -1216,46 +982,31 @@
   <div v-if="showHelpPopup" class="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4" @click.self="closeHelp">
     <div class="bg-white rounded-2xl w-full max-w-sm p-6 shadow-2xl max-h-[90vh] overflow-y-auto hide-scroll">
       <div class="flex items-center justify-between mb-4">
-        <h3 class="text-base font-black text-gray-800">📖 사용 가이드</h3>
+        <h3 class="text-base font-black text-gray-800">사용 가이드</h3>
         <button @click="closeHelp" class="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center text-gray-400 btn-press"><i class="fas fa-times text-sm"></i></button>
       </div>
-
-      <!-- 핵심 기능 요약 -->
       <div class="bg-gray-50 rounded-2xl p-4 mb-4 space-y-2.5">
-        <div class="text-xs font-black text-gray-600 mb-1">🔑 핵심 기능</div>
-        <div class="flex items-start gap-2">
-          <span class="text-red-400 flex-none font-black">•</span>
-          <p class="text-xs text-gray-600 leading-snug"><b>게임에서 먼저 교환하고</b> 앱에서 기록하세요!</p>
-        </div>
-        <div class="flex items-start gap-2">
-          <span class="text-pink-400 flex-none font-black">•</span>
-          <p class="text-xs text-gray-600 leading-snug">스티커 <b>탭 = +1</b> · − 버튼 = −1 · 🔍 = 보유자 찾기</p>
-        </div>
+        <div class="text-xs font-black text-gray-600 mb-1">핵심 기능</div>
+        <div class="flex items-start gap-2"><span class="text-red-400 flex-none font-black">•</span><p class="text-xs text-gray-600 leading-snug"><b>게임에서 먼저 교환하고</b> 앱에서 기록하세요!</p></div>
+        <div class="flex items-start gap-2"><span class="text-pink-400 flex-none font-black">•</span><p class="text-xs text-gray-600 leading-snug">스티커 <b>탭 = +1</b> · − 버튼 = −1 · 🔍 = 보유자 찾기</p></div>
         <div class="flex items-start gap-2">
           <span class="text-pink-400 flex-none font-black">•</span>
           <div class="text-xs text-gray-600 leading-snug">
-            <b>멤버 → 비교 → 교환하기 → 📨 쪽지 전송</b>
+            <b>멤버 → 비교 → 교환하기 → 쪽지 전송</b>
             <div class="mt-1 text-gray-400">체크1+2 = <b class="text-red-500">교환</b> · 체크1만 = <b class="text-blue-500">주기</b> · 체크2만 = <b class="text-green-600">받기</b></div>
           </div>
         </div>
-        <div class="flex items-start gap-2">
-          <span class="text-pink-400 flex-none font-black">•</span>
-          <p class="text-xs text-gray-600 leading-snug">캐릭터 여러 개면 상단 이름 옆 <b>▼ 버튼</b>으로 바로 전환</p>
-        </div>
-        <div class="flex items-start gap-2">
-          <span class="text-pink-400 flex-none font-black">•</span>
-          <p class="text-xs text-gray-600 leading-snug">하루 교환 <b>3회</b> 제한 · 매일 오전 8시 자동 초기화</p>
-        </div>
+        <div class="flex items-start gap-2"><span class="text-pink-400 flex-none font-black">•</span><p class="text-xs text-gray-600 leading-snug">캐릭터 여러 개면 상단 이름 옆 <b>▼ 버튼</b>으로 바로 전환</p></div>
+        <div class="flex items-start gap-2"><span class="text-pink-400 flex-none font-black">•</span><p class="text-xs text-gray-600 leading-snug">하루 교환 <b>3회</b> 제한 · 매일 오전 8시 자동 초기화</p></div>
       </div>
-
-            <div class="border border-pink-100 rounded-2xl p-3 mb-4 bg-pink-50 text-center">
-        <p class="text-xs text-pink-500 font-black mb-2">❓ 궁금한 점이 있나요?</p>
+      <div class="border border-pink-100 rounded-2xl p-3 mb-4 bg-pink-50 text-center">
+        <p class="text-xs text-pink-500 font-black mb-2">궁금한 점이 있나요?</p>
         <button @click="contactAdmin" class="w-full bg-pink-500 text-white py-2.5 rounded-xl font-black text-sm btn-press flex items-center justify-center gap-2">
           <i class="fas fa-envelope"></i> 시소에게 문의하기
         </button>
         <p class="text-[10px] text-pink-300 mt-1.5">이 교환소 쪽지함으로 67섭 시소에게 연결돼요</p>
       </div>
-      <button @click="closeHelp" class="w-full bg-gray-800 text-white py-3 rounded-2xl font-black text-sm btn-press">확인했습니다 ✅</button>
+      <button @click="closeHelp" class="w-full bg-gray-800 text-white py-3 rounded-2xl font-black text-sm btn-press">확인했습니다</button>
     </div>
   </div>
 
@@ -1277,7 +1028,6 @@ const { createApp, ref, computed, watch, onMounted, onBeforeUnmount, nextTick } 
 
 createApp({
   setup() {
-    // ─── 기본 상태 ───────────────────────────────────────────
     const isLoggedIn = ref(false);
     const isLoading = ref(false);
     const loginForm = ref({ server: '', nickname: '', password: '' });
@@ -1286,7 +1036,6 @@ createApp({
     const currentAlbumIdx = ref(0);
     const tradeCount = ref(0);
 
-    // 팝업 열림/닫힘
     const showPopup = ref(false);
     const showUserListPopup = ref(false);
     const showComparePopup = ref(false);
@@ -1297,232 +1046,38 @@ createApp({
     const showChatPopup = ref(false);
     const showRankingPopup = ref(false);
     const showHistoryPopup = ref(false);
+    const showAdminPopup = ref(false);
+    const showTradeAdjust = ref(false);
+    const showWelcomePopup = ref(false);
+    const tutorialStep = ref(0);
 
-    // ─── 공지사항 ──────────────────────────────────────────
     const noticeTitle = ref('');
     const noticeBody = ref('');
     const noticeDismissed = ref(false);
     const showNoticePopup = ref(false);
+    const adminNoticeTitle = ref('');
+    const adminNoticeBody = ref('');
 
-    const loadNotice = async () => {
-      try {
-        const doc = await db.collection('config').doc('service_info').get();
-        if (doc.exists) {
-          const d = doc.data();
-          const title = d.noticeTitle || '';
-          const body = d.noticeBody || '';
-          if (title) {
-            noticeTitle.value = title;
-            noticeBody.value = body;
-            noticeDismissed.value = false;
-            // 관리자 입력창에도 동기화
-            adminNoticeTitle.value = title;
-            adminNoticeBody.value = body;
-          }
-        }
-      } catch {}
-    };
-
-    // X 버튼으로 닫으면 세션 동안만 숨김 (새로고침하면 다시 보임)
-    // 영구적으로 숨기지 않음
-
-    // ─── 캐릭터 전환 상태 ────────────────────────────────────
     const showCharSwitcher = ref(false);
     const charUnreadCounts = ref({});
     const showAddChar = ref(false);
     const addCharForm = ref({ server:'', nickname:'', password:'' });
     const savedChars = ref([]);
-
     const currentDocId = computed(() => myDocId.value);
-
     const charStorageKey = 'oq_chars_v1';
 
-    // Firebase에서 내 캐릭터 목록 불러오기
-    // 비밀번호를 공통 키로 사용 - 같은 비번이면 같은 그룹 (단순하고 확실)
-    // 실제로는 현재 로그인 캐릭 docId 기준으로 저장, 다른 캐릭 추가 시 서로 연결
-    const getLinkedDocId = () => {
-      // 현재 캐릭터의 linkedChars 문서 ID 찾기
-      // localStorage에 마스터 docId 기록
-      const masterKey = 'oq_master_' + myDocId.value;
-      return localStorage.getItem(masterKey) || myDocId.value;
-    };
-
-    const loadSavedChars = async () => {
-      if (!userData.value) return;
-      const myDoc = myDocId.value;
-      try {
-        // 1) 내 docId로 직접 조회
-        const doc = await db.collection('linkedChars').doc(myDoc).get();
-        let chars = [];
-
-        if (doc.exists) {
-          chars = doc.data().chars || [];
-        }
-
-        // 2) 현재 캐릭터가 목록에 없으면 추가
-        const exists = chars.find(c => c.docId === myDoc);
-        if (!exists) {
-          chars.unshift({
-            docId: myDoc,
-            server: userData.value.server,
-            nickname: userData.value.nickname,
-            password: userData.value.password
-          });
-          await db.collection('linkedChars').doc(myDoc).set({ chars }, { merge: true });
-        }
-
-        // 3) 목록 안의 다른 캐릭들도 각자 이 목록을 가리키도록 업데이트
-        // (어떤 캐릭으로 로그인해도 같은 목록 보이게)
-        const batch = db.batch();
-        chars.forEach(c => {
-          if (c.docId !== myDoc) {
-            const ref = db.collection('linkedChars').doc(c.docId);
-            batch.set(ref, { chars, syncFrom: myDoc }, { merge: false });
-          }
-        });
-        await batch.commit();
-
-        savedChars.value = chars;
-      } catch {
-        // Firebase 실패 시 localStorage 폴백
-        try {
-          const raw = localStorage.getItem(charStorageKey);
-          savedChars.value = raw ? JSON.parse(raw) : [];
-          const exists = savedChars.value.find(c => c.docId === myDoc);
-          if (!exists) {
-            savedChars.value.unshift({
-              docId: myDoc,
-              server: userData.value.server,
-              nickname: userData.value.nickname,
-              password: userData.value.password
-            });
-          }
-        } catch { savedChars.value = []; }
-      }
-    };
-
-    const saveSavedChars = async () => {
-      if (!userData.value) return;
-      const myDoc = myDocId.value;
-      try {
-        // 모든 연결된 캐릭터 문서에 동일하게 저장
-        const batch = db.batch();
-        savedChars.value.forEach(c => {
-          const ref = db.collection('linkedChars').doc(c.docId);
-          batch.set(ref, { chars: savedChars.value }, { merge: false });
-        });
-        await batch.commit();
-      } catch {
-        localStorage.setItem(charStorageKey, JSON.stringify(savedChars.value));
-      }
-    };
-
-    const addChar = async () => {
-      const server = Number(addCharForm.value.server);
-      const nickname = (addCharForm.value.nickname || '').trim();
-      const password = (addCharForm.value.password || '').trim();
-      if (!server || !nickname || !password) { alert('모두 입력해주세요!'); return; }
-      if (!/^[0-9]{4}$/.test(password)) { alert('비밀번호는 숫자 4자리!'); return; }
-
-      const docId = 'S' + server + '_' + nickname;
-      if (savedChars.value.find(c => c.docId === docId)) { alert('이미 등록된 캐릭터예요!'); return; }
-
-      try {
-        const doc = await db.collection('users').doc(docId).get();
-        if (!doc.exists) { alert('존재하지 않는 캐릭터예요!\n먼저 해당 캐릭으로 한 번 로그인해주세요.'); return; }
-        const data = doc.data();
-        if ((data.password || '') !== password) { alert('비밀번호가 틀렸어요!'); return; }
-
-        savedChars.value.push({ docId, server, nickname, password });
-        await saveSavedChars();
-        addCharForm.value = { server:'', nickname:'', password:'' };
-        showAddChar.value = false;
-        alert('S' + server + ' ' + nickname + ' 추가됐어요! ✅\n이제 모든 기기에서 보여요 😊');
-      } catch(e) { alert('오류: ' + (e.message||e)); }
-    };
-
-    const removeChar = async (docId) => {
-      if (docId === currentDocId.value) { alert('현재 로그인 중인 캐릭터는 삭제할 수 없어요!'); return; }
-      savedChars.value = savedChars.value.filter(c => c.docId !== docId);
-      await saveSavedChars();
-    };
-
-    // 캐릭터별 읽지 않은 쪽지 수 가져오기
-    const fetchCharUnreads = async () => {
-      if (!savedChars.value || savedChars.value.length === 0) return;
-      try {
-        const counts = {};
-        for (const char of savedChars.value) {
-          if (char.docId === currentDocId.value) continue;
-          // 해당 캐릭터의 chatRooms에서 unread 합산
-          const snap = await db.collection('chatRooms')
-            .where('members', 'array-contains', char.docId)
-            .get();
-          let total = 0;
-          snap.forEach(doc => {
-            const d = doc.data();
-            total += (d.unread || {})[char.docId] || 0;
-          });
-          counts[char.docId] = total;
-        }
-        charUnreadCounts.value = counts;
-      } catch(e) {}
-    };
-
-    const switchChar = async (char) => {
-      if (char.docId === currentDocId.value) { showCharSwitcher.value = false; return; }
-      showCharSwitcher.value = false;
-      isLoading.value = true;
-      try {
-        const doc = await db.collection('users').doc(char.docId).get();
-        if (!doc.exists) { alert('캐릭터 데이터를 찾을 수 없어요!'); return; }
-        const data = doc.data();
-        if (!Array.isArray(data.collection) || data.collection.length !== 81) data.collection = Array(81).fill(0);
-
-        // 기존 구독 해제
-        if (chatUnsubscribe) { chatUnsubscribe(); chatUnsubscribe = null; }
-        if (roomsUnsubscribe) { roomsUnsubscribe(); roomsUnsubscribe = null; }
-        if (resetTimer) clearInterval(resetTimer);
-
-        userData.value = data;
-        localStorage.setItem('oq_user_v4', JSON.stringify(data));
-        favSet.value = loadFavSet();
-
-        await checkAndResetDailyLimit();
-        await updateLastActive();
-        startDailyResetWatcher();
-        subscribeUnread();
-
-        // 현재 캐릭을 목록 맨 앞으로
-        savedChars.value = savedChars.value.filter(c => c.docId !== char.docId);
-        savedChars.value.unshift(char);
-        await saveSavedChars();
-
-        currentView.value = 'dashboard';
-        // 전환 후 나머지 캐릭터 쪽지 재확인
-        setTimeout(() => fetchCharUnreads(), 1000);
-      } catch(e) { alert('전환 실패: ' + (e.message||e)); } finally { isLoading.value = false; }
-    };
-
-    // ─── 관리자 전용 상태 ────────────────────────────────────
-    const showAdminPopup = ref(false);
-    const showTradeAdjust = ref(false);
-    const showWelcomePopup = ref(false);
-    const tutorialStep = ref(0);
     const adminTab = ref('members');
     const adminSearch = ref('');
     const adminMembers = ref([]);
     const isAdminLoading = ref(false);
     const inactiveDays = ref(7);
 
-    // 검색/필터
     const searchKeyword = ref('');
     const memberFilter = ref('all');
     const needsKeyword = ref('');
     const needsLoading = ref(false);
     const spareOwnerCounts = ref(Array(81).fill(0));
 
-    // 교환 관련
     const exchangeList = ref([]);
     const userList = ref([]);
     const compareTarget = ref({});
@@ -1534,17 +1089,15 @@ createApp({
     const dealGiveIndex = ref(null);
     const dealReceiveIndex = ref(null);
 
-    // 앱 설정
     const appConfig = ref({
       albumNames: Array(9).fill(null).map((_,i)=>`앨범 ${i+1}`),
       albumCovers: Array(9).fill('')
     });
 
-    // 쪽지/채팅
     const chatTarget = ref(null);
-    const pendingDeal = ref(null);  // 쪽지 보낸 후 교환 기록 대기
-    const chatView = ref('list');   // 'list' | 'read' | 'write'
-    const readingMsg = ref(null);   // 현재 읽는 대화방 정보
+    const pendingDeal = ref(null);
+    const chatView = ref('list');
+    const readingMsg = ref(null);
     const chatMessages = ref([]);
     const chatRooms = ref([]);
     const chatInput = ref('');
@@ -1555,24 +1108,17 @@ createApp({
     let chatUnsubscribe = null;
     let roomsUnsubscribe = null;
 
-    // 랭킹
     const rankingList = ref([]);
-
-    // 히스토리
     const historyList = ref([]);
     const isHistoryLoading = ref(false);
 
-    // 타이머/홀드
     let resetTimer = null;
     let holdTimer = null;
     let holdTriggered = false;
 
-    // ─── 유틸 ────────────────────────────────────────────────
     const safeNick = v => (v||'').toString().trim();
     const safeServer = v => Number(v||0);
-
     const myDocId = computed(() => userData.value ? `S${userData.value.server}_${userData.value.nickname}` : '');
-
     const canEditAlbums = computed(() => {
       if (!userData.value) return false;
       return Number(userData.value.server)===67 && String(userData.value.nickname)==='시소';
@@ -1625,7 +1171,6 @@ createApp({
       return `${d.getMonth()+1}/${d.getDate()}`;
     };
 
-    // ─── 즐겨찾기 ────────────────────────────────────────────
     const favKey = computed(() => userData.value ? `oq_fav_S${userData.value.server}_${userData.value.nickname}` : 'oq_fav_guest');
     const favSet = ref(new Set());
     const isFavorite = id => favSet.value.has(id);
@@ -1639,7 +1184,6 @@ createApp({
       try { const r = localStorage.getItem(favKey.value); return new Set(JSON.parse(r||'[]')); } catch { return new Set(); }
     };
 
-    // ─── 앱 설정 ─────────────────────────────────────────────
     const loadAppConfig = async () => {
       try {
         const doc = await db.collection('config').doc('service_info').get();
@@ -1647,7 +1191,6 @@ createApp({
           const d = doc.data();
           if (Array.isArray(d.albumNames)&&d.albumNames.length===9) appConfig.value.albumNames = d.albumNames;
           if (Array.isArray(d.albumCovers)&&d.albumCovers.length===9) appConfig.value.albumCovers = d.albumCovers;
-          // 공지사항도 같이 불러오기
           if (d.noticeTitle) {
             noticeTitle.value = d.noticeTitle;
             noticeBody.value = d.noticeBody || '';
@@ -1672,7 +1215,6 @@ createApp({
       } catch (e) { alert('저장 실패: '+(e.message||e)); }
     };
 
-    // ─── 교환 횟수 리셋 ──────────────────────────────────────
     const checkAndResetDailyLimit = async () => {
       if (!userData.value) return;
       const today = getGameDate();
@@ -1696,7 +1238,6 @@ createApp({
       try { await db.collection('users').doc(myDocId.value).update({ lastActive: firebase.firestore.FieldValue.serverTimestamp() }); } catch {}
     };
 
-    // ─── 스티커 컬렉션 ───────────────────────────────────────
     const currentAlbumStickers = computed(() => {
       const col = userData.value ? userData.value.collection : Array(81).fill(0);
       return col.slice(currentAlbumIdx.value*9, currentAlbumIdx.value*9+9);
@@ -1739,28 +1280,16 @@ createApp({
     const onStickerHoldStart = i => {
       holdTriggered = false;
       if (holdTimer) clearTimeout(holdTimer);
-      holdTimer = setTimeout(() => {
-        holdTriggered = true;
-        updateCount(i, -1);
-      }, 500);
+      holdTimer = setTimeout(() => { holdTriggered = true; updateCount(i, -1); }, 500);
     };
-    const onStickerHoldEnd = () => {
-      if (holdTimer) { clearTimeout(holdTimer); holdTimer = null; }
-    };
-    // 모바일 터치 끝 - holdTriggered면 click 이벤트 막기
+    const onStickerHoldEnd = () => { if (holdTimer) { clearTimeout(holdTimer); holdTimer = null; } };
     const onStickerTouchEnd = i => {
       onStickerHoldEnd();
-      if (holdTriggered) {
-        holdTriggered = false;
-        return; // -1 이미 됐으니 여기서 종료
-      }
-      updateCount(i, 1); // 짧게 탭하면 +1
-    };
-    // PC 클릭 (마우스)
-    const onStickerClick = i => {
-      // 모바일에서는 touchend가 처리하므로 마우스 클릭만 처리
       if (holdTriggered) { holdTriggered = false; return; }
-      // 터치 기기면 무시 (touchend에서 이미 처리됨)
+      updateCount(i, 1);
+    };
+    const onStickerClick = i => {
+      if (holdTriggered) { holdTriggered = false; return; }
       updateCount(i, 1);
     };
     const onStickerTap = i => {
@@ -1768,8 +1297,6 @@ createApp({
       updateCount(i, 1);
     };
 
-    // ─── 초기화 ──────────────────────────────────────────────
-    // 교환 횟수 수동 조정
     const adjustTradeCount = async (chg) => {
       if (!userData.value) return;
       const next = (tradeCount.value || 0) + chg;
@@ -1779,10 +1306,7 @@ createApp({
       userData.value.dailyExchangeCount = next;
       userData.value.dailyExchangeDate = today;
       try {
-        await db.collection('users').doc(myDocId.value).update({
-          dailyExchangeCount: next,
-          dailyExchangeDate: today
-        });
+        await db.collection('users').doc(myDocId.value).update({ dailyExchangeCount: next, dailyExchangeDate: today });
         localStorage.setItem('oq_user_v4', JSON.stringify(userData.value));
       } catch(e) {}
     };
@@ -1802,7 +1326,6 @@ createApp({
       } catch(e) { alert('실패: '+(e.message||e)); } finally { isLoading.value = false; }
     };
 
-    // ─── 구해요 목록 ─────────────────────────────────────────
     const refreshSpareOwnerCounts = async () => {
       needsLoading.value = true;
       try {
@@ -1822,8 +1345,7 @@ createApp({
 
     const needsList = computed(() => {
       const col = userData.value?.collection || Array(81).fill(0);
-      return Array.from({length:81}, (_,i) => i)
-        .filter(i => col[i]===0)
+      return Array.from({length:81}, (_,i) => i).filter(i => col[i]===0)
         .map(i => ({ index:i, name:stickerNameByIndex(i), owners:spareOwnerCounts.value[i]||0 }));
     });
 
@@ -1832,7 +1354,6 @@ createApp({
       return kw ? needsList.value.filter(x=>x.name.toLowerCase().includes(kw)) : needsList.value;
     });
 
-    // ─── 보유자 찾기 ─────────────────────────────────────────
     const openExchangeByAbsoluteIndex = async absIdx => {
       showNeedsPopup.value = false;
       showPopup.value = true;
@@ -1851,11 +1372,8 @@ createApp({
           if ((uCol[absIdx]||0) > 1) {
             const giveable = [];
             for (let k=0;k<81;k++) if ((myCol[k]||0)>1&&(uCol[k]||0)===0) giveable.push(stickerNameByIndex(k));
-            matches.push({
-              id: doc.id, server:u.server, nickname:u.nickname, collection:uCol, lastActive:u.lastActive,
-              isTradeClosed: u.dailyExchangeDate===today&&(u.dailyExchangeCount||0)>=3,
-              giveable
-            });
+            matches.push({ id: doc.id, server:u.server, nickname:u.nickname, collection:uCol, lastActive:u.lastActive,
+              isTradeClosed: u.dailyExchangeDate===today&&(u.dailyExchangeCount||0)>=3, giveable });
           }
         });
         matches.sort((a,b)=>(tsToDate(b.lastActive)?.getTime()||0)-(tsToDate(a.lastActive)?.getTime()||0));
@@ -1863,7 +1381,6 @@ createApp({
       } catch(e) { alert('보유자 찾기 실패: '+(e.message||e)); } finally { isLoading.value = false; }
     };
 
-    // ─── 멤버 목록 ───────────────────────────────────────────
     const computeMatchFlags = target => {
       const myCol = userData.value?.collection || Array(81).fill(0);
       const tCol = Array.isArray(target?.collection) ? target.collection : Array(81).fill(0);
@@ -1890,12 +1407,10 @@ createApp({
           const col = Array.isArray(u.collection) ? u.collection : Array(81).fill(0);
           const total = col.reduce((a,b)=>a+(b>0?1:0),0);
           if (total<=0) return;
-          users.push({
-            id:doc.id, server:u.server, nickname:u.nickname, collection:col,
+          users.push({ id:doc.id, server:u.server, nickname:u.nickname, collection:col,
             lastActive:u.lastActive, lastUpdated:u.lastUpdated, totalCount:total,
             dailyExchangeCount:u.dailyExchangeCount||0, dailyExchangeDate:u.dailyExchangeDate||'',
-            isTradeClosed:isUserTradeClosed(u), match:computeMatchFlags(u)
-          });
+            isTradeClosed:isUserTradeClosed(u), match:computeMatchFlags(u) });
         });
         userList.value = users;
       } catch(e) { alert('리스트 로드 실패: '+(e.message||e)); } finally { isLoading.value = false; }
@@ -1924,7 +1439,6 @@ createApp({
       return list;
     });
 
-    // ─── 비교 팝업 ───────────────────────────────────────────
     const buildCompare = targetUser => {
       compareTarget.value = targetUser||{};
       const myCol = userData.value?.collection || Array(81).fill(0);
@@ -1946,7 +1460,6 @@ createApp({
       showComparePopup.value = true;
     };
 
-    // ─── 교환하기 ─────────────────────────────────────────
     const dealModeLabel = computed(() => {
       if (dealCheckGive.value&&dealCheckReceive.value) return '교환';
       if (dealCheckGive.value&&!dealCheckReceive.value) return '주기';
@@ -1966,7 +1479,6 @@ createApp({
     };
 
     const closeDealBuilder = () => { showDealBuilder.value=false; dealGiveIndex.value=null; dealReceiveIndex.value=null; };
-
     watch(dealCheckGive, v => { if(!v) dealGiveIndex.value=null; });
     watch(dealCheckReceive, v => { if(!v) dealReceiveIndex.value=null; });
 
@@ -1974,12 +1486,10 @@ createApp({
       if (!dealCheckGive.value&&!dealCheckReceive.value) { alert('체크를 최소 1개 켜주세요!'); return; }
       if (dealCheckGive.value&&dealGiveIndex.value===null) { alert('줄 스티커를 선택해주세요!'); return; }
       if (dealCheckReceive.value&&dealReceiveIndex.value===null) { alert('받을 스티커를 선택해주세요!'); return; }
-
       const myS=userData.value.server, myN=userData.value.nickname;
       const tS=compareTarget.value.server, tN=compareTarget.value.nickname;
       const gN=dealCheckGive.value?stickerNameByIndex(dealGiveIndex.value):null;
       const rN=dealCheckReceive.value?stickerNameByIndex(dealReceiveIndex.value):null;
-
       let text='';
       if (dealCheckGive.value&&dealCheckReceive.value)
         text=`[오피스퀸] S${tS} ${tN}님! S${myS} ${myN}입니다.\n제가 [${gN}] 드리고,\n저는 [${rN}] 받을게요!\n교환 가능하실까요?`;
@@ -1987,17 +1497,13 @@ createApp({
         text=`[오피스퀸] S${tS} ${tN}님! S${myS} ${myN}입니다.\n[${gN}] 여유분이 있어서 드릴게요!`;
       else
         text=`[오피스퀸] S${tS} ${tN}님! S${myS} ${myN}입니다.\n[${rN}] 여유분 있으시면 주실 수 있을까요?`;
-
       navigator.clipboard.writeText(text).then(()=>alert('복사됨! 📋 게임 채팅에 붙여넣기 하세요.')).catch(()=>alert('복사 실패'));
     };
 
     const copyAndChat = async () => {
-      // 문구 유효성 검사
       if (!dealCheckGive.value && !dealCheckReceive.value) { alert('체크를 최소 1개 켜주세요!'); return; }
       if (dealCheckGive.value && dealGiveIndex.value === null) { alert('줄 스티커를 선택해주세요!'); return; }
       if (dealCheckReceive.value && dealReceiveIndex.value === null) { alert('받을 스티커를 선택해주세요!'); return; }
-
-      // 문구 생성
       const myS=userData.value.server, myN=userData.value.nickname;
       const tS=compareTarget.value.server, tN=compareTarget.value.nickname;
       const gN=dealCheckGive.value?stickerNameByIndex(dealGiveIndex.value):null;
@@ -2009,35 +1515,25 @@ createApp({
         text=`[오피스퀸] S${tS} ${tN}님! S${myS} ${myN}입니다.\n[${gN}] 여유분이 있어서 드릴게요!`;
       else
         text=`[오피스퀸] S${tS} ${tN}님! S${myS} ${myN}입니다.\n[${rN}] 여유분 있으시면 주실 수 있을까요?`;
-
-      // 현재 교환 정보 저장 (쪽지 보낸 후 교환 기록용)
       pendingDeal.value = {
         target: { ...compareTarget.value },
-        checkGive: dealCheckGive.value,
-        checkReceive: dealCheckReceive.value,
-        giveIndex: dealGiveIndex.value,
-        receiveIndex: dealReceiveIndex.value,
+        checkGive: dealCheckGive.value, checkReceive: dealCheckReceive.value,
+        giveIndex: dealGiveIndex.value, receiveIndex: dealReceiveIndex.value,
         modeLabel: dealModeLabel.value
       };
-
-      // 클립보드 복사 후 쪽지창 열기
       try { await navigator.clipboard.writeText(text); } catch(e) {}
-      // 교환하기 닫고 쪽지창 열기
       showDealBuilder.value = false;
       await openDirectChat(compareTarget.value);
     };
 
-    // 쪽지창에서 바로 교환 기록
     const confirmDealFromChat = async () => {
       if (!pendingDeal.value) return;
       const pd = pendingDeal.value;
-      // 교환하기 상태 복원
       compareTarget.value = pd.target;
       dealCheckGive.value = pd.checkGive;
       dealCheckReceive.value = pd.checkReceive;
       dealGiveIndex.value = pd.giveIndex;
       dealReceiveIndex.value = pd.receiveIndex;
-      // 쪽지창 닫고 교환 기록 실행
       closeChatPopup();
       await confirmDeal();
       pendingDeal.value = null;
@@ -2047,27 +1543,22 @@ createApp({
       if (!userData.value||!compareTarget.value?.id) return;
       await checkAndResetDailyLimit();
       const today = getGameDate();
-
       if (!dealCheckGive.value&&!dealCheckReceive.value) { alert('체크를 최소 1개 켜주세요!'); return; }
       if (dealCheckGive.value&&dealGiveIndex.value===null) { alert('줄 스티커를 선택해주세요!'); return; }
       if (dealCheckReceive.value&&dealReceiveIndex.value===null) { alert('받을 스티커를 선택해주세요!'); return; }
       if (tradeCount.value>=3) { alert('오늘 교환 3회 소진! 내일 오전 8시에 다시 가능해요 🌙'); return; }
-
       const mode = dealModeLabel.value;
       const lines=[];
       if (dealCheckGive.value) lines.push(`- 내가 줌: ${stickerNameByIndex(dealGiveIndex.value)}`);
       if (dealCheckReceive.value) lines.push(`- 내가 받음: ${stickerNameByIndex(dealReceiveIndex.value)}`);
       if (!confirm(`${mode}을(를) 기록할까요?\n\n${lines.join('\n')}\n\n(교환횟수: 나/상대 각 1회 차감)`)) return;
-
       isLoading.value = true;
       try {
         const myRef = db.collection('users').doc(myDocId.value);
         const tRef = db.collection('users').doc(compareTarget.value.id);
-
         const tradePayload = {
           type: (dealCheckGive.value&&dealCheckReceive.value)?'exchange':dealCheckGive.value?'gift':'need',
-          typeLabel: mode,
-          date: today,
+          typeLabel: mode, date: today,
           createdAt: firebase.firestore.FieldValue.serverTimestamp(),
           from: { server:userData.value.server, nickname:userData.value.nickname, id:myDocId.value },
           to: { server:compareTarget.value.server, nickname:compareTarget.value.nickname, id:compareTarget.value.id },
@@ -2076,21 +1567,17 @@ createApp({
           giveName: dealCheckGive.value?stickerNameByIndex(dealGiveIndex.value):null,
           receiveName: dealCheckReceive.value?stickerNameByIndex(dealReceiveIndex.value):null
         };
-
         await db.runTransaction(async tx => {
           const mySnap = await tx.get(myRef);
           const tSnap = await tx.get(tRef);
           if (!mySnap.exists||!tSnap.exists) throw new Error('데이터 없음');
-
           const myData=mySnap.data(), tData=tSnap.data();
           const myCount=(myData.dailyExchangeDate===today)?(myData.dailyExchangeCount||0):0;
           const tCount=(tData.dailyExchangeDate===today)?(tData.dailyExchangeCount||0):0;
           if (myCount>=3) throw new Error('내 교환횟수 3회 초과');
           if (tCount>=3) throw new Error('상대 교환횟수 3회 초과');
-
           const myCol=[...(Array.isArray(myData.collection)?myData.collection:Array(81).fill(0))];
           const tCol=[...(Array.isArray(tData.collection)?tData.collection:Array(81).fill(0))];
-
           if (dealCheckGive.value) {
             const idx=dealGiveIndex.value;
             if ((myCol[idx]||0)<2) throw new Error('내 스티커가 여유(2장↑)가 아닙니다');
@@ -2103,19 +1590,16 @@ createApp({
             if ((myCol[idx]||0)!==0) throw new Error('내가 0장이 아닙니다');
             tCol[idx]--; myCol[idx]++;
           }
-
           const now=firebase.firestore.FieldValue.serverTimestamp();
           tx.update(myRef,{collection:myCol,dailyExchangeCount:myCount+1,dailyExchangeDate:today,lastUpdated:now,lastActive:now});
           tx.update(tRef,{collection:tCol,dailyExchangeCount:tCount+1,dailyExchangeDate:today,lastUpdated:now,lastActive:now});
           tx.set(db.collection('trades').doc(), tradePayload);
-
           userData.value.collection=myCol;
           userData.value.dailyExchangeCount=myCount+1;
           userData.value.dailyExchangeDate=today;
           tradeCount.value=myCount+1;
           compareTarget.value.collection=tCol;
         });
-
         localStorage.setItem('oq_user_v4', JSON.stringify(userData.value));
         alert(`교환 기록 완료! (오늘 ${tradeCount.value}/3회)`);
         buildCompare(compareTarget.value);
@@ -2124,7 +1608,6 @@ createApp({
       } catch(e) { alert('교환 실패: '+(e.message||e)); } finally { isLoading.value=false; }
     };
 
-    // ─── 쪽지/채팅 ───────────────────────────────────────────
     const getChatRoomId = (uid1, uid2) => [uid1, uid2].sort().join('__');
 
     const loadChatList = async () => {
@@ -2132,48 +1615,27 @@ createApp({
       isChatLoading.value = true;
       chatRooms.value = [];
       try {
-        const snap = await db.collection('chatRooms')
-          .where('members', 'array-contains', myDocId.value)
-          .orderBy('lastAt', 'desc')
-          .limit(30)
-          .get();
-
+        const snap = await db.collection('chatRooms').where('members', 'array-contains', myDocId.value).orderBy('lastAt', 'desc').limit(30).get();
         const rooms = [];
         for (const doc of snap.docs) {
           const d = doc.data();
           const otherId = (d.members||[]).find(m=>m!==myDocId.value);
           const parts = (otherId||'').split('_');
           const otherNickname = parts.slice(1).join('_') || otherId;
-          rooms.push({
-            id: doc.id,
-            otherId,
-            otherNickname,
-            lastMsg: d.lastMsg||'',
-            lastAt: d.lastAt,
-            unread: (d.unread||{})[myDocId.value]||0
-          });
+          rooms.push({ id: doc.id, otherId, otherNickname, lastMsg: d.lastMsg||'', lastAt: d.lastAt, unread: (d.unread||{})[myDocId.value]||0 });
         }
         chatRooms.value = rooms;
-
-        // 전체 미읽 수 계산
         unreadCount.value = rooms.reduce((a,r)=>a+r.unread,0);
       } catch(e) {
-        // orderBy 인덱스 없을 경우 fallback
         try {
-          const snap2 = await db.collection('chatRooms')
-            .where('members', 'array-contains', myDocId.value)
-            .get();
+          const snap2 = await db.collection('chatRooms').where('members', 'array-contains', myDocId.value).get();
           const rooms2 = [];
           for (const doc of snap2.docs) {
             const d = doc.data();
             const otherId = (d.members||[]).find(m=>m!==myDocId.value);
             const parts = (otherId||'').split('_');
             const otherNickname = parts.slice(1).join('_') || otherId;
-            rooms2.push({
-              id: doc.id, otherId, otherNickname,
-              lastMsg: d.lastMsg||'', lastAt: d.lastAt,
-              unread: (d.unread||{})[myDocId.value]||0
-            });
+            rooms2.push({ id: doc.id, otherId, otherNickname, lastMsg: d.lastMsg||'', lastAt: d.lastAt, unread: (d.unread||{})[myDocId.value]||0 });
           }
           rooms2.sort((a,b)=>(tsToDate(b.lastAt)?.getTime()||0)-(tsToDate(a.lastAt)?.getTime()||0));
           chatRooms.value = rooms2;
@@ -2186,41 +1648,30 @@ createApp({
       if (roomsUnsubscribe) roomsUnsubscribe();
       if (!userData.value) return;
       try {
-        roomsUnsubscribe = db.collection('chatRooms')
-          .where('members', 'array-contains', myDocId.value)
+        roomsUnsubscribe = db.collection('chatRooms').where('members', 'array-contains', myDocId.value)
           .onSnapshot(snap => {
             let total = 0;
             snap.forEach(doc => { const d=doc.data(); total+=(d.unread||{})[myDocId.value]||0; });
             unreadCount.value = total;
           }, async () => {
-            // 인덱스 없을 때 fallback - 단순 get으로 대체
             try {
-              const snap = await db.collection('chatRooms')
-                .where('members', 'array-contains', myDocId.value).get();
+              const snap = await db.collection('chatRooms').where('members', 'array-contains', myDocId.value).get();
               let total = 0;
               snap.forEach(doc => { const d=doc.data(); total+=(d.unread||{})[myDocId.value]||0; });
               unreadCount.value = total;
             } catch {}
           });
       } catch {
-        // try/catch fallback
-        db.collection('chatRooms')
-          .where('members', 'array-contains', myDocId.value)
-          .get().then(snap => {
-            let total = 0;
-            snap.forEach(doc => { const d=doc.data(); total+=(d.unread||{})[myDocId.value]||0; });
-            unreadCount.value = total;
-          }).catch(() => {});
+        db.collection('chatRooms').where('members', 'array-contains', myDocId.value).get()
+          .then(snap => { let total = 0; snap.forEach(doc => { const d=doc.data(); total+=(d.unread||{})[myDocId.value]||0; }); unreadCount.value = total; }).catch(() => {});
       }
     };
 
-    // 주기적으로 unread 갱신 (30초마다)
     const startUnreadPolling = () => {
       setInterval(async () => {
         if (!isLoggedIn.value || !userData.value) return;
         try {
-          const snap = await db.collection('chatRooms')
-            .where('members', 'array-contains', myDocId.value).get();
+          const snap = await db.collection('chatRooms').where('members', 'array-contains', myDocId.value).get();
           let total = 0;
           snap.forEach(doc => { const d=doc.data(); total+=(d.unread||{})[myDocId.value]||0; });
           unreadCount.value = total;
@@ -2228,77 +1679,45 @@ createApp({
       }, 30000);
     };
 
-    const openChat = async () => {
-      chatTarget.value = null;
-      chatView.value = 'list';
-      readingMsg.value = null;
-      showChatPopup.value = true;
-      await loadChatList();
-    };
+    const openChat = async () => { chatTarget.value = null; chatView.value = 'list'; readingMsg.value = null; showChatPopup.value = true; await loadChatList(); };
 
     const openDirectChat = async user => {
-      showUserListPopup.value = false;
-      showPopup.value = false;
-      showComparePopup.value = false;
-      chatTarget.value = user;
-      readingMsg.value = { otherNick: user.nickname };
-      chatView.value = 'read';
-      showChatPopup.value = true;
+      showUserListPopup.value = false; showPopup.value = false; showComparePopup.value = false;
+      chatTarget.value = user; readingMsg.value = { otherNick: user.nickname };
+      chatView.value = 'read'; showChatPopup.value = true;
       await loadChatMessages(user);
     };
 
-    const openChatRoom = async room => {
-      chatTarget.value = { id: room.otherId, nickname: room.otherNickname, server: '' };
-      await loadChatMessages({ id: room.otherId });
-    };
+    const openChatRoom = async room => { chatTarget.value = { id: room.otherId, nickname: room.otherNickname, server: '' }; await loadChatMessages({ id: room.otherId }); };
 
     const openMailRoom = async room => {
       chatTarget.value = { id: room.otherId, nickname: room.otherNickname, server: room.otherServer || '' };
-      readingMsg.value = { otherNick: room.otherNickname };
-      chatView.value = 'read';
+      readingMsg.value = { otherNick: room.otherNickname }; chatView.value = 'read';
       await loadChatMessages({ id: room.otherId });
     };
 
     const loadChatMessages = async targetUser => {
       if (!targetUser?.id) return;
-      isChatLoading.value = true;
-      chatMessages.value = [];
+      isChatLoading.value = true; chatMessages.value = [];
       if (chatUnsubscribe) chatUnsubscribe();
-
       const roomId = getChatRoomId(myDocId.value, targetUser.id);
-
       try {
-        // 읽음 처리 (동적 필드명 점 문제 회피)
         const readUpdate = {};
         readUpdate['unread.' + myDocId.value] = 0;
-        await db.collection('chatRooms').doc(roomId).set({
-          members: [myDocId.value, targetUser.id]
-        }, { merge: true });
+        await db.collection('chatRooms').doc(roomId).set({ members: [myDocId.value, targetUser.id] }, { merge: true });
         await db.collection('chatRooms').doc(roomId).update(readUpdate);
-
-        // 실시간 구독
-        chatUnsubscribe = db.collection('chatRooms').doc(roomId)
-          .collection('messages')
-          .orderBy('createdAt', 'asc')
-          .limit(100)
+        chatUnsubscribe = db.collection('chatRooms').doc(roomId).collection('messages').orderBy('createdAt', 'asc').limit(100)
           .onSnapshot(snap => {
             chatMessages.value = snap.docs.map(d=>({ id:d.id, ...d.data() }));
-            // 스크롤 아래로
-            nextTick(() => {
-              if (chatBodyRef.value) chatBodyRef.value.scrollTop = chatBodyRef.value.scrollHeight;
-            });
+            nextTick(() => { if (chatBodyRef.value) chatBodyRef.value.scrollTop = chatBodyRef.value.scrollHeight; });
           }, () => {});
       } catch(e) {
-        // orderBy 인덱스 없을 경우 fallback
-        chatUnsubscribe = db.collection('chatRooms').doc(roomId)
-          .collection('messages')
+        chatUnsubscribe = db.collection('chatRooms').doc(roomId).collection('messages')
           .onSnapshot(snap => {
             const msgs = snap.docs.map(d=>({ id:d.id, ...d.data() }));
             msgs.sort((a,b)=>(tsToDate(a.createdAt)?.getTime()||0)-(tsToDate(b.createdAt)?.getTime()||0));
             chatMessages.value = msgs;
-            nextTick(() => {
-              if (chatBodyRef.value) chatBodyRef.value.scrollTop = chatBodyRef.value.scrollHeight;
-            });
+            nextTick(() => { if (chatBodyRef.value) chatBodyRef.value.scrollTop = chatBodyRef.value.scrollHeight; });
           }, () => {});
       } finally { isChatLoading.value=false; }
     };
@@ -2306,34 +1725,18 @@ createApp({
     const sendMessage = async () => {
       const text = chatInput.value.trim();
       if (!text || isChatSending.value || !chatTarget.value) return;
-      // write 모드면 먼저 chatMessages 구독 시작
-      if (chatView.value === 'write') {
-        readingMsg.value = { otherNick: chatTarget.value.nickname };
-        await loadChatMessages(chatTarget.value);
-        chatView.value = 'read';
-      }
-      isChatSending.value = true;
-      chatInput.value = '';
+      if (chatView.value === 'write') { readingMsg.value = { otherNick: chatTarget.value.nickname }; await loadChatMessages(chatTarget.value); chatView.value = 'read'; }
+      isChatSending.value = true; chatInput.value = '';
       const roomId = getChatRoomId(myDocId.value, chatTarget.value.id);
       try {
         const now = firebase.firestore.FieldValue.serverTimestamp();
         const roomRef = db.collection('chatRooms').doc(roomId);
-        // unread는 update로 별도 처리 (set에서 동적 필드명 점(.) 문제 회피)
-        await roomRef.set({
-          members: [myDocId.value, chatTarget.value.id],
-          lastMsg: text,
-          lastAt: now
-        }, { merge: true });
-        // unread 카운트 별도 update
+        await roomRef.set({ members: [myDocId.value, chatTarget.value.id], lastMsg: text, lastAt: now }, { merge: true });
         const unreadUpdate = {};
         unreadUpdate['unread.' + chatTarget.value.id] = firebase.firestore.FieldValue.increment(1);
         unreadUpdate['unread.' + myDocId.value] = 0;
         await roomRef.update(unreadUpdate);
-        await roomRef.collection('messages').add({
-          text, senderId: myDocId.value,
-          senderNick: userData.value.nickname,
-          createdAt: now
-        });
+        await roomRef.collection('messages').add({ text, senderId: myDocId.value, senderNick: userData.value.nickname, createdAt: now });
       } catch(e) { alert('전송 실패: '+(e.message||e)); chatInput.value = text; } finally { isChatSending.value=false; }
     };
 
@@ -2342,80 +1745,54 @@ createApp({
       isChatLoading.value = true;
       try {
         const roomRef = db.collection('chatRooms').doc(room.id);
-        // 메시지 전체 삭제
         const msgSnap = await roomRef.collection('messages').get();
         const batch = db.batch();
         msgSnap.forEach(doc => batch.delete(doc.ref));
         batch.delete(roomRef);
         await batch.commit();
-        // 목록에서 제거
         chatRooms.value = chatRooms.value.filter(r => r.id !== room.id);
-        // 미읽 수 재계산
         unreadCount.value = chatRooms.value.reduce((a, r) => a + r.unread, 0);
-      } catch(e) {
-        alert('나가기 실패: ' + (e.message || e));
-      } finally {
-        isChatLoading.value = false;
-      }
+      } catch(e) { alert('나가기 실패: ' + (e.message || e)); } finally { isChatLoading.value = false; }
     };
 
     const closeChatPopup = () => {
       showChatPopup.value = false;
       if (chatUnsubscribe) { chatUnsubscribe(); chatUnsubscribe=null; }
-      chatTarget.value = null;
-      chatView.value = 'list';
-      readingMsg.value = null;
-      chatMessages.value = [];
+      chatTarget.value = null; chatView.value = 'list'; readingMsg.value = null; chatMessages.value = [];
     };
 
     const isMyMsg = msg => msg.senderId === myDocId.value;
 
-    // ─── 랭킹 ────────────────────────────────────────────────
     const openRanking = async () => {
-      showRankingPopup.value = true;
-      isLoading.value = true;
-      rankingList.value = [];
+      showRankingPopup.value = true; isLoading.value = true; rankingList.value = [];
       try {
         const snap = await db.collection('users').get();
         const list = [];
         snap.forEach(doc => {
-          const u = doc.data();
-          if (!u) return;
+          const u = doc.data(); if (!u) return;
           const col = Array.isArray(u.collection) ? u.collection : [];
           const total = col.reduce((a,b)=>a+(b>0?1:0),0);
           if (total<=0) return;
-          list.push({
-            id: doc.id, server:u.server, nickname:u.nickname, totalCount:total,
-            isMe: u.server===userData.value.server&&u.nickname===userData.value.nickname
-          });
+          list.push({ id: doc.id, server:u.server, nickname:u.nickname, totalCount:total,
+            isMe: u.server===userData.value.server&&u.nickname===userData.value.nickname });
         });
         list.sort((a,b)=>b.totalCount-a.totalCount);
         rankingList.value = list;
       } catch(e) { alert('랭킹 로드 실패'); } finally { isLoading.value=false; }
     };
 
-    // ─── 히스토리 ────────────────────────────────────────────
     const openHistoryPopup = async () => {
-      showHistoryPopup.value = true;
-      isHistoryLoading.value = true;
-      historyList.value = [];
+      showHistoryPopup.value = true; isHistoryLoading.value = true; historyList.value = [];
       try {
-        // 내가 from 또는 to인 거래 조회
         const [fromSnap, toSnap] = await Promise.all([
           db.collection('trades').where('from.id', '==', myDocId.value).orderBy('createdAt','desc').limit(15).get(),
           db.collection('trades').where('to.id', '==', myDocId.value).orderBy('createdAt','desc').limit(15).get()
         ]);
-        const allTrades = [];
-        const seen = new Set();
-        [...fromSnap.docs, ...toSnap.docs].forEach(doc => {
-          if (seen.has(doc.id)) return;
-          seen.add(doc.id);
-          allTrades.push({ id:doc.id, ...doc.data() });
-        });
+        const allTrades = []; const seen = new Set();
+        [...fromSnap.docs, ...toSnap.docs].forEach(doc => { if (seen.has(doc.id)) return; seen.add(doc.id); allTrades.push({ id:doc.id, ...doc.data() }); });
         allTrades.sort((a,b)=>(tsToDate(b.createdAt)?.getTime()||0)-(tsToDate(a.createdAt)?.getTime()||0));
         historyList.value = allTrades.slice(0,30);
       } catch(e) {
-        // fallback: 인덱스 없는 경우
         try {
           const snap = await db.collection('trades').where('from.id','==',myDocId.value).limit(30).get();
           historyList.value = snap.docs.map(d=>({id:d.id,...d.data()})).sort((a,b)=>(tsToDate(b.createdAt)?.getTime()||0)-(tsToDate(a.createdAt)?.getTime()||0));
@@ -2423,35 +1800,19 @@ createApp({
       } finally { isHistoryLoading.value=false; }
     };
 
-    // ─── 공지사항 저장 ────────────────────────────────────────
-    const adminNoticeTitle = ref('');
-    const adminNoticeBody = ref('');
-
     const saveNotice = async () => {
       if (!canEditAlbums.value) return;
       try {
         const title = adminNoticeTitle.value.trim();
         const body = adminNoticeBody.value.trim();
-        await db.collection('config').doc('service_info').set(
-          { noticeTitle: title, noticeBody: body },
-          { merge: true }
-        );
-        noticeTitle.value = title;
-        noticeBody.value = body;
-        noticeDismissed.value = false;
-        if (!title) {
-          alert('공지가 삭제됐어요!');
-        } else {
-          alert('공지 등록 완료! ✅\n모든 유저 배너에 표시돼요.');
-        }
+        await db.collection('config').doc('service_info').set({ noticeTitle: title, noticeBody: body }, { merge: true });
+        noticeTitle.value = title; noticeBody.value = body; noticeDismissed.value = false;
+        if (!title) { alert('공지가 삭제됐어요!'); } else { alert('공지 등록 완료! ✅\n모든 유저 배너에 표시돼요.'); }
       } catch(e) { alert('실패: ' + (e.message||e)); }
     };
 
-    // ─── 관리자 기능 ─────────────────────────────────────────
     const openAdminPopup = async () => {
-      adminTab.value = 'members';
-      adminSearch.value = '';
-      // 기존 공지 내용 불러오기
+      adminTab.value = 'members'; adminSearch.value = '';
       adminNoticeTitle.value = noticeTitle.value || '';
       adminNoticeBody.value = noticeBody.value || '';
       showAdminPopup.value = true;
@@ -2460,14 +1821,12 @@ createApp({
 
     const loadAdminMembers = async () => {
       if (!canEditAlbums.value) return;
-      isAdminLoading.value = true;
-      adminMembers.value = [];
+      isAdminLoading.value = true; adminMembers.value = [];
       try {
         const snap = await db.collection('users').get();
         const list = [];
         snap.forEach(doc => {
-          const u = doc.data();
-          if (!u) return;
+          const u = doc.data(); if (!u) return;
           const col = Array.isArray(u.collection) ? u.collection : [];
           const total = col.reduce((a,b)=>a+(b>0?1:0),0);
           list.push({ id:doc.id, server:u.server, nickname:u.nickname, lastActive:u.lastActive, totalCount:total });
@@ -2486,10 +1845,7 @@ createApp({
     const adminDeleteMember = async member => {
       if (!confirm(`정말로 [S${member.server} ${member.nickname}]을(를) 삭제할까요?\n이 작업은 되돌릴 수 없어요!`)) return;
       isAdminLoading.value = true;
-      try {
-        await db.collection('users').doc(member.id).delete();
-        adminMembers.value = adminMembers.value.filter(m=>m.id!==member.id);
-        alert('삭제 완료 ✅');
+      try { await db.collection('users').doc(member.id).delete(); adminMembers.value = adminMembers.value.filter(m=>m.id!==member.id); alert('삭제 완료 ✅');
       } catch(e) { alert('삭제 실패: '+(e.message||e)); } finally { isAdminLoading.value=false; }
     };
 
@@ -2511,22 +1867,13 @@ createApp({
       isAdminLoading.value = true;
       try {
         const snap = await db.collection('users').get();
-        const batch = db.batch();
-        let count = 0;
+        const batch = db.batch(); let count = 0;
         snap.forEach(doc => {
-          const u = doc.data();
-          const last = tsToDate(u.lastActive);
-          if (!last || last < cutoff) {
-            // 시소 본인은 제외
-            if (u.server===67&&u.nickname==='시소') return;
-            batch.delete(doc.ref);
-            count++;
-          }
+          const u = doc.data(); const last = tsToDate(u.lastActive);
+          if (!last || last < cutoff) { if (u.server===67&&u.nickname==='시소') return; batch.delete(doc.ref); count++; }
         });
         if (count===0) { alert('해당 조건의 계정이 없어요!'); isAdminLoading.value=false; return; }
-        await batch.commit();
-        alert(`${count}개 계정 삭제 완료 ✅`);
-        await loadAdminMembers();
+        await batch.commit(); alert(`${count}개 계정 삭제 완료 ✅`); await loadAdminMembers();
       } catch(e) { alert('실패: '+(e.message||e)); } finally { isAdminLoading.value=false; }
     };
 
@@ -2535,19 +1882,15 @@ createApp({
       isAdminLoading.value = true;
       try {
         const snap = await db.collection('users').get();
-        const batch = db.batch();
-        let count = 0;
+        const batch = db.batch(); let count = 0;
         snap.forEach(doc => {
-          const u = doc.data();
-          if (u.server===67&&u.nickname==='시소') return;
+          const u = doc.data(); if (u.server===67&&u.nickname==='시소') return;
           const col = Array.isArray(u.collection) ? u.collection : [];
           const total = col.reduce((a,b)=>a+(b>0?1:0),0);
           if (total===0) { batch.delete(doc.ref); count++; }
         });
         if (count===0) { alert('스티커 0개 계정이 없어요!'); isAdminLoading.value=false; return; }
-        await batch.commit();
-        alert(`${count}개 유령 계정 삭제 완료 ✅`);
-        await loadAdminMembers();
+        await batch.commit(); alert(`${count}개 유령 계정 삭제 완료 ✅`); await loadAdminMembers();
       } catch(e) { alert('실패: '+(e.message||e)); } finally { isAdminLoading.value=false; }
     };
 
@@ -2557,35 +1900,119 @@ createApp({
       isAdminLoading.value = true;
       try {
         const snap = await db.collection('users').get();
-        const batch = db.batch();
-        const now = firebase.firestore.FieldValue.serverTimestamp();
+        const batch = db.batch(); const now = firebase.firestore.FieldValue.serverTimestamp();
         snap.forEach(doc => { batch.update(doc.ref, { collection:Array(81).fill(0), lastUpdated:now }); });
         await batch.commit();
-        // 내 데이터도 초기화
         if (userData.value) { userData.value.collection = Array(81).fill(0); localStorage.setItem('oq_user_v4', JSON.stringify(userData.value)); }
-        alert('전체 초기화 완료 ✅\n모든 유저의 스티커가 0이 됐어요.');
-        await loadAdminMembers();
+        alert('전체 초기화 완료 ✅\n모든 유저의 스티커가 0이 됐어요.'); await loadAdminMembers();
       } catch(e) { alert('실패: '+(e.message||e)); } finally { isAdminLoading.value=false; }
     };
 
-    const contactAdmin = async () => {
-      closeHelp();
-      // 시소 계정으로 직접 쪽지 오픈
-      const adminUser = { id:'S67_시소', server:67, nickname:'시소' };
-      await openDirectChat(adminUser);
+    const contactAdmin = async () => { closeHelp(); await openDirectChat({ id:'S67_시소', server:67, nickname:'시소' }); };
+
+    const loadSavedChars = async () => {
+      if (!userData.value) return;
+      const myDoc = myDocId.value;
+      try {
+        const doc = await db.collection('linkedChars').doc(myDoc).get();
+        let chars = [];
+        if (doc.exists) { chars = doc.data().chars || []; }
+        const exists = chars.find(c => c.docId === myDoc);
+        if (!exists) {
+          chars.unshift({ docId: myDoc, server: userData.value.server, nickname: userData.value.nickname, password: userData.value.password });
+          await db.collection('linkedChars').doc(myDoc).set({ chars }, { merge: true });
+        }
+        const batch = db.batch();
+        chars.forEach(c => { if (c.docId !== myDoc) { const ref = db.collection('linkedChars').doc(c.docId); batch.set(ref, { chars, syncFrom: myDoc }, { merge: false }); } });
+        await batch.commit();
+        savedChars.value = chars;
+      } catch {
+        try {
+          const raw = localStorage.getItem(charStorageKey);
+          savedChars.value = raw ? JSON.parse(raw) : [];
+          const exists = savedChars.value.find(c => c.docId === myDoc);
+          if (!exists) { savedChars.value.unshift({ docId: myDoc, server: userData.value.server, nickname: userData.value.nickname, password: userData.value.password }); }
+        } catch { savedChars.value = []; }
+      }
     };
 
-    // ─── 로그인/로그아웃 ─────────────────────────────────────
+    const saveSavedChars = async () => {
+      if (!userData.value) return;
+      try {
+        const batch = db.batch();
+        savedChars.value.forEach(c => { const ref = db.collection('linkedChars').doc(c.docId); batch.set(ref, { chars: savedChars.value }, { merge: false }); });
+        await batch.commit();
+      } catch { localStorage.setItem(charStorageKey, JSON.stringify(savedChars.value)); }
+    };
+
+    const addChar = async () => {
+      const server = Number(addCharForm.value.server);
+      const nickname = (addCharForm.value.nickname || '').trim();
+      const password = (addCharForm.value.password || '').trim();
+      if (!server || !nickname || !password) { alert('모두 입력해주세요!'); return; }
+      if (!/^[0-9]{4}$/.test(password)) { alert('비밀번호는 숫자 4자리!'); return; }
+      const docId = 'S' + server + '_' + nickname;
+      if (savedChars.value.find(c => c.docId === docId)) { alert('이미 등록된 캐릭터예요!'); return; }
+      try {
+        const doc = await db.collection('users').doc(docId).get();
+        if (!doc.exists) { alert('존재하지 않는 캐릭터예요!\n먼저 해당 캐릭으로 한 번 로그인해주세요.'); return; }
+        const data = doc.data();
+        if ((data.password || '') !== password) { alert('비밀번호가 틀렸어요!'); return; }
+        savedChars.value.push({ docId, server, nickname, password });
+        await saveSavedChars();
+        addCharForm.value = { server:'', nickname:'', password:'' }; showAddChar.value = false;
+        alert('S' + server + ' ' + nickname + ' 추가됐어요! ✅\n이제 모든 기기에서 보여요 😊');
+      } catch(e) { alert('오류: ' + (e.message||e)); }
+    };
+
+    const removeChar = async (docId) => {
+      if (docId === currentDocId.value) { alert('현재 로그인 중인 캐릭터는 삭제할 수 없어요!'); return; }
+      savedChars.value = savedChars.value.filter(c => c.docId !== docId);
+      await saveSavedChars();
+    };
+
+    const fetchCharUnreads = async () => {
+      if (!savedChars.value || savedChars.value.length === 0) return;
+      try {
+        const counts = {};
+        for (const char of savedChars.value) {
+          if (char.docId === currentDocId.value) continue;
+          const snap = await db.collection('chatRooms').where('members', 'array-contains', char.docId).get();
+          let total = 0;
+          snap.forEach(doc => { const d = doc.data(); total += (d.unread || {})[char.docId] || 0; });
+          counts[char.docId] = total;
+        }
+        charUnreadCounts.value = counts;
+      } catch(e) {}
+    };
+
+    const switchChar = async (char) => {
+      if (char.docId === currentDocId.value) { showCharSwitcher.value = false; return; }
+      showCharSwitcher.value = false; isLoading.value = true;
+      try {
+        const doc = await db.collection('users').doc(char.docId).get();
+        if (!doc.exists) { alert('캐릭터 데이터를 찾을 수 없어요!'); return; }
+        const data = doc.data();
+        if (!Array.isArray(data.collection) || data.collection.length !== 81) data.collection = Array(81).fill(0);
+        if (chatUnsubscribe) { chatUnsubscribe(); chatUnsubscribe = null; }
+        if (roomsUnsubscribe) { roomsUnsubscribe(); roomsUnsubscribe = null; }
+        if (resetTimer) clearInterval(resetTimer);
+        userData.value = data; localStorage.setItem('oq_user_v4', JSON.stringify(data)); favSet.value = loadFavSet();
+        await checkAndResetDailyLimit(); await updateLastActive(); startDailyResetWatcher(); subscribeUnread();
+        savedChars.value = savedChars.value.filter(c => c.docId !== char.docId);
+        savedChars.value.unshift(char); await saveSavedChars();
+        currentView.value = 'dashboard'; setTimeout(() => fetchCharUnreads(), 1000);
+      } catch(e) { alert('전환 실패: ' + (e.message||e)); } finally { isLoading.value = false; }
+    };
+
     const handleLogin = async () => {
       if (isLoading.value) return;
-      const server=safeServer(loginForm.value.server);
-      const nickname=safeNick(loginForm.value.nickname);
+      const server=safeServer(loginForm.value.server); const nickname=safeNick(loginForm.value.nickname);
       const password=(loginForm.value.password||'').trim();
       if (!nickname||!password) { alert('정보를 입력해주세요!'); return; }
       if (!/^\d{4}$/.test(password)) { alert('비밀번호는 숫자 4자리!'); return; }
       if (/\s/.test(nickname)) { alert('닉네임에 공백은 안 돼요!'); return; }
       if (!server) { alert('서버 번호를 입력해주세요!'); return; }
-
       isLoading.value = true;
       try {
         await loadAppConfig();
@@ -2599,33 +2026,19 @@ createApp({
           if (!Array.isArray(d.collection)||d.collection.length!==81) d.collection=Array(81).fill(0);
           finalData = d;
         } else {
-          finalData = {
-            server, nickname, password,
-            collection: Array(81).fill(0),
+          finalData = { server, nickname, password, collection: Array(81).fill(0),
             createdAt: firebase.firestore.FieldValue.serverTimestamp(),
             lastActive: firebase.firestore.FieldValue.serverTimestamp(),
             lastUpdated: firebase.firestore.FieldValue.serverTimestamp(),
-            dailyExchangeCount: 0, dailyExchangeDate: getGameDate()
-          };
+            dailyExchangeCount: 0, dailyExchangeDate: getGameDate() };
           await docRef.set(finalData);
         }
-        userData.value = finalData;
-        localStorage.setItem('oq_user_v4', JSON.stringify(finalData));
-        favSet.value = loadFavSet();
-        isLoggedIn.value = true;
-        await loadSavedChars();
-        await checkAndResetDailyLimit();
-        await updateLastActive();
-        startDailyResetWatcher();
-        subscribeUnread();
-        setTimeout(() => fetchCharUnreads(), 1500);
-
-        // 처음 가입한 사람이면 튜토리얼 팝업
+        userData.value = finalData; localStorage.setItem('oq_user_v4', JSON.stringify(finalData));
+        favSet.value = loadFavSet(); isLoggedIn.value = true;
+        await loadSavedChars(); await checkAndResetDailyLimit(); await updateLastActive();
+        startDailyResetWatcher(); subscribeUnread(); setTimeout(() => fetchCharUnreads(), 1500);
         const isNewUser = !doc.exists;
-        if (isNewUser) {
-          tutorialStep.value = 0;
-          setTimeout(() => { showWelcomePopup.value = true; }, 500);
-        }
+        if (isNewUser) { tutorialStep.value = 0; setTimeout(() => { showWelcomePopup.value = true; }, 500); }
       } catch(e) { alert('오류: '+(e.message||e)); } finally { isLoading.value=false; }
     };
 
@@ -2634,16 +2047,9 @@ createApp({
       const saved = localStorage.getItem('oq_user_v4');
       if (!saved) return;
       try {
-        userData.value = JSON.parse(saved);
-        favSet.value = loadFavSet();
-        isLoggedIn.value = true;
-        await loadSavedChars();
-        await checkAndResetDailyLimit();
-        await updateLastActive();
-        startDailyResetWatcher();
-        subscribeUnread();
-        // 로그인 직후 다른 캐릭터 쪽지 확인
-        setTimeout(() => fetchCharUnreads(), 1500);
+        userData.value = JSON.parse(saved); favSet.value = loadFavSet(); isLoggedIn.value = true;
+        await loadSavedChars(); await checkAndResetDailyLimit(); await updateLastActive();
+        startDailyResetWatcher(); subscribeUnread(); setTimeout(() => fetchCharUnreads(), 1500);
       } catch {}
     };
 
@@ -2652,31 +2058,20 @@ createApp({
       if (chatUnsubscribe) chatUnsubscribe();
       if (roomsUnsubscribe) roomsUnsubscribe();
       localStorage.removeItem('oq_user_v4');
-      userData.value = null;
-      isLoggedIn.value = false;
-      loginForm.value = { server:'', nickname:'', password:'' };
-      currentView.value = 'dashboard';
+      userData.value = null; isLoggedIn.value = false;
+      loginForm.value = { server:'', nickname:'', password:'' }; currentView.value = 'dashboard';
       [showPopup, showUserListPopup, showComparePopup, showNeedsPopup,
        showDealBuilder, showHelpPopup, showChatPopup, showRankingPopup, showHistoryPopup, showAdminPopup]
         .forEach(r=>r.value=false);
     };
 
-    // 캐릭터 드롭다운 열릴 때 N 뱃지 갱신
     watch(showCharSwitcher, (v) => { if (v) fetchCharUnreads(); });
 
-    const closeWelcomePopup = () => {
-      showWelcomePopup.value = false;
-      tutorialStep.value = 0;
-      currentView.value = 'dashboard';
-    };
-
+    const closeWelcomePopup = () => { showWelcomePopup.value = false; tutorialStep.value = 0; currentView.value = 'dashboard'; };
     const openHelp = () => showHelpPopup.value=true;
     const closeHelp = () => showHelpPopup.value=false;
 
-    onMounted(() => {
-      checkLogin();
-      startUnreadPolling();
-    });
+    onMounted(() => { checkLogin(); startUnreadPolling(); });
     onBeforeUnmount(() => {
       if (resetTimer) clearInterval(resetTimer);
       if (holdTimer) clearTimeout(holdTimer);
@@ -2705,22 +2100,16 @@ createApp({
       copyDealBuilderText, confirmDeal, copyAndChat, confirmDealFromChat, pendingDeal,
       getActiveText, getActiveColor,
       appConfig, canEditAlbums, showAlbumSettingsPopup, saveAppConfig,
-      // 쪽지
       showChatPopup, chatTarget, chatMessages, chatRooms, chatInput,
       isChatLoading, isChatSending, unreadCount, chatBodyRef,
       openChat, openDirectChat, openChatRoom, openMailRoom, sendMessage, closeChatPopup, isMyMsg, formatChatTime, leaveChatRoom,
       chatView, readingMsg,
-      // 랭킹
       showRankingPopup, openRanking, rankingList,
-      // 히스토리
       showHistoryPopup, openHistoryPopup, historyList, isHistoryLoading,
-      // 캐릭터 전환
       showCharSwitcher, showAddChar, addCharForm, savedChars, currentDocId, charUnreadCounts,
       addChar, removeChar, switchChar,
-      // 공지사항
       noticeTitle, noticeBody, noticeDismissed, showNoticePopup,
       adminNoticeTitle, adminNoticeBody, saveNotice,
-      // 관리자
       showAdminPopup, adminTab, adminSearch, adminMembers, isAdminLoading, inactiveDays,
       openAdminPopup, loadAdminMembers, filteredAdminMembers,
       adminDeleteMember, adminResetMember, adminDeleteInactive, adminDeleteEmpty, adminResetAll,

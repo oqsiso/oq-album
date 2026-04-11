@@ -631,7 +631,10 @@
   <div v-if="showNeedsPopup" class="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-end justify-center z-50" @click.self="showNeedsPopup=false">
     <div class="bg-white sheet w-full max-w-md p-5 max-h-[85vh] flex flex-col shadow-2xl">
       <div class="flex items-center justify-between mb-3">
-        <h3 class="text-base font-black text-gray-800">🔍 구해요</h3>
+        <div>
+          <h3 class="text-base font-black text-gray-800">🔍 구해요</h3>
+          <p class="text-[10px] text-gray-400 mt-0.5">보유자 수 탭 = 보유자 찾기 · 체크 후 게시판에 올리기 가능</p>
+        </div>
         <button @click="showNeedsPopup=false" class="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center text-gray-400 btn-press"><i class="fas fa-times text-sm"></i></button>
       </div>
 

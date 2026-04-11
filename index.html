@@ -726,10 +726,16 @@
               </div>
             </div>
             <p class="text-sm text-gray-700 leading-snug mb-2">{{ post.text }}</p>
-            <button @click="openDirectChat({id: post.authorId, server: post.server, nickname: post.nickname})"
-                    class="text-[11px] bg-pink-50 text-pink-500 border border-pink-100 px-3 py-1.5 rounded-xl font-black btn-press">
-              <i class="fas fa-envelope text-[10px] mr-1"></i>쪽지 보내기
-            </button>
+            <div class="flex gap-2">
+              <button @click="openCompareFromBoard(post)"
+                      class="flex-1 py-1.5 bg-gray-100 text-gray-600 rounded-xl font-black text-xs btn-press">
+                비교하기
+              </button>
+              <button @click="openDirectChat({id: post.authorId, server: post.server, nickname: post.nickname})"
+                      class="flex-1 py-1.5 bg-pink-50 text-pink-500 border border-pink-100 rounded-xl font-black text-xs btn-press">
+                <i class="fas fa-envelope text-[10px] mr-1"></i>쪽지 보내기
+              </button>
+            </div>
           </div>
         </div>
       </template>
@@ -1076,9 +1082,9 @@
       <div class="border border-pink-100 rounded-2xl p-3 mb-4 bg-pink-50 text-center">
         <p class="text-xs text-pink-500 font-black mb-2">궁금한 점이 있나요?</p>
         <button @click="contactAdmin" class="w-full bg-pink-500 text-white py-2.5 rounded-xl font-black text-sm btn-press flex items-center justify-center gap-2">
-          <i class="fas fa-envelope"></i> 시소에게 문의하기
+          <i class="fas fa-envelope"></i> 관리자에게 문의하기
         </button>
-        <p class="text-[10px] text-pink-300 mt-1.5">이 교환소 쪽지함으로 67섭 시소에게 연결돼요</p>
+        <p class="text-[10px] text-pink-300 mt-1.5">이 교환소 쪽지함으로 관리자에게 연결돼요</p>
       </div>
       <button @click="closeHelp" class="w-full bg-gray-800 text-white py-3 rounded-2xl font-black text-sm btn-press">확인했습니다</button>
     </div>
@@ -1418,6 +1424,20 @@ createApp({
         });
         spareOwnerCounts.value = counts;
       } catch { spareOwnerCounts.value = Array(81).fill(0); } finally { needsLoading.value = false; }
+    };
+
+    const openCompareFromBoard = async (post) => {
+      showNeedsPopup.value = false;
+      isLoading.value = true;
+      try {
+        const doc = await db.collection('users').doc(post.authorId).get();
+        if (!doc.exists) { alert('상대 데이터를 찾을 수 없어요!'); return; }
+        const u = doc.data();
+        const col = Array.isArray(u.collection) ? u.collection : Array(81).fill(0);
+        const user = { id: post.authorId, server: post.server, nickname: post.nickname, collection: col };
+        buildCompare(user);
+        showComparePopup.value = true;
+      } catch(e) { alert('실패: ' + (e.message||e)); } finally { isLoading.value = false; }
     };
 
     const postToBoard = (item) => {
@@ -2243,7 +2263,7 @@ ${canGive.slice(0,3).join(', ')} 드릴 수 있어요 😊`;
       tradeCount, resetMyStickers, adjustTradeCount, showTradeAdjust,
       showPopup, showUserListPopup, showComparePopup,
       showNeedsPopup, openNeedsPopup, needsKeyword, needsListFiltered, needsLoading,
-      needsTab, boardPosts, boardLoading, boardInput, showBoardWrite, loadBoard, submitBoard, deleteBoard, postToBoard,
+      needsTab, boardPosts, boardLoading, boardInput, showBoardWrite, loadBoard, submitBoard, deleteBoard, postToBoard, openCompareFromBoard,
       openExchangeByAbsoluteIndex, exchangeList, popupStickerName,
       openMemberPopup, filteredUserList, searchKeyword, memberFilter,
       toggleFavorite, isFavorite,

@@ -687,10 +687,14 @@
       <!-- 게시판 탭 -->
       <template v-if="needsTab==='board'">
         <!-- 글쓰기 -->
-        <div v-if="!showBoardWrite" class="mb-3">
+        <div v-if="!showBoardWrite" class="mb-3 flex gap-2">
           <button @click="showBoardWrite=true"
-                  class="w-full py-2.5 border-2 border-dashed border-gray-200 rounded-2xl text-sm text-gray-400 font-black btn-press hover:border-pink-300 hover:text-pink-400 transition">
-            + 구해요 글 올리기
+                  class="flex-1 py-2.5 border-2 border-dashed border-gray-200 rounded-2xl text-sm text-gray-400 font-black btn-press hover:border-pink-300 hover:text-pink-400 transition">
+            + 글 올리기
+          </button>
+          <button @click="postAllNeeds"
+                  class="flex-1 py-2.5 border-2 border-dashed border-pink-200 rounded-2xl text-sm text-pink-400 font-black btn-press hover:border-pink-400 hover:text-pink-600 transition">
+            한번에 올리기
           </button>
         </div>
         <div v-else class="mb-3 bg-gray-50 rounded-2xl p-3 space-y-2">
@@ -1438,6 +1442,23 @@ createApp({
         buildCompare(user);
         showComparePopup.value = true;
       } catch(e) { alert('실패: ' + (e.message||e)); } finally { isLoading.value = false; }
+    };
+
+    const postAllNeeds = () => {
+      // 보유자 있는 구해요 스티커만 모아서 문구 생성
+      const col = userData.value?.collection || Array(81).fill(0);
+      const items = [];
+      for (let i = 0; i < 81; i++) {
+        if ((col[i]||0) === 0 && (spareOwnerCounts.value[i]||0) > 0) {
+          items.push(stickerNameByIndex(i) + ' 구해요!');
+        }
+      }
+      if (items.length === 0) {
+        alert('보유자가 있는 구해요 스티커가 없어요!');
+        return;
+      }
+      showBoardWrite.value = true;
+      boardInput.value = items.join('\n');
     };
 
     const postToBoard = (item) => {
@@ -2250,7 +2271,7 @@ createApp({
       tradeCount, resetMyStickers, adjustTradeCount, showTradeAdjust,
       showPopup, showUserListPopup, showComparePopup,
       showNeedsPopup, openNeedsPopup, needsKeyword, needsListFiltered, needsLoading,
-      needsTab, boardPosts, boardLoading, boardInput, showBoardWrite, loadBoard, submitBoard, deleteBoard, postToBoard, openCompareFromBoard,
+      needsTab, boardPosts, boardLoading, boardInput, showBoardWrite, loadBoard, submitBoard, deleteBoard, postToBoard, postAllNeeds, openCompareFromBoard,
       openExchangeByAbsoluteIndex, exchangeList, popupStickerName,
       openMemberPopup, filteredUserList, searchKeyword, memberFilter,
       toggleFavorite, isFavorite,

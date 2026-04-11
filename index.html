@@ -520,7 +520,7 @@
     <div class="bg-white sheet w-full max-w-md p-5 max-h-[85vh] overflow-y-auto hide-scroll shadow-2xl">
       <div class="flex items-center justify-between mb-3">
         <div class="flex items-center gap-2">
-          <button v-if="compareFromMember" @click="showComparePopup=false; showUserListPopup=true; compareFromMember=false"
+          <button v-if="compareFrom" @click="compareFrom==='member' ? (showComparePopup=false, showUserListPopup=true) : (showComparePopup=false, showNeedsPopup=true); compareFrom=''"
                   class="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center text-gray-400 btn-press">
             <i class="fas fa-chevron-left text-xs"></i>
           </button>
@@ -1179,7 +1179,7 @@ createApp({
     const needsKeyword = ref('');
     const checkedNeeds = ref(new Set());
     const showNeedsWasOpen = ref(false);
-    const compareFromMember = ref(false);
+    const compareFrom = ref('');
     const needsTab = ref('my');
     const boardPosts = ref([]);
     const boardLoading = ref(false);
@@ -1463,6 +1463,7 @@ createApp({
         const col = Array.isArray(u.collection) ? u.collection : Array(81).fill(0);
         const user = { id: post.authorId, server: post.server, nickname: post.nickname, collection: col };
         buildCompare(user);
+        compareFrom.value = 'board';
         showComparePopup.value = true;
       } catch(e) { alert('실패: ' + (e.message||e)); } finally { isLoading.value = false; }
     };
@@ -1662,7 +1663,7 @@ createApp({
       showPopup.value = false;
       buildCompare(targetUser);
       showComparePopup.value = true;
-      compareFromMember.value = true;
+      compareFrom.value = 'member';
     };
 
     const dealModeLabel = computed(() => {
@@ -2316,7 +2317,7 @@ createApp({
       showPopup, showUserListPopup, showComparePopup,
       showNeedsPopup, openNeedsPopup, needsKeyword, needsListFiltered, needsLoading,
       needsTab, boardPosts, boardLoading, boardInput, showBoardWrite, loadBoard, submitBoard, deleteBoard, postToBoard, postAllNeeds, postCheckedNeeds, openCompareFromBoard,
-      checkedNeeds, toggleNeedsCheck, showNeedsWasOpen, compareFromMember,
+      checkedNeeds, toggleNeedsCheck, showNeedsWasOpen, compareFrom,
       openExchangeByAbsoluteIndex, exchangeList, popupStickerName,
       openMemberPopup, filteredUserList, searchKeyword, memberFilter,
       toggleFavorite, isFavorite,

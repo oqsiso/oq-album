@@ -656,6 +656,13 @@
           <input v-model="needsKeyword" type="text" placeholder="앨범명/번호 검색"
                  class="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-2xl text-sm bg-gray-50 focus:outline-none focus:border-pink-200">
         </div>
+        <!-- 선택한 것 게시판 올리기 버튼 -->
+        <div v-if="checkedNeeds.size > 0" class="mb-2">
+          <button @click="postCheckedNeeds"
+                  class="w-full py-2.5 bg-pink-500 text-white rounded-2xl font-black text-sm btn-press">
+            선택한 {{ checkedNeeds.size }}개 게시판에 올리기
+          </button>
+        </div>
         <div class="overflow-y-auto flex-1 hide-scroll">
           <div v-if="needsLoading" class="flex justify-center py-10"><div class="loader"></div></div>
           <div v-else-if="needsListFiltered.length===0" class="text-center text-gray-400 py-10 bg-gray-50 rounded-2xl text-xs">
@@ -663,21 +670,17 @@
           </div>
           <div v-else class="space-y-2">
             <div v-for="item in needsListFiltered" :key="item.index"
-                 class="border border-gray-100 p-3 rounded-2xl bg-white">
-              <div class="flex items-center justify-between gap-2 mb-2">
-                <div class="font-black text-gray-800 text-sm truncate">{{ item.name }}</div>
+                 class="border p-3 rounded-2xl bg-white transition cursor-pointer"
+                 :class="checkedNeeds.has(item.index) ? 'border-pink-300 bg-pink-50' : 'border-gray-100'"
+                 @click="toggleNeedsCheck(item.index)">
+              <div class="flex items-center gap-2">
+                <div class="w-5 h-5 rounded-md border-2 flex items-center justify-center flex-none transition"
+                     :class="checkedNeeds.has(item.index) ? 'bg-pink-500 border-pink-500' : 'border-gray-300'">
+                  <i v-if="checkedNeeds.has(item.index)" class="fas fa-check text-white text-[9px]"></i>
+                </div>
+                <div class="font-black text-gray-800 text-sm truncate flex-1">{{ item.name }}</div>
                 <span class="text-[10px] px-2 py-1 rounded-full font-black flex-none"
                       :class="item.owners>0?'bg-green-100 text-green-700':'bg-gray-100 text-gray-400'">보유자 {{ item.owners }}명</span>
-              </div>
-              <div class="flex gap-2">
-                <button @click="openExchangeByAbsoluteIndex(item.index)"
-                        class="flex-1 py-1.5 bg-gray-100 text-gray-600 rounded-xl font-black text-xs btn-press">
-                  보유자 찾기
-                </button>
-                <button @click="postToBoard(item)"
-                        class="flex-1 py-1.5 bg-pink-50 text-pink-500 border border-pink-100 rounded-xl font-black text-xs btn-press">
-                  게시판에 올리기
-                </button>
               </div>
             </div>
           </div>
@@ -687,14 +690,10 @@
       <!-- 게시판 탭 -->
       <template v-if="needsTab==='board'">
         <!-- 글쓰기 -->
-        <div v-if="!showBoardWrite" class="mb-3 flex gap-2">
+        <div v-if="!showBoardWrite" class="mb-3">
           <button @click="showBoardWrite=true"
-                  class="flex-1 py-2.5 border-2 border-dashed border-gray-200 rounded-2xl text-sm text-gray-400 font-black btn-press hover:border-pink-300 hover:text-pink-400 transition">
-            + 글 올리기
-          </button>
-          <button @click="postAllNeeds"
-                  class="flex-1 py-2.5 border-2 border-dashed border-pink-200 rounded-2xl text-sm text-pink-400 font-black btn-press hover:border-pink-400 hover:text-pink-600 transition">
-            한번에 올리기
+                  class="w-full py-2.5 border-2 border-dashed border-gray-200 rounded-2xl text-sm text-gray-400 font-black btn-press hover:border-pink-300 hover:text-pink-400 transition">
+            + 구해요 글 올리기
           </button>
         </div>
         <div v-else class="mb-3 bg-gray-50 rounded-2xl p-3 space-y-2">
@@ -1159,6 +1158,7 @@ createApp({
     const searchKeyword = ref('');
     const memberFilter = ref('all');
     const needsKeyword = ref('');
+    const checkedNeeds = ref(new Set());
     const needsTab = ref('my');
     const boardPosts = ref([]);
     const boardLoading = ref(false);
@@ -1444,6 +1444,25 @@ createApp({
       } catch(e) { alert('실패: ' + (e.message||e)); } finally { isLoading.value = false; }
     };
 
+    const toggleNeedsCheck = (idx) => {
+      const s = new Set(checkedNeeds.value);
+      if (s.has(idx)) s.delete(idx); else s.add(idx);
+      checkedNeeds.value = s;
+    };
+
+    const postCheckedNeeds = () => {
+      if (checkedNeeds.value.size === 0) return;
+      const lines = [];
+      checkedNeeds.value.forEach(idx => {
+        lines.push(stickerNameByIndex(idx) + ' 구해요!');
+      });
+      needsTab.value = 'board';
+      showBoardWrite.value = true;
+      boardInput.value = lines.join('\n');
+      checkedNeeds.value = new Set();
+      loadBoard();
+    };
+
     const postAllNeeds = () => {
       // 보유자 있는 구해요 스티커만 모아서 문구 생성
       const col = userData.value?.collection || Array(81).fill(0);
@@ -1502,7 +1521,7 @@ createApp({
       } catch(e) { alert('실패: ' + (e.message||e)); }
     };
 
-    const openNeedsPopup = async () => { needsKeyword.value=''; needsTab.value='my'; showBoardWrite.value=false; showNeedsPopup.value=true; await refreshSpareOwnerCounts(); };
+    const openNeedsPopup = async () => { needsKeyword.value=''; needsTab.value='my'; showBoardWrite.value=false; checkedNeeds.value=new Set(); showNeedsPopup.value=true; await refreshSpareOwnerCounts(); };
 
     const needsList = computed(() => {
       const col = userData.value?.collection || Array(81).fill(0);
@@ -2271,7 +2290,8 @@ createApp({
       tradeCount, resetMyStickers, adjustTradeCount, showTradeAdjust,
       showPopup, showUserListPopup, showComparePopup,
       showNeedsPopup, openNeedsPopup, needsKeyword, needsListFiltered, needsLoading,
-      needsTab, boardPosts, boardLoading, boardInput, showBoardWrite, loadBoard, submitBoard, deleteBoard, postToBoard, postAllNeeds, openCompareFromBoard,
+      needsTab, boardPosts, boardLoading, boardInput, showBoardWrite, loadBoard, submitBoard, deleteBoard, postToBoard, postAllNeeds, postCheckedNeeds, openCompareFromBoard,
+      checkedNeeds, toggleNeedsCheck,
       openExchangeByAbsoluteIndex, exchangeList, popupStickerName,
       openMemberPopup, filteredUserList, searchKeyword, memberFilter,
       toggleFavorite, isFavorite,

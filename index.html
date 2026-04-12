@@ -681,7 +681,7 @@
             <div v-for="item in needsListFiltered" :key="item.index"
                  class="border p-3 rounded-2xl bg-white transition"
                  :class="checkedNeeds.has(item.index) ? 'border-pink-300 bg-pink-50' : 'border-gray-100'">
-              <div class="flex items-center gap-2" @click.prevent="toggleNeedsCheck(item.index)" @touchend.prevent="toggleNeedsCheck(item.index)">
+              <div class="flex items-center gap-2" @click="toggleNeedsCheck(item.index)">
                 <div class="w-5 h-5 rounded-md border-2 flex items-center justify-center flex-none transition cursor-pointer"
                      :class="checkedNeeds.has(item.index) ? 'bg-pink-500 border-pink-500' : 'border-gray-300'">
                   <i v-if="checkedNeeds.has(item.index)" class="fas fa-check text-white text-[9px]"></i>
@@ -1466,7 +1466,13 @@ createApp({
       } catch(e) { alert('실패: ' + (e.message||e)); } finally { isLoading.value = false; }
     };
 
+    let _lastToggleIdx = null;
+    let _lastToggleTime = 0;
     const toggleNeedsCheck = (idx) => {
+      const now = Date.now();
+      if (_lastToggleIdx === idx && now - _lastToggleTime < 300) return;
+      _lastToggleIdx = idx;
+      _lastToggleTime = now;
       const s = new Set(checkedNeeds.value);
       if (s.has(idx)) s.delete(idx); else s.add(idx);
       checkedNeeds.value = s;

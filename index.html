@@ -18,6 +18,8 @@
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;700;900&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
+  <script src="https://cdn.jsdelivr.net/npm/eruda"></script>
+  <script>eruda.init();</script>
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
   <script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
@@ -1466,6 +1468,7 @@ createApp({
     };
 
     const toggleNeedsCheck = (idx) => {
+      console.log('toggle:', idx, Date.now());
       const arr = checkedNeeds.value;
       const i = arr.indexOf(idx);
       if (i >= 0) checkedNeeds.value = arr.filter(x => x !== idx);

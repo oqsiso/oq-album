@@ -450,27 +450,18 @@
     <div class="bg-white sheet w-full max-w-md px-5 pt-2 pb-5 max-h-[85vh] flex flex-col shadow-2xl">
       <!-- 핸들바 -->
       <div class="w-10 h-1 bg-gray-200 rounded-full mx-auto mb-3"></div>
+      <!-- 헤더 + 탭 -->
       <div class="flex items-center justify-between mb-2">
         <h3 class="text-base font-black text-gray-800">👥 활동 멤버 <span class="text-pink-500">{{ filteredUserList.length }}명</span></h3>
         <button @click="showUserListPopup=false" class="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center text-gray-400 btn-press"><i class="fas fa-times text-sm"></i></button>
       </div>
-
-      <div style="display:flex;gap:6px;margin-bottom:12px;overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch;">
-        <button @click="memberFilter='all'"
-                :style="memberFilter==='all'?'background:#111827;color:#fff;border-color:#111827;':'background:#f9fafb;color:#6b7280;border-color:#e5e7eb;'"
-                style="height:28px;padding:0 12px;font-size:11px;font-weight:800;border-radius:14px;border:1.5px solid;white-space:nowrap;flex-shrink:0;cursor:pointer;font-family:inherit;">전체</button>
-        <button @click="memberFilter='winwin'"
-                :style="memberFilter==='winwin'?'background:#111827;color:#fff;border-color:#111827;':'background:#f9fafb;color:#6b7280;border-color:#e5e7eb;'"
-                style="height:28px;padding:0 12px;font-size:11px;font-weight:800;border-radius:14px;border:1.5px solid;white-space:nowrap;flex-shrink:0;cursor:pointer;font-family:inherit;">🔥 추천</button>
-        <button @click="memberFilter='receive'"
-                :style="memberFilter==='receive'?'background:#111827;color:#fff;border-color:#111827;':'background:#f9fafb;color:#6b7280;border-color:#e5e7eb;'"
-                style="height:28px;padding:0 12px;font-size:11px;font-weight:800;border-radius:14px;border:1.5px solid;white-space:nowrap;flex-shrink:0;cursor:pointer;font-family:inherit;">받기</button>
-        <button @click="memberFilter='give'"
-                :style="memberFilter==='give'?'background:#111827;color:#fff;border-color:#111827;':'background:#f9fafb;color:#6b7280;border-color:#e5e7eb;'"
-                style="height:28px;padding:0 12px;font-size:11px;font-weight:800;border-radius:14px;border:1.5px solid;white-space:nowrap;flex-shrink:0;cursor:pointer;font-family:inherit;">주기</button>
-        <button @click="memberFilter='fav'"
-                :style="memberFilter==='fav'?'background:#111827;color:#fff;border-color:#111827;':'background:#f9fafb;color:#6b7280;border-color:#e5e7eb;'"
-                style="height:28px;padding:0 12px;font-size:11px;font-weight:800;border-radius:14px;border:1.5px solid;white-space:nowrap;flex-shrink:0;cursor:pointer;font-family:inherit;">⭐ 즐겨찾기</button>
+      <!-- 탭 -->
+      <div class="flex gap-1.5 mb-3 overflow-x-auto hide-scroll flex-none">
+        <button @click="memberFilter='all'" class="tab-btn flex-none" :class="memberFilter==='all'?'tab-on':'tab-off'">전체</button>
+        <button @click="memberFilter='winwin'" class="tab-btn flex-none" :class="memberFilter==='winwin'?'tab-on':'tab-off'">🔥 추천</button>
+        <button @click="memberFilter='receive'" class="tab-btn flex-none" :class="memberFilter==='receive'?'tab-on':'tab-off'">받기</button>
+        <button @click="memberFilter='give'" class="tab-btn flex-none" :class="memberFilter==='give'?'tab-on':'tab-off'">주기</button>
+        <button @click="memberFilter='fav'" class="tab-btn flex-none" :class="memberFilter==='fav'?'tab-on':'tab-off'">⭐ 즐겨찾기</button>
       </div>
 
       <div class="relative mb-3">

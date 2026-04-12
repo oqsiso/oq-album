@@ -681,8 +681,7 @@
             <div v-for="item in needsListFiltered" :key="item.index"
                  class="border p-3 rounded-2xl bg-white transition flex items-center gap-2 select-none cursor-pointer"
                  :class="checkedNeeds.includes(item.index) ? 'border-pink-300 bg-pink-50' : 'border-gray-100'"
-                 @click="toggleNeedsCheck(item.index)"
-                 @touchstart.prevent="toggleNeedsCheck(item.index)">
+                 @click="toggleNeedsCheck(item.index)">
               <div class="w-5 h-5 rounded-md border-2 flex items-center justify-center flex-none transition"
                    :class="checkedNeeds.includes(item.index) ? 'bg-pink-500 border-pink-500' : 'border-gray-300'">
                 <i v-if="checkedNeeds.includes(item.index)" class="fas fa-check text-white text-[9px]"></i>
@@ -690,7 +689,8 @@
               <span class="font-black text-gray-800 text-sm truncate flex-1">{{ item.name }}</span>
               <span class="text-[10px] px-2 py-1 rounded-full font-black flex-none cursor-pointer"
                     :class="item.owners>0?'bg-green-100 text-green-700':'bg-gray-100 text-gray-400'"
-                    @click.stop="item.owners>0 ? openExchangeByAbsoluteIndex(item.index) : null">
+                    @click.stop="item.owners>0 ? openExchangeByAbsoluteIndex(item.index) : null"
+                    @touchstart.stop="item.owners>0 ? openExchangeByAbsoluteIndex(item.index) : null">
                 보유자 {{ item.owners }}명
               </span>
             </div>

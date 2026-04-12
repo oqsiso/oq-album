@@ -679,17 +679,18 @@
           </div>
           <div v-else class="space-y-2">
             <div v-for="item in needsListFiltered" :key="item.index"
-                 class="border p-3 rounded-2xl bg-white transition flex items-center gap-2 cursor-pointer select-none"
-                 :class="checkedNeeds.has(item.index) ? 'border-pink-300 bg-pink-50' : 'border-gray-100'"
-                 @touchstart.prevent="toggleNeedsCheck(item.index)">
-              <div class="w-5 h-5 rounded-md border-2 flex items-center justify-center flex-none transition"
-                   :class="checkedNeeds.has(item.index) ? 'bg-pink-500 border-pink-500' : 'border-gray-300'">
+                 class="border p-3 rounded-2xl bg-white transition flex items-center gap-2 select-none"
+                 :class="checkedNeeds.has(item.index) ? 'border-pink-300 bg-pink-50' : 'border-gray-100'">
+              <div class="w-5 h-5 rounded-md border-2 flex items-center justify-center flex-none transition cursor-pointer"
+                   :class="checkedNeeds.has(item.index) ? 'bg-pink-500 border-pink-500' : 'border-gray-300'"
+                   @click="toggleNeedsCheck(item.index)">
                 <i v-if="checkedNeeds.has(item.index)" class="fas fa-check text-white text-[9px]"></i>
               </div>
-              <span class="font-black text-gray-800 text-sm truncate flex-1">{{ item.name }}</span>
-              <span class="text-[10px] px-2 py-1 rounded-full font-black flex-none"
+              <span class="font-black text-gray-800 text-sm truncate flex-1 cursor-pointer"
+                    @click="toggleNeedsCheck(item.index)">{{ item.name }}</span>
+              <span class="text-[10px] px-2 py-1 rounded-full font-black flex-none cursor-pointer"
                     :class="item.owners>0?'bg-green-100 text-green-700':'bg-gray-100 text-gray-400'"
-                    @touchstart.prevent.stop="item.owners>0 ? openExchangeByAbsoluteIndex(item.index) : null">
+                    @click="item.owners>0 ? openExchangeByAbsoluteIndex(item.index) : null">
                 보유자 {{ item.owners }}명
               </span>
             </div>
@@ -1465,14 +1466,11 @@ createApp({
       } catch(e) { alert('실패: ' + (e.message||e)); } finally { isLoading.value = false; }
     };
 
-    const _toggleLocks = {};
     const toggleNeedsCheck = (idx) => {
-      if (_toggleLocks[idx]) return;
-      _toggleLocks[idx] = true;
+      console.log('toggle called:', idx, new Date().getTime());
       const s = new Set(checkedNeeds.value);
       if (s.has(idx)) s.delete(idx); else s.add(idx);
       checkedNeeds.value = s;
-      setTimeout(() => { delete _toggleLocks[idx]; }, 600);
     };
 
     const postCheckedNeeds = () => {

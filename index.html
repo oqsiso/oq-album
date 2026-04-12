@@ -680,11 +680,11 @@
           <div v-else class="space-y-2">
             <div v-for="item in needsListFiltered" :key="item.index"
                  class="border p-3 rounded-2xl bg-white transition flex items-center gap-2 select-none cursor-pointer"
-                 :class="checkedNeeds.has(item.index) ? 'border-pink-300 bg-pink-50' : 'border-gray-100'"
+                 :class="checkedNeeds.includes(item.index) ? 'border-pink-300 bg-pink-50' : 'border-gray-100'"
                  @click="toggleNeedsCheck(item.index)">
               <div class="w-5 h-5 rounded-md border-2 flex items-center justify-center flex-none transition"
-                   :class="checkedNeeds.has(item.index) ? 'bg-pink-500 border-pink-500' : 'border-gray-300'">
-                <i v-if="checkedNeeds.has(item.index)" class="fas fa-check text-white text-[9px]"></i>
+                   :class="checkedNeeds.includes(item.index) ? 'bg-pink-500 border-pink-500' : 'border-gray-300'">
+                <i v-if="checkedNeeds.includes(item.index)" class="fas fa-check text-white text-[9px]"></i>
               </div>
               <span class="font-black text-gray-800 text-sm truncate flex-1">{{ item.name }}</span>
               <span class="text-[10px] px-2 py-1 rounded-full font-black flex-none cursor-pointer"
@@ -1174,7 +1174,7 @@ createApp({
     const searchKeyword = ref('');
     const memberFilter = ref('all');
     const needsKeyword = ref('');
-    const checkedNeeds = ref(new Set());
+    const checkedNeeds = ref([]);
     const showNeedsWasOpen = ref(false);
     const compareFrom = ref('');
     const needsTab = ref('my');
@@ -1466,14 +1466,14 @@ createApp({
     };
 
     const toggleNeedsCheck = (idx) => {
-      console.log('toggle called:', idx, new Date().getTime());
-      const s = new Set(checkedNeeds.value);
-      if (s.has(idx)) s.delete(idx); else s.add(idx);
-      checkedNeeds.value = s;
+      const arr = checkedNeeds.value;
+      const i = arr.indexOf(idx);
+      if (i >= 0) checkedNeeds.value = arr.filter(x => x !== idx);
+      else checkedNeeds.value = [...arr, idx];
     };
 
     const postCheckedNeeds = () => {
-      if (checkedNeeds.value.size === 0) return;
+      if (checkedNeeds.value.length === 0) return;
       const names = [];
       checkedNeeds.value.forEach(idx => {
         names.push(stickerNameByIndex(idx, true));
@@ -1481,7 +1481,7 @@ createApp({
       needsTab.value = 'board';
       showBoardWrite.value = true;
       boardInput.value = names.join(', ') + ' 구해요!';
-      checkedNeeds.value = new Set();
+      checkedNeeds.value = [];
       loadBoard();
     };
 
@@ -1543,7 +1543,7 @@ createApp({
       } catch(e) { alert('실패: ' + (e.message||e)); }
     };
 
-    const openNeedsPopup = async () => { needsKeyword.value=''; needsTab.value='my'; showBoardWrite.value=false; checkedNeeds.value=new Set(); showNeedsPopup.value=true; await refreshSpareOwnerCounts(); };
+    const openNeedsPopup = async () => { needsKeyword.value=''; needsTab.value='my'; showBoardWrite.value=false; checkedNeeds.value=[]; showNeedsPopup.value=true; await refreshSpareOwnerCounts(); };
 
     const needsList = computed(() => {
       const col = userData.value?.collection || Array(81).fill(0);

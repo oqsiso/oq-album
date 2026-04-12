@@ -666,10 +666,10 @@
                  class="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-2xl text-sm bg-gray-50 focus:outline-none focus:border-pink-200">
         </div>
         <!-- 선택한 것 게시판 올리기 버튼 -->
-        <div v-if="checkedNeeds.size > 0" class="mb-2">
+        <div v-if="checkedNeeds.length > 0" class="mb-2">
           <button @click="postCheckedNeeds"
                   class="w-full py-2.5 bg-pink-500 text-white rounded-2xl font-black text-sm btn-press">
-            선택한 {{ checkedNeeds.size }}개 게시판에 올리기
+            선택한 {{ checkedNeeds.length }}개 게시판에 올리기
           </button>
         </div>
         <div class="overflow-y-auto flex-1 hide-scroll">

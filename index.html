@@ -1464,16 +1464,14 @@ createApp({
       } catch(e) { alert('실패: ' + (e.message||e)); } finally { isLoading.value = false; }
     };
 
-    let _lastToggleIdx = null;
-    let _lastToggleTime = 0;
+    let _toggleLock = false;
     const toggleNeedsCheck = (idx) => {
-      const now = Date.now();
-      if (_lastToggleIdx === idx && now - _lastToggleTime < 300) return;
-      _lastToggleIdx = idx;
-      _lastToggleTime = now;
+      if (_toggleLock) return;
+      _toggleLock = true;
       const s = new Set(checkedNeeds.value);
       if (s.has(idx)) s.delete(idx); else s.add(idx);
       checkedNeeds.value = s;
+      setTimeout(() => { _toggleLock = false; }, 500);
     };
 
     const postCheckedNeeds = () => {

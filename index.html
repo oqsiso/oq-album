@@ -270,7 +270,6 @@
                :class="count >= 2 ? 'border-pink-300' : count === 1 ? 'border-blue-200' : 'border-gray-100'">
             <div class="relative flex flex-col items-center justify-center py-4 cursor-pointer select-none"
                  :class="count >= 2 ? 'bg-pink-50' : count === 1 ? 'bg-blue-50' : 'bg-gray-50'"
-                 @click="onStickerClick(i)"
                  @mousedown="onStickerHoldStart(i)" @mouseup="onStickerHoldEnd" @mouseleave="onStickerHoldEnd"
                  @touchstart="onStickerHoldStart(i)" @touchend="onStickerTouchEnd(i)" @touchcancel="onStickerHoldEnd">
               <span class="text-2xl font-black leading-none"
@@ -1468,11 +1467,13 @@ createApp({
     };
 
     const toggleNeedsCheck = (idx) => {
-      console.log('toggle:', idx, Date.now());
+      console.log('toggle:', idx, 'current:', JSON.stringify(checkedNeeds.value));
       const arr = checkedNeeds.value;
       const i = arr.indexOf(idx);
+      console.log('indexOf:', i);
       if (i >= 0) checkedNeeds.value = arr.filter(x => x !== idx);
       else checkedNeeds.value = [...arr, idx];
+      console.log('after:', JSON.stringify(checkedNeeds.value));
     };
 
     const postCheckedNeeds = () => {

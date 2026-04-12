@@ -678,20 +678,21 @@
             {{ needsKeyword ? '검색 결과 없음' : '구해요가 없어요! 다 모으셨나요? 🎉' }}
           </div>
           <div v-else class="space-y-2">
-            <label v-for="item in needsListFiltered" :key="item.index"
-                 class="border p-3 rounded-2xl bg-white transition flex items-center gap-2 cursor-pointer"
-                 :class="checkedNeeds.has(item.index) ? 'border-pink-300 bg-pink-50' : 'border-gray-100'">
-              <input type="checkbox"
-                     :checked="checkedNeeds.has(item.index)"
-                     @change="toggleNeedsCheck(item.index)"
-                     class="w-5 h-5 accent-pink-500 flex-none cursor-pointer">
+            <div v-for="item in needsListFiltered" :key="item.index"
+                 class="border p-3 rounded-2xl bg-white transition flex items-center gap-2 cursor-pointer select-none"
+                 :class="checkedNeeds.has(item.index) ? 'border-pink-300 bg-pink-50' : 'border-gray-100'"
+                 @touchstart.prevent="toggleNeedsCheck(item.index)">
+              <div class="w-5 h-5 rounded-md border-2 flex items-center justify-center flex-none transition"
+                   :class="checkedNeeds.has(item.index) ? 'bg-pink-500 border-pink-500' : 'border-gray-300'">
+                <i v-if="checkedNeeds.has(item.index)" class="fas fa-check text-white text-[9px]"></i>
+              </div>
               <span class="font-black text-gray-800 text-sm truncate flex-1">{{ item.name }}</span>
               <span class="text-[10px] px-2 py-1 rounded-full font-black flex-none"
                     :class="item.owners>0?'bg-green-100 text-green-700':'bg-gray-100 text-gray-400'"
-                    @click.stop="item.owners>0 ? openExchangeByAbsoluteIndex(item.index) : null">
+                    @touchstart.prevent.stop="item.owners>0 ? openExchangeByAbsoluteIndex(item.index) : null">
                 보유자 {{ item.owners }}명
               </span>
-            </label>
+            </div>
           </div>
         </div>
       </template>

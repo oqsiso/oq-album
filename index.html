@@ -1465,14 +1465,14 @@ createApp({
       } catch(e) { alert('실패: ' + (e.message||e)); } finally { isLoading.value = false; }
     };
 
-    let _toggleLock = false;
+    const _toggleLocks = {};
     const toggleNeedsCheck = (idx) => {
-      if (_toggleLock) return;
-      _toggleLock = true;
+      if (_toggleLocks[idx]) return;
+      _toggleLocks[idx] = true;
       const s = new Set(checkedNeeds.value);
       if (s.has(idx)) s.delete(idx); else s.add(idx);
       checkedNeeds.value = s;
-      setTimeout(() => { _toggleLock = false; }, 500);
+      setTimeout(() => { delete _toggleLocks[idx]; }, 600);
     };
 
     const postCheckedNeeds = () => {

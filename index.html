@@ -1256,12 +1256,24 @@ createApp({
       return 'bg-gray-300';
     };
 
+    const STICKER_STARS = [
+      [1,1,1,1,1,1,2,2,2],  // 케이크 제작
+      [1,1,1,1,1,2,2,2,2],  // 집 장만
+      [1,1,1,2,2,2,2,2,3],  // 반려동물
+      [1,1,2,2,2,3,3,4,4],  // 여행하기
+      [2,2,3,3,3,4,4,4,5],  // 연애하기
+      [3,3,3,3,4,4,4,4,5],  // 마음 평정
+      [3,3,4,4,4,4,5,5,5],  // 5kg 감량
+      [3,3,4,4,4,4,5,5,5],  // 2억벌자
+      [3,4,4,4,4,5,5,5,5],  // 행운아 되기
+    ];
     const stickerNameByIndex = (absIdx, short=false) => {
       const aIdx = Math.floor(absIdx/9);
       const sIdx = (absIdx%9)+1;
       const albumName = appConfig.value.albumNames[aIdx]||`앨범${aIdx+1}`;
-      if (short) return `${albumName} ${sIdx}번`;
-      return `${albumName} - ${sIdx}번`;
+      const star = STICKER_STARS[aIdx] ? `(${STICKER_STARS[aIdx][sIdx-1]}성)` : '';
+      if (short) return `${albumName} ${sIdx}번 ${star}`;
+      return `${albumName} - ${sIdx}번 ${star}`;
     };
 
     const formatChatTime = ts => {

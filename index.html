@@ -1286,17 +1286,51 @@ createApp({
       return `${d.getMonth()+1}/${d.getDate()}`;
     };
 
-    const favKey = computed(() => userData.value ? `oq_fav_S${userData.value.server}_${userData.value.nickname}` : 'oq_fav_guest');
+    // ─── 즐겨찾기 (Firebase 저장 - 기기 동기화) ────────────────
     const favSet = ref(new Set());
     const isFavorite = id => favSet.value.has(id);
-    const toggleFavorite = id => {
+
+    const toggleFavorite = async id => {
+      if (!id || !userData.value) return;
       const s = new Set(favSet.value);
       if (s.has(id)) s.delete(id); else s.add(id);
       favSet.value = s;
-      localStorage.setItem(favKey.value, JSON.stringify([...s]));
+      try {
+        await db.collection('users').doc(myDocId.value).update({ favorites: [...s] });
+      } catch(e) {}
     };
-    const loadFavSet = () => {
-      try { const r = localStorage.getItem(favKey.value); return new Set(JSON.parse(r||'[]')); } catch { return new Set(); }
+
+    const loadFavSet = async () => {
+      if (!userData.value) return;
+      try {
+        const doc = await db.collection('users').doc(myDocId.value).get();
+        if (doc.exists) {
+          const data = doc.data();
+          const favArr = Array.isArray(data.favorites) ? data.favorites : [];
+          // 기존 localStorage 데이터 마이그레이션
+          const oldKey = `oq_fav_S${userData.value.server}_${userData.value.nickname}`;
+          const oldRaw = localStorage.getItem(oldKey);
+          if (oldRaw && favArr.length === 0) {
+            try {
+              const oldArr = JSON.parse(oldRaw);
+              if (oldArr.length > 0) {
+                favSet.value = new Set(oldArr);
+                await db.collection('users').doc(myDocId.value).update({ favorites: oldArr });
+                localStorage.removeItem(oldKey);
+                return;
+              }
+            } catch {}
+          }
+          favSet.value = new Set(favArr);
+        }
+      } catch(e) {
+        // fallback: localStorage
+        try {
+          const oldKey = `oq_fav_S${userData.value.server}_${userData.value.nickname}`;
+          const r = localStorage.getItem(oldKey);
+          favSet.value = new Set(JSON.parse(r||'[]'));
+        } catch { favSet.value = new Set(); }
+      }
     };
 
     const loadAppConfig = async () => {
@@ -2211,7 +2245,7 @@ createApp({
         if (roomsUnsubscribe) { roomsUnsubscribe(); roomsUnsubscribe = null; }
         if (resetTimer) clearInterval(resetTimer);
         userData.value = data; localStorage.setItem('oq_user_v4', JSON.stringify(data)); favSet.value = loadFavSet();
-        await checkAndResetDailyLimit(); await updateLastActive(); startDailyResetWatcher(); subscribeUnread();
+        await checkAndResetDailyLimit(); await updateLastActive(); await loadFavSet(); startDailyResetWatcher(); subscribeUnread();
         savedChars.value = savedChars.value.filter(c => c.docId !== char.docId);
         savedChars.value.unshift(char); await saveSavedChars();
         currentView.value = 'dashboard'; setTimeout(() => fetchCharUnreads(), 1000);
@@ -2249,7 +2283,7 @@ createApp({
         userData.value = finalData; localStorage.setItem('oq_user_v4', JSON.stringify(finalData));
         favSet.value = loadFavSet(); isLoggedIn.value = true;
         await loadSavedChars(); await checkAndResetDailyLimit(); await updateLastActive();
-        startDailyResetWatcher(); subscribeUnread(); setTimeout(() => fetchCharUnreads(), 1500);
+        await loadFavSet(); startDailyResetWatcher(); subscribeUnread(); setTimeout(() => fetchCharUnreads(), 1500);
         const isNewUser = !doc.exists;
         if (isNewUser) { tutorialStep.value = 0; setTimeout(() => { showWelcomePopup.value = true; }, 500); }
       } catch(e) { alert('오류: '+(e.message||e)); } finally { isLoading.value=false; }
@@ -2274,13 +2308,13 @@ createApp({
         }
         favSet.value = loadFavSet(); isLoggedIn.value = true;
         await loadSavedChars(); await checkAndResetDailyLimit(); await updateLastActive();
-        startDailyResetWatcher(); subscribeUnread(); setTimeout(() => fetchCharUnreads(), 1500);
+        await loadFavSet(); startDailyResetWatcher(); subscribeUnread(); setTimeout(() => fetchCharUnreads(), 1500);
       } catch {
         // Firebase 실패 시 localStorage 폴백
         try {
           userData.value = JSON.parse(saved); favSet.value = loadFavSet(); isLoggedIn.value = true;
           await loadSavedChars(); await checkAndResetDailyLimit(); await updateLastActive();
-          startDailyResetWatcher(); subscribeUnread(); setTimeout(() => fetchCharUnreads(), 1500);
+          await loadFavSet(); startDailyResetWatcher(); subscribeUnread(); setTimeout(() => fetchCharUnreads(), 1500);
         } catch {}
       }
     };

@@ -137,12 +137,20 @@
                   <span v-if="char.docId !== currentDocId && charUnreadCounts[char.docId] > 0"
                         class="ml-auto bg-red-500 text-white text-[9px] font-black px-1.5 py-0.5 rounded-full flex-none pulse">N</span>
                 </div>
+                <button v-if="char.docId !== currentDocId" @click.stop="openCompareMyChar(char)"
+                        class="text-[10px] font-black text-purple-400 hover:text-purple-600 border border-purple-200 hover:border-purple-400 px-1.5 py-0.5 rounded-lg flex-none transition btn-press">
+                  비교
+                </button>
                 <span v-if="char.docId !== currentDocId" @click.stop="removeChar(char.docId)"
                       class="text-gray-300 hover:text-red-400 cursor-pointer px-1 flex-none">
                   <i class="fas fa-xmark text-xs"></i>
                 </span>
               </div>
-              <div v-if="!showAddChar" class="pt-1 border-t border-gray-100">
+              <div v-if="!showAddChar" class="pt-1 border-t border-gray-100 space-y-0.5">
+                <button @click="openAllCharsPopup"
+                        class="w-full flex items-center gap-2 px-3 py-2 rounded-xl hover:bg-purple-50 text-purple-500 text-sm font-black transition">
+                  <i class="fas fa-layer-group text-xs"></i> 전체 캐릭터 현황
+                </button>
                 <button @click="showAddChar = true"
                         class="w-full flex items-center gap-2 px-3 py-2 rounded-xl hover:bg-gray-50 text-gray-500 text-sm font-black transition">
                   <i class="fas fa-plus text-xs"></i> 캐릭터 추가
@@ -513,16 +521,21 @@
     <div class="bg-white sheet w-full max-w-md p-5 max-h-[85vh] overflow-y-auto hide-scroll shadow-2xl">
       <div class="flex items-center justify-between mb-3">
         <div class="flex items-center gap-2">
-          <button v-if="compareFrom" @click="compareFrom==='member' ? (showComparePopup=false, showUserListPopup=true) : (showComparePopup=false, showNeedsPopup=true); compareFrom=''"
+          <button v-if="compareFrom" @click="compareFrom==='member' ? (showComparePopup=false, showUserListPopup=true) : compareFrom==='needs' ? (showComparePopup=false, showNeedsPopup=true) : (showComparePopup=false); compareFrom=''"
                   class="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center text-gray-400 btn-press">
             <i class="fas fa-chevron-left text-xs"></i>
           </button>
           <div>
-            <div class="text-xs text-gray-400 mb-0.5">나 vs 상대방</div>
+            <div class="text-xs text-gray-400 mb-0.5">{{ compareFrom === 'mychar' ? '🔀 내 캐릭터 비교' : '나 vs 상대방' }}</div>
             <div class="flex items-center gap-2 flex-wrap">
               <h3 class="text-base font-black text-gray-800">S{{ compareTarget.server }} {{ compareTarget.nickname }}</h3>
-              <button @click="openDirectChat(compareTarget)" class="text-[11px] bg-pink-500 text-white px-2.5 py-1.5 rounded-full font-black btn-press">📨 쪽지</button>
-              <button @click="openDealBuilder" class="text-[11px] bg-gray-900 text-white px-2.5 py-1.5 rounded-full font-black btn-press">교환하기</button>
+              <template v-if="compareFrom !== 'mychar'">
+                <button @click="openDirectChat(compareTarget)" class="text-[11px] bg-pink-500 text-white px-2.5 py-1.5 rounded-full font-black btn-press">📨 쪽지</button>
+                <button @click="openDealBuilder" class="text-[11px] bg-gray-900 text-white px-2.5 py-1.5 rounded-full font-black btn-press">교환하기</button>
+              </template>
+              <template v-else>
+                <span class="text-[11px] bg-purple-100 text-purple-600 px-2.5 py-1.5 rounded-full font-black">이동 가능 스티커 확인</span>
+              </template>
             </div>
           </div>
         </div>
@@ -1002,6 +1015,62 @@
     </div>
   </div>
 
+  <!-- ===== 내 캐릭터 전체 현황 팝업 ===== -->
+  <div v-if="showAllCharsPopup" class="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-end justify-center z-50" @click.self="showAllCharsPopup=false">
+    <div class="bg-white sheet w-full max-w-md p-5 max-h-[88vh] overflow-y-auto hide-scroll shadow-2xl">
+      <div class="flex items-center justify-between mb-4">
+        <div>
+          <div class="text-xs text-gray-400 mb-0.5">🔀 내 캐릭터 전체 현황</div>
+          <h3 class="text-base font-black text-gray-800">이동 가능한 스티커</h3>
+        </div>
+        <button @click="showAllCharsPopup=false" class="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center text-gray-400 btn-press"><i class="fas fa-times text-sm"></i></button>
+      </div>
+      <div v-if="allCharsLoading" class="flex justify-center py-10"><div class="loader"></div></div>
+      <div v-else-if="allCharsData.length < 2" class="text-center text-gray-400 text-sm py-10">
+        캐릭터가 2개 이상이어야 비교할 수 있어요!
+      </div>
+      <div v-else class="space-y-3">
+        <!-- 캐릭터별 수집 현황 요약 -->
+        <div class="bg-gray-50 rounded-2xl p-3 border border-gray-100">
+          <div class="text-[11px] font-black text-gray-500 mb-2">📊 캐릭터별 수집 현황</div>
+          <div class="space-y-1.5">
+            <div v-for="c in allCharsData" :key="c.docId" class="flex items-center gap-2">
+              <span class="bg-pink-100 text-pink-600 text-[10px] px-1.5 py-0.5 rounded font-black flex-none">S{{ c.server }}</span>
+              <span class="text-xs font-black text-gray-700 truncate flex-1">{{ c.nickname }}</span>
+              <div class="w-24 h-2.5 bg-gray-200 rounded-full overflow-hidden flex-none">
+                <div class="h-full bg-gradient-to-r from-pink-400 to-purple-400 rounded-full" :style="{ width: (c.collected/81*100) + '%' }"></div>
+              </div>
+              <span class="text-[10px] font-black text-gray-500 flex-none w-10 text-right">{{ c.collected }}/81</span>
+            </div>
+          </div>
+        </div>
+        <!-- 이동 추천 목록 -->
+        <div class="text-[11px] font-black text-gray-500 px-1">💡 이동 추천 <span class="text-[10px] font-normal text-gray-400">(여유(2장↑) → 없는 캐릭터)</span></div>
+        <div v-if="allCharsMoves.length === 0" class="text-center text-gray-400 text-xs py-6 bg-gray-50 rounded-2xl">이동 가능한 스티커가 없어요 😅</div>
+        <div v-else class="space-y-2">
+          <div v-for="move in allCharsMoves" :key="move.name + move.from + move.to"
+               class="bg-white border border-purple-100 rounded-2xl p-3 flex items-center gap-2.5">
+            <div class="bg-purple-50 rounded-xl p-2 flex-none">
+              <i class="fas fa-arrow-right text-purple-400 text-xs"></i>
+            </div>
+            <div class="flex-1 min-w-0">
+              <div class="text-xs font-black text-gray-800 truncate">{{ move.name }}</div>
+              <div class="text-[10px] text-gray-400 mt-0.5">
+                <span class="text-pink-500 font-black">{{ move.fromNick }}</span>
+                <i class="fas fa-arrow-right mx-1 text-[8px]"></i>
+                <span class="text-purple-500 font-black">{{ move.toNick }}</span>
+              </div>
+            </div>
+            <div class="text-[10px] text-gray-400 flex-none text-right">
+              <div class="font-black text-gray-600">{{ move.fromCount }}장 보유</div>
+              <div>→ 0장</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- ===== 튜토리얼 팝업 ===== -->
   <div v-if="showWelcomePopup" class="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
     <div class="bg-white rounded-2xl w-full max-w-sm shadow-2xl overflow-hidden fade-up">
@@ -1154,6 +1223,9 @@ createApp({
     const showCharSwitcher = ref(false);
     const charUnreadCounts = ref({});
     const showAddChar = ref(false);
+    const showAllCharsPopup = ref(false);
+    const allCharsData = ref([]);
+    const allCharsLoading = ref(false);
     const addCharForm = ref({ server:'', nickname:'', password:'' });
     const savedChars = ref([]);
     const currentDocId = computed(() => myDocId.value);
@@ -1696,6 +1768,56 @@ createApp({
         if ((tCol[i]||0)>1&&(myCol[i]||0)===0) res.receiveOnly.push(obj);
       }
       compareResult.value = res;
+    };
+
+    const allCharsMoves = computed(() => {
+      if (allCharsData.value.length < 2) return [];
+      const moves = [];
+      for (let i = 0; i < 81; i++) {
+        const name = stickerNameByIndex(i);
+        // 여유(2장↑) 있는 캐릭터 찾기
+        const givers = allCharsData.value.filter(c => (c.collection[i] || 0) >= 2);
+        // 0장인 캐릭터 찾기
+        const receivers = allCharsData.value.filter(c => (c.collection[i] || 0) === 0);
+        for (const g of givers) {
+          for (const r of receivers) {
+            if (g.docId !== r.docId) {
+              moves.push({ name, from: g.docId, fromNick: g.nickname, fromCount: g.collection[i], to: r.docId, toNick: r.nickname });
+            }
+          }
+        }
+      }
+      return moves;
+    });
+
+    const openAllCharsPopup = async () => {
+      showCharSwitcher.value = false;
+      showAllCharsPopup.value = true;
+      allCharsLoading.value = true;
+      try {
+        const results = [];
+        for (const char of savedChars.value) {
+          const snap = await db.collection('users').doc(char.docId).get();
+          if (!snap.exists) continue;
+          const data = snap.data();
+          const col = Array.isArray(data.collection) ? data.collection : Array(81).fill(0);
+          results.push({ docId: char.docId, server: char.server, nickname: char.nickname, collection: col, collected: col.filter(v => v > 0).length });
+        }
+        allCharsData.value = results;
+      } catch(e) { alert('불러오기 실패: ' + (e.message||e)); } finally { allCharsLoading.value = false; }
+    };
+
+    const openCompareMyChar = async (char) => {
+      showCharSwitcher.value = false;
+      isLoading.value = true;
+      try {
+        const snap = await db.collection('users').doc(char.docId).get();
+        if (!snap.exists) { alert('캐릭터 데이터를 불러올 수 없어요!'); return; }
+        const data = snap.data();
+        buildCompare({ id: char.docId, server: char.server, nickname: char.nickname, collection: data.collection });
+        compareFrom.value = 'mychar';
+        showComparePopup.value = true;
+      } catch(e) { alert('오류: ' + (e.message||e)); } finally { isLoading.value = false; }
     };
 
     const openCompare = targetUser => {
@@ -2362,7 +2484,8 @@ createApp({
       openExchangeByAbsoluteIndex, exchangeList, popupStickerName,
       openMemberPopup, filteredUserList, searchKeyword, memberFilter,
       toggleFavorite, isFavorite,
-      openCompare, compareTarget, compareResult,
+      openCompare, openCompareMyChar, compareTarget, compareResult,
+      showAllCharsPopup, allCharsData, allCharsLoading, allCharsMoves, openAllCharsPopup,
       showDealBuilder, openDealBuilder, closeDealBuilder,
       dealCheckGive, dealCheckReceive, dealModeLabel, dealGiveIndex, dealReceiveIndex,
       copyDealBuilderText, confirmDeal, copyAndChat, confirmDealFromChat, pendingDeal,

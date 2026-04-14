@@ -1017,54 +1017,108 @@
 
   <!-- ===== 내 캐릭터 전체 현황 팝업 ===== -->
   <div v-if="showAllCharsPopup" class="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-end justify-center z-50" @click.self="showAllCharsPopup=false">
-    <div class="bg-white sheet w-full max-w-md p-5 max-h-[88vh] overflow-y-auto hide-scroll shadow-2xl">
-      <div class="flex items-center justify-between mb-4">
-        <div>
-          <div class="text-xs text-gray-400 mb-0.5">🔀 내 캐릭터 전체 현황</div>
-          <h3 class="text-base font-black text-gray-800">이동 가능한 스티커</h3>
+    <div class="bg-white sheet w-full max-w-md shadow-2xl max-h-[90vh] flex flex-col">
+
+      <!-- 헤더 -->
+      <div class="p-4 border-b border-gray-100 flex-none">
+        <div class="flex items-center justify-between mb-3">
+          <div>
+            <div class="text-xs text-gray-400 mb-0.5">🔀 내 캐릭터 전체 현황</div>
+            <h3 class="text-base font-black text-gray-800">스티커 보유 현황 비교</h3>
+          </div>
+          <button @click="showAllCharsPopup=false" class="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center text-gray-400 btn-press">
+            <i class="fas fa-times text-sm"></i>
+          </button>
         </div>
-        <button @click="showAllCharsPopup=false" class="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center text-gray-400 btn-press"><i class="fas fa-times text-sm"></i></button>
+        <!-- 앨범 탭 -->
+        <div class="flex gap-1.5 overflow-x-auto hide-scroll pb-0.5">
+          <button @click="allCharsAlbumIdx = -1"
+                  class="tab-btn flex-none"
+                  :class="allCharsAlbumIdx === -1 ? 'tab-on' : 'tab-off'">전체</button>
+          <button v-for="(name, idx) in appConfig.albumNames" :key="idx"
+                  @click="allCharsAlbumIdx = idx"
+                  class="tab-btn flex-none"
+                  :class="allCharsAlbumIdx === idx ? 'tab-on' : 'tab-off'">
+            {{ name.length > 4 ? name.slice(0,4)+'…' : name }}
+          </button>
+        </div>
       </div>
-      <div v-if="allCharsLoading" class="flex justify-center py-10"><div class="loader"></div></div>
-      <div v-else-if="allCharsData.length < 2" class="text-center text-gray-400 text-sm py-10">
-        캐릭터가 2개 이상이어야 비교할 수 있어요!
-      </div>
-      <div v-else class="space-y-3">
-        <!-- 캐릭터별 수집 현황 요약 -->
-        <div class="bg-gray-50 rounded-2xl p-3 border border-gray-100">
-          <div class="text-[11px] font-black text-gray-500 mb-2">📊 캐릭터별 수집 현황</div>
-          <div class="space-y-1.5">
-            <div v-for="c in allCharsData" :key="c.docId" class="flex items-center gap-2">
-              <span class="bg-pink-100 text-pink-600 text-[10px] px-1.5 py-0.5 rounded font-black flex-none">S{{ c.server }}</span>
-              <span class="text-xs font-black text-gray-700 truncate flex-1">{{ c.nickname }}</span>
-              <div class="w-24 h-2.5 bg-gray-200 rounded-full overflow-hidden flex-none">
-                <div class="h-full bg-gradient-to-r from-pink-400 to-purple-400 rounded-full" :style="{ width: (c.collected/81*100) + '%' }"></div>
+
+      <!-- 본문 -->
+      <div class="flex-1 overflow-y-auto hide-scroll">
+        <div v-if="allCharsLoading" class="flex justify-center py-10"><div class="loader"></div></div>
+        <div v-else-if="allCharsData.length < 2" class="text-center text-gray-400 text-sm py-10 p-4">
+          캐릭터가 2개 이상이어야 비교할 수 있어요!
+        </div>
+        <div v-else>
+          <!-- 수집 현황 요약 -->
+          <div class="px-4 pt-3 pb-2">
+            <div class="bg-gray-50 rounded-2xl p-3 border border-gray-100">
+              <div class="text-[11px] font-black text-gray-500 mb-2">📊 캐릭터별 수집 현황</div>
+              <div class="space-y-1.5">
+                <div v-for="c in allCharsData" :key="c.docId" class="flex items-center gap-2">
+                  <span class="bg-pink-100 text-pink-600 text-[10px] px-1.5 py-0.5 rounded font-black flex-none">S{{ c.server }}</span>
+                  <span class="text-xs font-black text-gray-700 truncate flex-1">{{ c.nickname }}</span>
+                  <div class="w-20 h-2 bg-gray-200 rounded-full overflow-hidden flex-none">
+                    <div class="h-full bg-gradient-to-r from-pink-400 to-purple-400 rounded-full gauge-fill" :style="{ width: (c.collected/81*100) + '%' }"></div>
+                  </div>
+                  <span class="text-[10px] font-black text-gray-500 flex-none w-10 text-right">{{ c.collected }}/81</span>
+                </div>
               </div>
-              <span class="text-[10px] font-black text-gray-500 flex-none w-10 text-right">{{ c.collected }}/81</span>
             </div>
           </div>
-        </div>
-        <!-- 이동 추천 목록 -->
-        <div class="text-[11px] font-black text-gray-500 px-1">💡 이동 추천 <span class="text-[10px] font-normal text-gray-400">(여유(2장↑) → 없는 캐릭터)</span></div>
-        <div v-if="allCharsMoves.length === 0" class="text-center text-gray-400 text-xs py-6 bg-gray-50 rounded-2xl">이동 가능한 스티커가 없어요 😅</div>
-        <div v-else class="space-y-2">
-          <div v-for="move in allCharsMoves" :key="move.name + move.from + move.to"
-               class="bg-white border border-purple-100 rounded-2xl p-3 flex items-center gap-2.5">
-            <div class="bg-purple-50 rounded-xl p-2 flex-none">
-              <i class="fas fa-arrow-right text-purple-400 text-xs"></i>
+
+          <!-- 범례 + 카운트 -->
+          <div class="px-4 pb-2 flex items-center gap-2 flex-wrap">
+            <span class="text-[10px] text-gray-400 font-black">
+              {{ allCharsAlbumIdx === -1 ? '전체' : appConfig.albumNames[allCharsAlbumIdx] }} ·
+              <span class="text-pink-500">{{ allCharsTableItems.length }}개</span> (누군가 0인 스티커만)
+            </span>
+            <div class="flex items-center gap-1.5 ml-auto text-[10px] font-black">
+              <span class="bg-pink-100 text-pink-600 px-1.5 py-0.5 rounded">여유</span>
+              <span class="bg-blue-50 text-blue-500 px-1.5 py-0.5 rounded">보유</span>
+              <span class="bg-red-50 text-red-400 px-1.5 py-0.5 rounded">없음</span>
             </div>
-            <div class="flex-1 min-w-0">
-              <div class="text-xs font-black text-gray-800 truncate">{{ move.name }}</div>
-              <div class="text-[10px] text-gray-400 mt-0.5">
-                <span class="text-pink-500 font-black">{{ move.fromNick }}</span>
-                <i class="fas fa-arrow-right mx-1 text-[8px]"></i>
-                <span class="text-purple-500 font-black">{{ move.toNick }}</span>
-              </div>
-            </div>
-            <div class="text-[10px] text-gray-400 flex-none text-right">
-              <div class="font-black text-gray-600">{{ move.fromCount }}장 보유</div>
-              <div>→ 0장</div>
-            </div>
+          </div>
+
+          <!-- 테이블 -->
+          <div v-if="allCharsTableItems.length === 0" class="text-center text-gray-400 text-xs py-8 mx-4 bg-gray-50 rounded-2xl">
+            🎉 모든 캐릭터가 이 앨범의 스티커를 보유 중이에요!
+          </div>
+          <div v-else class="overflow-x-auto hide-scroll px-4 pb-4">
+            <table class="w-full text-xs border-collapse">
+              <thead>
+                <tr class="border-b-2 border-gray-200">
+                  <th class="text-left text-[10px] font-black text-gray-500 py-2 pr-2 sticky left-0 bg-white min-w-[90px]">스티커</th>
+                  <th v-for="c in allCharsData" :key="c.docId"
+                      class="text-center text-[10px] font-black py-2 px-1 min-w-[48px]"
+                      :class="c.docId === myDocId ? 'text-pink-600' : 'text-gray-500'">
+                    <div class="truncate max-w-[48px]">{{ c.nickname.length > 4 ? c.nickname.slice(0,4)+'…' : c.nickname }}</div>
+                    <div class="text-gray-300 font-normal text-[9px]">S{{ c.server }}</div>
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr v-for="item in allCharsTableItems" :key="item.absIdx"
+                    class="border-b border-gray-100"
+                    :class="item.hasMove ? 'bg-purple-50/30' : ''">
+                  <td class="py-2 pr-2 sticky left-0 bg-inherit">
+                    <div class="text-[10px] font-black text-gray-700 leading-tight">{{ item.shortName }}</div>
+                    <div v-if="item.hasMove" class="text-[9px] text-purple-500 font-black">↕ 이동가능</div>
+                  </td>
+                  <td v-for="c in allCharsData" :key="c.docId" class="py-1.5 px-0.5 text-center">
+                    <div class="text-sm font-black rounded-lg py-1 mx-0.5"
+                         :class="(c.collection[item.absIdx]||0) >= 2
+                           ? 'bg-pink-100 text-pink-600'
+                           : (c.collection[item.absIdx]||0) === 1
+                             ? 'bg-blue-50 text-blue-500'
+                             : 'bg-red-50 text-red-400'">
+                      {{ c.collection[item.absIdx] || 0 }}
+                    </div>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
           </div>
         </div>
       </div>
@@ -1790,9 +1844,30 @@ createApp({
       return moves;
     });
 
+    const allCharsAlbumIdx = ref(-1);
+
+    const allCharsTableItems = computed(() => {
+      if (allCharsData.value.length < 2) return [];
+      const result = [];
+      const start = allCharsAlbumIdx.value === -1 ? 0 : allCharsAlbumIdx.value * 9;
+      const end = allCharsAlbumIdx.value === -1 ? 81 : start + 9;
+      for (let i = start; i < end; i++) {
+        const hasZero = allCharsData.value.some(c => (c.collection[i] || 0) === 0);
+        if (!hasZero) continue;
+        const hasSpare = allCharsData.value.some(c => (c.collection[i] || 0) >= 2);
+        const aIdx = Math.floor(i / 9);
+        const sIdx = (i % 9) + 1;
+        const albumName = appConfig.value.albumNames[aIdx] || ('앨범'+(aIdx+1));
+        const shortAlbum = albumName.length > 4 ? albumName.slice(0,4)+'…' : albumName;
+        result.push({ absIdx: i, shortName: shortAlbum + ' ' + sIdx + '번', hasMove: hasZero && hasSpare });
+      }
+      return result;
+    });
+
     const openAllCharsPopup = async () => {
       showCharSwitcher.value = false;
       showAllCharsPopup.value = true;
+      allCharsAlbumIdx.value = -1;
       allCharsLoading.value = true;
       try {
         const results = [];
@@ -2485,7 +2560,7 @@ createApp({
       openMemberPopup, filteredUserList, searchKeyword, memberFilter,
       toggleFavorite, isFavorite,
       openCompare, openCompareMyChar, compareTarget, compareResult,
-      showAllCharsPopup, allCharsData, allCharsLoading, allCharsMoves, openAllCharsPopup,
+      showAllCharsPopup, allCharsData, allCharsLoading, allCharsMoves, allCharsAlbumIdx, allCharsTableItems, openAllCharsPopup,
       showDealBuilder, openDealBuilder, closeDealBuilder,
       dealCheckGive, dealCheckReceive, dealModeLabel, dealGiveIndex, dealReceiveIndex,
       copyDealBuilderText, confirmDeal, copyAndChat, confirmDealFromChat, pendingDeal,

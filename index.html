@@ -1108,7 +1108,7 @@
                     class="border-b border-gray-100"
                     :class="item.hasMove ? 'bg-purple-50/30' : ''">
                   <td class="py-2 pr-3 sticky left-0 bg-inherit">
-                    <div class="text-sm font-black text-gray-700">{{ item.sIdx }}번</div>
+                    <div class="text-sm font-black text-gray-700">{{ item.displayName }}</div>
                     <div v-if="item.hasMove" class="text-[9px] text-purple-500 font-black">↕이동</div>
                   </td>
                   <td v-for="c in allCharsData" :key="c.docId" class="py-1.5 px-0.5 text-center">
@@ -1875,8 +1875,13 @@ createApp({
         const hasZero = allCharsData.value.some(c => (c.collection[i] || 0) === 0);
         if (!hasZero) continue;
         const hasSpare = allCharsData.value.some(c => (c.collection[i] || 0) >= 2);
+        const aIdx = Math.floor(i / 9);
         const sIdx = (i % 9) + 1;
-        result.push({ absIdx: i, sIdx, hasMove: hasZero && hasSpare });
+        const albumName = appConfig.value.albumNames[aIdx] || ('앨범'+(aIdx+1));
+        const shortAlbum = albumName.length > 4 ? albumName.slice(0,4)+'…' : albumName;
+        // 전체탭이면 앨범명 포함, 앨범탭 선택시엔 번호만
+        const displayName = allCharsAlbumIdx.value === -1 ? shortAlbum + ' ' + sIdx + '번' : sIdx + '번';
+        result.push({ absIdx: i, sIdx, displayName, hasMove: hasZero && hasSpare });
       }
       return result;
     });

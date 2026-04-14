@@ -1186,13 +1186,35 @@
             <p class="text-xs text-amber-700 font-black">⚠️ 반드시 게임에서 먼저 교환하고<br>앱에서 기록하세요!</p>
           </div>
         </div>
+        <div v-if="tutorialStep===4" class="p-6 fade-up">
+          <div class="text-xs font-black text-purple-500 mb-1">STEP 4</div>
+          <h3 class="text-lg font-black text-gray-900 mb-2">부캐도 한 번에 관리해요</h3>
+          <p class="text-sm text-gray-400 leading-relaxed mb-4">캐릭터가 여러 개라면<br>앱 안에서 바로 전환할 수 있어요!</p>
+          <div class="bg-purple-50 border border-purple-200 rounded-2xl p-4 space-y-3 mb-3">
+            <div class="flex items-start gap-2">
+              <span class="text-purple-400 font-black flex-none">①</span>
+              <p class="text-xs text-gray-600 leading-snug">상단 이름 옆 <b>▼ 버튼</b> 탭 → 캐릭터 추가</p>
+            </div>
+            <div class="flex items-start gap-2">
+              <span class="text-purple-400 font-black flex-none">②</span>
+              <p class="text-xs text-gray-600 leading-snug">목록에서 탭하면 <b>로그아웃 없이</b> 바로 전환!</p>
+            </div>
+            <div class="flex items-start gap-2">
+              <span class="text-purple-400 font-black flex-none">③</span>
+              <p class="text-xs text-gray-600 leading-snug"><b>전체 캐릭터 현황</b>으로 부캐 스티커 한눈에 비교</p>
+            </div>
+          </div>
+          <div class="bg-gray-50 rounded-2xl p-3 text-center">
+            <p class="text-xs text-gray-500">캐릭터가 1개면 안 써도 돼요 😊</p>
+          </div>
+        </div>
       </div>
       <div class="px-6 pb-6">
         <div class="flex justify-center gap-1.5 mb-4">
-          <div v-for="i in 4" :key="i" class="rounded-full transition-all"
+          <div v-for="i in 5" :key="i" class="rounded-full transition-all"
                :style="tutorialStep===i-1 ? 'width:20px;height:6px;background:#111827;' : 'width:6px;height:6px;background:#e5e7eb;'"></div>
         </div>
-        <button v-if="tutorialStep < 3" @click="tutorialStep++" class="w-full py-3.5 bg-gray-900 text-white rounded-2xl font-black text-sm btn-press">다음 →</button>
+        <button v-if="tutorialStep < 4" @click="tutorialStep++" class="w-full py-3.5 bg-gray-900 text-white rounded-2xl font-black text-sm btn-press">다음 →</button>
         <button v-else @click="closeWelcomePopup" class="w-full py-3.5 bg-gray-900 text-white rounded-2xl font-black text-sm btn-press">시작하기!</button>
         <button @click="showWelcomePopup=false" class="w-full py-2 text-gray-400 text-xs font-black mt-1 btn-press">건너뛰기</button>
       </div>

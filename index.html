@@ -137,12 +137,20 @@
                   <span v-if="char.docId !== currentDocId && charUnreadCounts[char.docId] > 0"
                         class="ml-auto bg-red-500 text-white text-[9px] font-black px-1.5 py-0.5 rounded-full flex-none pulse">N</span>
                 </div>
+                <button v-if="char.docId !== currentDocId" @click.stop="openCompareMyChar(char)"
+                        class="text-[10px] font-black text-purple-400 hover:text-purple-600 border border-purple-200 hover:border-purple-400 px-1.5 py-0.5 rounded-lg flex-none transition btn-press">
+                  비교
+                </button>
                 <span v-if="char.docId !== currentDocId" @click.stop="removeChar(char.docId)"
                       class="text-gray-300 hover:text-red-400 cursor-pointer px-1 flex-none">
                   <i class="fas fa-xmark text-xs"></i>
                 </span>
               </div>
-              <div v-if="!showAddChar" class="pt-1 border-t border-gray-100">
+              <div v-if="!showAddChar" class="pt-1 border-t border-gray-100 space-y-0.5">
+                <button @click="openAllCharsPopup"
+                        class="w-full flex items-center gap-2 px-3 py-2 rounded-xl hover:bg-purple-50 text-purple-500 text-sm font-black transition">
+                  <i class="fas fa-layer-group text-xs"></i> 전체 캐릭터 현황
+                </button>
                 <button @click="showAddChar = true"
                         class="w-full flex items-center gap-2 px-3 py-2 rounded-xl hover:bg-gray-50 text-gray-500 text-sm font-black transition">
                   <i class="fas fa-plus text-xs"></i> 캐릭터 추가
@@ -513,16 +521,21 @@
     <div class="bg-white sheet w-full max-w-md p-5 max-h-[85vh] overflow-y-auto hide-scroll shadow-2xl">
       <div class="flex items-center justify-between mb-3">
         <div class="flex items-center gap-2">
-          <button v-if="compareFrom" @click="compareFrom==='member' ? (showComparePopup=false, showUserListPopup=true) : (showComparePopup=false, showNeedsPopup=true); compareFrom=''"
+          <button v-if="compareFrom" @click="compareFrom==='member' ? (showComparePopup=false, showUserListPopup=true) : compareFrom==='needs' ? (showComparePopup=false, showNeedsPopup=true) : (showComparePopup=false); compareFrom=''"
                   class="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center text-gray-400 btn-press">
             <i class="fas fa-chevron-left text-xs"></i>
           </button>
           <div>
-            <div class="text-xs text-gray-400 mb-0.5">나 vs 상대방</div>
+            <div class="text-xs text-gray-400 mb-0.5">{{ compareFrom === 'mychar' ? '🔀 내 캐릭터 비교' : '나 vs 상대방' }}</div>
             <div class="flex items-center gap-2 flex-wrap">
               <h3 class="text-base font-black text-gray-800">S{{ compareTarget.server }} {{ compareTarget.nickname }}</h3>
-              <button @click="openDirectChat(compareTarget)" class="text-[11px] bg-pink-500 text-white px-2.5 py-1.5 rounded-full font-black btn-press">📨 쪽지</button>
-              <button @click="openDealBuilder" class="text-[11px] bg-gray-900 text-white px-2.5 py-1.5 rounded-full font-black btn-press">교환하기</button>
+              <template v-if="compareFrom !== 'mychar'">
+                <button @click="openDirectChat(compareTarget)" class="text-[11px] bg-pink-500 text-white px-2.5 py-1.5 rounded-full font-black btn-press">📨 쪽지</button>
+                <button @click="openDealBuilder" class="text-[11px] bg-gray-900 text-white px-2.5 py-1.5 rounded-full font-black btn-press">교환하기</button>
+              </template>
+              <template v-else>
+                <span class="text-[11px] bg-purple-100 text-purple-600 px-2.5 py-1.5 rounded-full font-black">이동 가능 스티커 확인</span>
+              </template>
             </div>
           </div>
         </div>
@@ -749,111 +762,309 @@
     </div>
   </div>
 
-
-  <!-- ===== 내 캐릭터 전체 현황 팝업 ===== -->
-  <div v-if="showAllCharsPopup" class="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-end justify-center z-50" @click.self="showAllCharsPopup=false">
-    <div class="bg-white sheet w-full max-w-md shadow-2xl max-h-[90vh] flex flex-col">
-
-      <!-- 헤더 -->
-      <div class="p-4 border-b border-gray-100 flex-none">
-        <div class="flex items-center justify-between mb-3">
+  <!-- ===== 보유자 찾기 팝업 ===== -->
+  <div v-if="showPopup" class="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-end justify-center z-50" @click.self="showPopup=false">
+    <div class="bg-white sheet w-full max-w-md p-5 max-h-[85vh] overflow-y-auto hide-scroll shadow-2xl">
+      <div class="flex items-center justify-between mb-3">
+        <div class="flex items-center gap-2">
+          <button v-if="showNeedsWasOpen" @click="showPopup=false; showNeedsPopup=true; showNeedsWasOpen=false"
+                  class="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center text-gray-400 btn-press">
+            <i class="fas fa-chevron-left text-xs"></i>
+          </button>
           <div>
-            <div class="text-xs text-gray-400 mb-0.5">🔀 내 캐릭터 전체 현황</div>
-            <h3 class="text-base font-black text-gray-800">스티커 보유 현황 비교</h3>
+            <h3 class="text-base font-black text-gray-800">교환 도우미</h3>
+            <p class="text-xs text-pink-500 font-black mt-0.5">{{ popupStickerName }} 보유자</p>
           </div>
-          <button @click="showAllCharsPopup=false" class="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center text-gray-400 btn-press">
-            <i class="fas fa-times text-sm"></i>
-          </button>
         </div>
-        <!-- 앨범 탭 -->
-        <div class="flex gap-1.5 overflow-x-auto hide-scroll pb-0.5">
-          <button @click="allCharsAlbumIdx = -1"
-                  class="tab-btn flex-none"
-                  :class="allCharsAlbumIdx === -1 ? 'tab-on' : 'tab-off'">전체</button>
-          <button v-for="(name, idx) in appConfig.albumNames" :key="idx"
-                  @click="allCharsAlbumIdx = idx"
-                  class="tab-btn flex-none"
-                  :class="allCharsAlbumIdx === idx ? 'tab-on' : 'tab-off'">
-            {{ name.length > 4 ? name.slice(0,4)+'…' : name }}
-          </button>
+        <button @click="showPopup=false" class="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center text-gray-400 btn-press"><i class="fas fa-times text-sm"></i></button>
+      </div>
+      <div v-if="isLoading" class="flex justify-center py-10"><div class="loader"></div></div>
+      <div v-else-if="exchangeList.length===0" class="text-center py-10 text-gray-400 bg-gray-50 rounded-2xl text-xs">
+        <div class="text-2xl mb-2">😭</div>여유분 있는 멤버가 없어요
+      </div>
+      <div v-else class="space-y-3">
+        <div v-for="user in exchangeList" :key="user.id" class="border border-gray-100 p-3 rounded-2xl bg-white shadow-sm">
+          <div class="flex justify-between items-center mb-2">
+            <div class="flex items-center gap-1.5 flex-wrap">
+              <span class="bg-pink-100 text-pink-600 text-[10px] px-1.5 py-0.5 rounded-lg font-black">S{{ user.server }}</span>
+              <span class="font-black text-gray-700 text-sm">{{ user.nickname }}</span>
+            </div>
+            <div class="flex gap-1.5">
+              <button @click="openDirectChat(user)" class="text-[10px] bg-pink-500 text-white px-2 py-1 rounded-lg btn-press font-black">📨</button>
+              <button @click="openCompare(user)" class="text-[10px] bg-gray-800 text-white px-2 py-1 rounded-lg btn-press font-black">비교</button>
+            </div>
+          </div>
+          <div v-if="user.giveable.length>0" class="bg-blue-50 p-2 rounded-xl">
+            <div class="text-[10px] text-blue-500 font-black mb-1"><i class="fas fa-gift mr-1"></i>내가 줄 수 있는 스티커</div>
+            <div class="flex flex-wrap gap-1">
+              <span v-for="(sticker,sIdx) in user.giveable.slice(0,6)" :key="sIdx" class="text-[9px] bg-white border border-blue-100 px-1.5 py-0.5 rounded text-gray-500">{{ sticker }}</span>
+              <span v-if="user.giveable.length>6" class="text-[9px] text-gray-400">+{{ user.giveable.length-6 }}개</span>
+            </div>
+          </div>
+          <div class="text-[10px] text-gray-400 mt-1">{{ getActiveText(user.lastActive) }}</div>
         </div>
       </div>
+    </div>
+  </div>
 
-      <!-- 본문 -->
-      <div class="flex-1 overflow-y-auto hide-scroll">
-        <div v-if="allCharsLoading" class="flex justify-center py-10"><div class="loader"></div></div>
-        <div v-else-if="allCharsData.length < 2" class="text-center text-gray-400 text-sm py-10 p-4">
-          캐릭터가 2개 이상이어야 비교할 수 있어요!
-        </div>
-        <div v-else>
-          <!-- 수집 현황 요약 -->
-          <div class="px-4 pt-3 pb-2">
-            <div class="bg-gray-50 rounded-2xl p-3 border border-gray-100">
-              <div class="text-[11px] font-black text-gray-500 mb-2">📊 캐릭터별 수집 현황</div>
-              <div class="space-y-1.5">
-                <div v-for="c in allCharsData" :key="c.docId" class="flex items-center gap-2">
-                  <span class="bg-pink-100 text-pink-600 text-[10px] px-1.5 py-0.5 rounded font-black flex-none">S{{ c.server }}</span>
-                  <span class="text-xs font-black text-gray-700 truncate flex-1">{{ c.nickname }}</span>
-                  <div class="w-20 h-2 bg-gray-200 rounded-full overflow-hidden flex-none">
-                    <div class="h-full bg-gradient-to-r from-pink-400 to-purple-400 rounded-full gauge-fill" :style="{ width: (c.collected/81*100) + '%' }"></div>
-                  </div>
-                  <span class="text-[10px] font-black text-gray-500 flex-none w-10 text-right">{{ c.collected }}/81</span>
-                </div>
+  <!-- ===== 쪽지함 팝업 ===== -->
+  <div v-if="showChatPopup" class="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-end justify-center z-50" @click.self="closeChatPopup">
+    <div class="bg-white sheet w-full max-w-md shadow-2xl flex flex-col" style="height:85vh">
+      <div class="p-4 border-b border-gray-100 flex-none">
+        <div class="flex items-center justify-between">
+          <div class="flex items-center gap-2">
+            <button v-if="chatView !== 'list'" @click="chatView='list'; loadChatList()"
+                    class="w-7 h-7 rounded-full bg-gray-100 flex items-center justify-center text-gray-400 btn-press">
+              <i class="fas fa-arrow-left text-xs"></i>
+            </button>
+            <div>
+              <h3 class="text-base font-black text-gray-800">
+                <span v-if="chatView==='list'">📨 쪽지함</span>
+                <span v-else-if="chatView==='read'">📩 {{ readingMsg ? readingMsg.otherNick : '' }}</span>
+                <span v-else>✏️ 새 쪽지</span>
+              </h3>
+              <div v-if="chatView==='list'" class="text-xs text-gray-400">
+                {{ unreadCount > 0 ? `읽지 않은 쪽지 ${unreadCount}개` : '새 쪽지 없음' }}
               </div>
             </div>
           </div>
+          <div class="flex items-center gap-1.5">
+            <button v-if="chatView==='list'" @click="chatView='write'; chatTarget=null; chatInput=''"
+                    class="text-[11px] bg-pink-500 text-white px-3 py-1.5 rounded-xl font-black btn-press flex items-center gap-1">
+              <i class="fas fa-pen text-[10px]"></i> 쓰기
+            </button>
+            <button @click="closeChatPopup" class="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center text-gray-400 btn-press">
+              <i class="fas fa-times text-sm"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+      <div v-if="chatView==='list'" class="flex-1 overflow-y-auto hide-scroll">
+        <div v-if="isChatLoading" class="flex justify-center py-10"><div class="loader"></div></div>
+        <div v-else-if="chatRooms.length===0" class="flex flex-col items-center justify-center h-full text-gray-400 text-xs">
+          <div class="text-4xl mb-3">📭</div>
+          <div class="font-black text-gray-500 mb-1">쪽지가 없어요</div>
+          <div class="text-gray-400">멤버에서 상대를 찾아 쪽지를 보내보세요!</div>
+        </div>
+        <div v-else class="divide-y divide-gray-100">
+          <div v-for="room in chatRooms" :key="room.id"
+               class="flex items-center px-4 py-3.5 hover:bg-gray-50 transition cursor-pointer"
+               :class="room.unread > 0 ? 'bg-pink-50/60' : ''" @click="openMailRoom(room)">
+            <div class="w-10 h-10 rounded-full flex items-center justify-center font-black text-sm flex-none mr-3"
+                 :class="room.unread > 0 ? 'bg-pink-200 text-pink-700' : 'bg-gray-100 text-gray-500'">
+              {{ (room.otherNickname || '?')[0] }}
+            </div>
+            <div class="flex-1 min-w-0">
+              <div class="flex items-center justify-between gap-2 mb-0.5">
+                <span class="font-black text-sm" :class="room.unread > 0 ? 'text-gray-900' : 'text-gray-700'">{{ room.otherNickname }}</span>
+                <span class="text-[10px] text-gray-400 flex-none">{{ formatChatTime(room.lastAt) }}</span>
+              </div>
+              <div class="flex items-center gap-2">
+                <span class="text-[11px] truncate" :class="room.unread > 0 ? 'text-gray-700 font-bold' : 'text-gray-400'">{{ room.lastMsg }}</span>
+                <span v-if="room.unread > 0" class="bg-pink-500 text-white text-[9px] font-black px-1.5 py-0.5 rounded-full flex-none">{{ room.unread }}</span>
+              </div>
+            </div>
+            <button @click.stop="leaveChatRoom(room)" class="w-7 h-7 rounded-lg bg-gray-100 text-gray-300 flex items-center justify-center btn-press flex-none ml-2 hover:text-red-400">
+              <i class="fas fa-xmark text-xs"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+      <div v-if="chatView==='read' && readingMsg" class="flex-1 overflow-y-auto hide-scroll p-4 flex flex-col gap-3">
+        <div v-if="isChatLoading" class="flex justify-center py-10"><div class="loader"></div></div>
+        <div v-else-if="chatMessages.length===0" class="text-center text-gray-400 py-10 text-xs bg-gray-50 rounded-2xl">아직 주고받은 쪽지가 없어요</div>
+        <div v-else v-for="msg in chatMessages" :key="msg.id"
+             class="flex flex-col rounded-2xl border p-3.5"
+             :class="isMyMsg(msg) ? 'bg-pink-50 border-pink-100 items-end' : 'bg-white border-gray-100 items-start'">
+          <div class="flex items-center gap-2 mb-2 w-full" :class="isMyMsg(msg) ? 'flex-row-reverse' : ''">
+            <div class="w-7 h-7 rounded-full flex items-center justify-center font-black text-xs flex-none"
+                 :class="isMyMsg(msg) ? 'bg-pink-200 text-pink-700' : 'bg-gray-100 text-gray-500'">
+              {{ (msg.senderNick || '?')[0] }}
+            </div>
+            <span class="font-black text-xs text-gray-600">{{ msg.senderNick }}</span>
+            <span class="text-[10px] text-gray-400 ml-auto">{{ formatChatTime(msg.createdAt) }}</span>
+          </div>
+          <p class="text-sm text-gray-700 leading-relaxed w-full whitespace-pre-wrap" :class="isMyMsg(msg) ? 'text-right' : ''">{{ msg.text }}</p>
+        </div>
+      </div>
+      <div v-if="pendingDeal && chatView==='read' && chatTarget && pendingDeal.target && chatTarget.id === pendingDeal.target.id"
+           class="flex-none bg-sky-50 border-t border-sky-200 px-4 py-3">
+        <div class="text-[11px] text-sky-600 font-black mb-2">📨 쪽지 보냈나요? 게임에서 교환 후 기록하세요!</div>
+        <button @click="confirmDealFromChat" class="w-full py-2.5 bg-sky-500 text-white rounded-xl font-black text-sm btn-press flex items-center justify-center gap-2">
+          <i class="fas fa-check"></i> ✅ 교환 기록하기
+        </button>
+        <button @click="pendingDeal = null" class="w-full mt-1.5 py-1.5 text-sky-400 text-xs font-black btn-press">나중에 할게요</button>
+      </div>
+      <div v-if="chatView==='read' || chatView==='write'" class="border-t border-gray-100 p-3 flex-none bg-white">
+        <div v-if="chatView==='write'" class="mb-2">
+          <div class="text-xs font-black text-gray-500 mb-1.5">받는 사람</div>
+          <select v-model="chatTarget" class="w-full p-2.5 border border-gray-200 rounded-xl text-sm bg-white focus:outline-none focus:border-pink-300">
+            <option :value="null">선택해주세요</option>
+            <option v-for="user in userList" :key="user.id" :value="user">S{{ user.server }} {{ user.nickname }}</option>
+          </select>
+        </div>
+        <div class="flex gap-2">
+          <textarea v-model="chatInput" :placeholder="chatView==='read' ? '답장 내용 입력...' : '쪽지 내용 입력...'" rows="3"
+                    class="flex-1 py-2.5 px-3 bg-gray-50 border border-gray-200 rounded-2xl text-sm focus:outline-none focus:border-pink-300 resize-none"></textarea>
+          <button @click="sendMessage" :disabled="!chatInput.trim() || isChatSending || (chatView==='write' && !chatTarget)"
+                  class="w-10 h-10 self-end bg-pink-500 text-white rounded-full flex items-center justify-center btn-press disabled:opacity-40 flex-none">
+            <i class="fas fa-paper-plane text-sm"></i>
+          </button>
+        </div>
+        <div class="text-[10px] text-gray-400 mt-1.5 text-center">{{ chatView==='write' ? '멤버 목록에서 바로 쪽지 보내기도 가능해요' : '' }}</div>
+      </div>
+    </div>
+  </div>
 
-          <!-- 범례 + 카운트 -->
-          <div class="px-4 pb-2 flex items-center gap-2 flex-wrap">
-            <span class="text-[10px] text-gray-400 font-black">
-              {{ allCharsAlbumIdx === -1 ? '전체' : appConfig.albumNames[allCharsAlbumIdx] }} ·
-              <span class="text-pink-500">{{ allCharsTableItems.length }}개</span> (누군가 0인 스티커만)
-            </span>
-            <div class="flex items-center gap-1.5 ml-auto text-[10px] font-black">
-              <span class="bg-pink-100 text-pink-600 px-1.5 py-0.5 rounded">여유</span>
-              <span class="bg-blue-50 text-blue-500 px-1.5 py-0.5 rounded">보유</span>
-              <span class="bg-red-50 text-red-400 px-1.5 py-0.5 rounded">없음</span>
+  <!-- ===== 랭킹 팝업 ===== -->
+  <div v-if="showRankingPopup" class="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-end justify-center z-50" @click.self="showRankingPopup=false">
+    <div class="bg-white sheet w-full max-w-md p-5 max-h-[85vh] flex flex-col shadow-2xl">
+      <div class="flex items-center justify-between mb-4">
+        <h3 class="text-base font-black text-gray-800">🏆 수집률 랭킹</h3>
+        <button @click="showRankingPopup=false" class="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center text-gray-400 btn-press"><i class="fas fa-times text-sm"></i></button>
+      </div>
+      <div v-if="isLoading" class="flex justify-center py-10"><div class="loader"></div></div>
+      <div v-else class="overflow-y-auto flex-1 hide-scroll space-y-2">
+        <div v-for="(user, idx) in rankingList" :key="user.id"
+             class="flex items-center gap-3 p-3 rounded-2xl border-2"
+             :class="idx===0?'rank-gold':idx===1?'rank-silver':idx===2?'rank-bronze':'border-gray-100 bg-white'">
+          <div class="w-8 h-8 rounded-full flex items-center justify-center font-black text-sm flex-none"
+               :class="idx===0?'bg-amber-400 text-white':idx===1?'bg-gray-400 text-white':idx===2?'bg-orange-400 text-white':'bg-gray-100 text-gray-500'">
+            {{ idx===0?'🥇':idx===1?'🥈':idx===2?'🥉':idx+1 }}
+          </div>
+          <div class="flex-1 min-w-0">
+            <div class="flex items-center gap-1.5">
+              <span class="bg-pink-100 text-pink-600 text-[10px] px-1.5 py-0.5 rounded font-black">S{{ user.server }}</span>
+              <span class="font-black text-sm truncate" :class="user.isMe?'text-pink-600':'text-gray-800'">{{ user.nickname }}{{ user.isMe ? ' (나)' : '' }}</span>
+              <i v-if="user.totalCount>=81" class="fas fa-crown text-amber-400 text-xs"></i>
+            </div>
+            <div class="mt-1 w-full h-2 bg-gray-100 rounded-full overflow-hidden">
+              <div class="h-full bg-gradient-to-r from-pink-400 to-purple-400 gauge-fill" :style="{width: (user.totalCount/81*100)+'%'}"></div>
             </div>
           </div>
-
-          <!-- 테이블 -->
-          <div v-if="allCharsTableItems.length === 0" class="text-center text-gray-400 text-xs py-8 mx-4 bg-gray-50 rounded-2xl">
-            🎉 모든 캐릭터가 이 앨범의 스티커를 보유 중이에요!
+          <div class="text-right flex-none">
+            <div class="text-sm font-black" :class="user.totalCount>=81?'text-emerald-500':'text-gray-700'">{{ user.totalCount }}/81</div>
+            <div class="text-[10px] text-gray-400">{{ Math.round(user.totalCount/81*100) }}%</div>
           </div>
-          <div v-else class="overflow-x-auto hide-scroll px-4 pb-4">
-            <table class="w-full text-xs border-collapse">
-              <thead>
-                <tr class="border-b-2 border-gray-200">
-                  <th class="text-left text-[10px] font-black text-gray-500 py-2 pr-2 sticky left-0 bg-white min-w-[90px]">스티커</th>
-                  <th v-for="c in allCharsData" :key="c.docId"
-                      class="text-center text-[10px] font-black py-2 px-1 min-w-[48px]"
-                      :class="c.docId === myDocId ? 'text-pink-600' : 'text-gray-500'">
-                    <div class="truncate max-w-[48px]">{{ c.nickname.length > 4 ? c.nickname.slice(0,4)+'…' : c.nickname }}</div>
-                    <div class="text-gray-300 font-normal text-[9px]">S{{ c.server }}</div>
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr v-for="item in allCharsTableItems" :key="item.absIdx"
-                    class="border-b border-gray-100"
-                    :class="item.hasMove ? 'bg-purple-50/30' : ''">
-                  <td class="py-2 pr-2 sticky left-0 bg-inherit">
-                    <div class="text-[10px] font-black text-gray-700 leading-tight">{{ item.shortName }}</div>
-                    <div v-if="item.hasMove" class="text-[9px] text-purple-500 font-black">↕ 이동가능</div>
-                  </td>
-                  <td v-for="c in allCharsData" :key="c.docId" class="py-1.5 px-0.5 text-center">
-                    <div class="text-sm font-black rounded-lg py-1 mx-0.5"
-                         :class="(c.collection[item.absIdx]||0) >= 2
-                           ? 'bg-pink-100 text-pink-600'
-                           : (c.collection[item.absIdx]||0) === 1
-                             ? 'bg-blue-50 text-blue-500'
-                             : 'bg-red-50 text-red-400'">
-                      {{ c.collection[item.absIdx] || 0 }}
-                    </div>
-                  </td>
-                </tr>
-              </tbody>
-            </table>
+        </div>
+        <div v-if="rankingList.length===0" class="text-center text-gray-400 py-10 text-xs bg-gray-50 rounded-2xl">데이터가 없어요</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== 교환 히스토리 팝업 ===== -->
+  <div v-if="showHistoryPopup" class="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-end justify-center z-50" @click.self="showHistoryPopup=false">
+    <div class="bg-white sheet w-full max-w-md p-5 max-h-[85vh] flex flex-col shadow-2xl">
+      <div class="flex items-center justify-between mb-4">
+        <div>
+          <h3 class="text-base font-black text-gray-800">📋 내 교환 기록</h3>
+          <p class="text-xs text-gray-400 mt-0.5">최근 30건</p>
+        </div>
+        <button @click="showHistoryPopup=false" class="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center text-gray-400 btn-press"><i class="fas fa-times text-sm"></i></button>
+      </div>
+      <div v-if="isHistoryLoading" class="flex justify-center py-10"><div class="loader"></div></div>
+      <div v-else-if="historyList.length===0" class="text-center text-gray-400 py-10 bg-gray-50 rounded-2xl text-xs">
+        <div class="text-3xl mb-2">📋</div>아직 교환 기록이 없어요
+      </div>
+      <div v-else class="overflow-y-auto flex-1 hide-scroll space-y-2">
+        <div v-for="trade in historyList" :key="trade.id" class="border rounded-2xl p-3"
+             :class="trade.typeLabel==='교환'?'border-red-100 bg-red-50':trade.typeLabel==='주기'?'border-blue-100 bg-blue-50':'border-green-100 bg-green-50'">
+          <div class="flex items-center justify-between mb-1.5">
+            <span class="text-xs font-black" :class="trade.typeLabel==='교환'?'text-red-500':trade.typeLabel==='주기'?'text-blue-500':'text-green-600'">
+              {{ trade.typeLabel==='교환'?'❤️':trade.typeLabel==='주기'?'🎁':'🔍' }} {{ trade.typeLabel }}
+            </span>
+            <span class="text-[10px] text-gray-400">{{ trade.date }}</span>
+          </div>
+          <div class="text-xs text-gray-700">
+            <span v-if="trade.typeLabel==='교환'"><b>{{ trade.from.nickname }}</b> → <b>{{ trade.giveName }}</b><br><b>{{ trade.to.nickname }}</b> → <b>{{ trade.receiveName }}</b></span>
+            <span v-else-if="trade.typeLabel==='주기'"><b>{{ trade.from.nickname }}</b>이(가) <b>{{ trade.giveName }}</b> 주기</span>
+            <span v-else><b>{{ trade.from.nickname }}</b>이(가) <b>{{ trade.receiveName }}</b> 받기</span>
+          </div>
+          <div class="text-[10px] text-gray-400 mt-1">
+            상대: S{{ trade.from.id === myDocId ? trade.to.server : trade.from.server }}
+            {{ trade.from.id === myDocId ? trade.to.nickname : trade.from.nickname }}
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== 교환 횟수 조정 팝업 ===== -->
+  <div v-if="showTradeAdjust" class="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4" @click.self="showTradeAdjust=false">
+    <div class="bg-white rounded-2xl w-72 p-6 shadow-2xl">
+      <div class="flex items-center justify-between mb-4">
+        <h3 class="text-base font-black text-gray-800">교환 횟수 조정</h3>
+        <button @click="showTradeAdjust=false" class="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center text-gray-400 btn-press"><i class="fas fa-times text-sm"></i></button>
+      </div>
+      <p class="text-xs text-gray-400 mb-4 text-center">게임에서 직접 교환했을 때 수동으로 조정하세요</p>
+      <div class="flex items-center justify-center gap-6 mb-6">
+        <button @click="adjustTradeCount(-1)" :disabled="tradeCount <= 0"
+                class="w-12 h-12 rounded-2xl bg-gray-100 text-gray-600 flex items-center justify-center text-2xl font-black btn-press disabled:opacity-30">−</button>
+        <div class="text-center">
+          <div class="text-4xl font-black text-gray-800">{{ tradeCount }}</div>
+          <div class="text-xs text-gray-400 mt-1">/ 3회</div>
+        </div>
+        <button @click="adjustTradeCount(1)" :disabled="tradeCount >= 3"
+                class="w-12 h-12 rounded-2xl bg-sky-500 text-white flex items-center justify-center text-2xl font-black btn-press disabled:opacity-30">+</button>
+      </div>
+      <div class="w-full bg-gray-100 rounded-full h-2 mb-5">
+        <div class="bg-gradient-to-r from-sky-400 to-purple-400 h-2 rounded-full gauge-fill" :style="{width: (tradeCount/3*100)+'%'}"></div>
+      </div>
+      <button @click="showTradeAdjust=false" class="w-full py-3 bg-gray-800 text-white rounded-2xl font-black text-sm btn-press">확인</button>
+      <p class="text-[10px] text-gray-400 text-center mt-2">매일 오전 8시 자동 초기화</p>
+    </div>
+  </div>
+
+  <!-- ===== 내 캐릭터 전체 현황 팝업 ===== -->
+  <div v-if="showAllCharsPopup" class="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-end justify-center z-50" @click.self="showAllCharsPopup=false">
+    <div class="bg-white sheet w-full max-w-md p-5 max-h-[88vh] overflow-y-auto hide-scroll shadow-2xl">
+      <div class="flex items-center justify-between mb-4">
+        <div>
+          <div class="text-xs text-gray-400 mb-0.5">🔀 내 캐릭터 전체 현황</div>
+          <h3 class="text-base font-black text-gray-800">이동 가능한 스티커</h3>
+        </div>
+        <button @click="showAllCharsPopup=false" class="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center text-gray-400 btn-press"><i class="fas fa-times text-sm"></i></button>
+      </div>
+      <div v-if="allCharsLoading" class="flex justify-center py-10"><div class="loader"></div></div>
+      <div v-else-if="allCharsData.length < 2" class="text-center text-gray-400 text-sm py-10">
+        캐릭터가 2개 이상이어야 비교할 수 있어요!
+      </div>
+      <div v-else class="space-y-3">
+        <!-- 캐릭터별 수집 현황 요약 -->
+        <div class="bg-gray-50 rounded-2xl p-3 border border-gray-100">
+          <div class="text-[11px] font-black text-gray-500 mb-2">📊 캐릭터별 수집 현황</div>
+          <div class="space-y-1.5">
+            <div v-for="c in allCharsData" :key="c.docId" class="flex items-center gap-2">
+              <span class="bg-pink-100 text-pink-600 text-[10px] px-1.5 py-0.5 rounded font-black flex-none">S{{ c.server }}</span>
+              <span class="text-xs font-black text-gray-700 truncate flex-1">{{ c.nickname }}</span>
+              <div class="w-24 h-2.5 bg-gray-200 rounded-full overflow-hidden flex-none">
+                <div class="h-full bg-gradient-to-r from-pink-400 to-purple-400 rounded-full" :style="{ width: (c.collected/81*100) + '%' }"></div>
+              </div>
+              <span class="text-[10px] font-black text-gray-500 flex-none w-10 text-right">{{ c.collected }}/81</span>
+            </div>
+          </div>
+        </div>
+        <!-- 이동 추천 목록 -->
+        <div class="text-[11px] font-black text-gray-500 px-1">💡 이동 추천 <span class="text-[10px] font-normal text-gray-400">(여유(2장↑) → 없는 캐릭터)</span></div>
+        <div v-if="allCharsMoves.length === 0" class="text-center text-gray-400 text-xs py-6 bg-gray-50 rounded-2xl">이동 가능한 스티커가 없어요 😅</div>
+        <div v-else class="space-y-2">
+          <div v-for="move in allCharsMoves" :key="move.name + move.from + move.to"
+               class="bg-white border border-purple-100 rounded-2xl p-3 flex items-center gap-2.5">
+            <div class="bg-purple-50 rounded-xl p-2 flex-none">
+              <i class="fas fa-arrow-right text-purple-400 text-xs"></i>
+            </div>
+            <div class="flex-1 min-w-0">
+              <div class="text-xs font-black text-gray-800 truncate">{{ move.name }}</div>
+              <div class="text-[10px] text-gray-400 mt-0.5">
+                <span class="text-pink-500 font-black">{{ move.fromNick }}</span>
+                <i class="fas fa-arrow-right mx-1 text-[8px]"></i>
+                <span class="text-purple-500 font-black">{{ move.toNick }}</span>
+              </div>
+            </div>
+            <div class="text-[10px] text-gray-400 flex-none text-right">
+              <div class="font-black text-gray-600">{{ move.fromCount }}장 보유</div>
+              <div>→ 0장</div>
+            </div>
           </div>
         </div>
       </div>
@@ -1012,6 +1223,9 @@ createApp({
     const showCharSwitcher = ref(false);
     const charUnreadCounts = ref({});
     const showAddChar = ref(false);
+    const showAllCharsPopup = ref(false);
+    const allCharsData = ref([]);
+    const allCharsLoading = ref(false);
     const addCharForm = ref({ server:'', nickname:'', password:'' });
     const savedChars = ref([]);
     const currentDocId = computed(() => myDocId.value);
@@ -1318,70 +1532,6 @@ createApp({
       } catch(e) {}
     };
 
-    // ─── 전체 캐릭터 현황 ────────────────────────────────────
-    const showAllCharsPopup = ref(false);
-    const allCharsData = ref([]);
-    const allCharsLoading = ref(false);
-    const allCharsAlbumIdx = ref(-1);
-
-    const allCharsTableItems = computed(() => {
-      if (allCharsData.value.length < 2) return [];
-      const result = [];
-      const start = allCharsAlbumIdx.value === -1 ? 0 : allCharsAlbumIdx.value * 9;
-      const end = allCharsAlbumIdx.value === -1 ? 81 : start + 9;
-
-      for (let i = start; i < end; i++) {
-        // 내 캐릭 중 누군가 0인 것만 표시
-        const hasZero = allCharsData.value.some(c => (c.collection[i] || 0) === 0);
-        if (!hasZero) continue;
-
-        const hasSpare = allCharsData.value.some(c => (c.collection[i] || 0) >= 2);
-        const hasMove = hasZero && hasSpare; // 이동 가능 = 여유있는 캐릭 + 없는 캐릭 동시 존재
-
-        // shortName: 앨범명 축약 + 번호
-        const aIdx = Math.floor(i / 9);
-        const sIdx = (i % 9) + 1;
-        const albumName = appConfig.value.albumNames[aIdx] || `앨범${aIdx+1}`;
-        const shortAlbum = albumName.length > 4 ? albumName.slice(0,4)+'…' : albumName;
-
-        result.push({
-          absIdx: i,
-          name: stickerNameByIndex(i),
-          shortName: `${shortAlbum} ${sIdx}번`,
-          hasMove
-        });
-      }
-      return result;
-    });
-
-    const openAllCharsPopup = async () => {
-      showCharSwitcher.value = false;
-      showAllCharsPopup.value = true;
-      allCharsAlbumIdx.value = -1;
-      allCharsLoading.value = true;
-      try {
-        const results = [];
-        for (const char of savedChars.value) {
-          const snap = await db.collection('users').doc(char.docId).get();
-          if (!snap.exists) continue;
-          const data = snap.data();
-          const col = Array.isArray(data.collection) ? data.collection : Array(81).fill(0);
-          results.push({
-            docId: char.docId,
-            server: char.server,
-            nickname: char.nickname,
-            collection: col,
-            collected: col.filter(v => v > 0).length
-          });
-        }
-        allCharsData.value = results;
-      } catch(e) {
-        alert('불러오기 실패: ' + (e.message||e));
-      } finally {
-        allCharsLoading.value = false;
-      }
-    };
-
     const resetMyStickers = async () => {
       if (!userData.value) return;
       const input = prompt('⚠️ 스티커를 전부 0으로 초기화합니다.\n진행하려면 [초기화] 라고 입력하세요:');
@@ -1618,6 +1768,56 @@ createApp({
         if ((tCol[i]||0)>1&&(myCol[i]||0)===0) res.receiveOnly.push(obj);
       }
       compareResult.value = res;
+    };
+
+    const allCharsMoves = computed(() => {
+      if (allCharsData.value.length < 2) return [];
+      const moves = [];
+      for (let i = 0; i < 81; i++) {
+        const name = stickerNameByIndex(i);
+        // 여유(2장↑) 있는 캐릭터 찾기
+        const givers = allCharsData.value.filter(c => (c.collection[i] || 0) >= 2);
+        // 0장인 캐릭터 찾기
+        const receivers = allCharsData.value.filter(c => (c.collection[i] || 0) === 0);
+        for (const g of givers) {
+          for (const r of receivers) {
+            if (g.docId !== r.docId) {
+              moves.push({ name, from: g.docId, fromNick: g.nickname, fromCount: g.collection[i], to: r.docId, toNick: r.nickname });
+            }
+          }
+        }
+      }
+      return moves;
+    });
+
+    const openAllCharsPopup = async () => {
+      showCharSwitcher.value = false;
+      showAllCharsPopup.value = true;
+      allCharsLoading.value = true;
+      try {
+        const results = [];
+        for (const char of savedChars.value) {
+          const snap = await db.collection('users').doc(char.docId).get();
+          if (!snap.exists) continue;
+          const data = snap.data();
+          const col = Array.isArray(data.collection) ? data.collection : Array(81).fill(0);
+          results.push({ docId: char.docId, server: char.server, nickname: char.nickname, collection: col, collected: col.filter(v => v > 0).length });
+        }
+        allCharsData.value = results;
+      } catch(e) { alert('불러오기 실패: ' + (e.message||e)); } finally { allCharsLoading.value = false; }
+    };
+
+    const openCompareMyChar = async (char) => {
+      showCharSwitcher.value = false;
+      isLoading.value = true;
+      try {
+        const snap = await db.collection('users').doc(char.docId).get();
+        if (!snap.exists) { alert('캐릭터 데이터를 불러올 수 없어요!'); return; }
+        const data = snap.data();
+        buildCompare({ id: char.docId, server: char.server, nickname: char.nickname, collection: data.collection });
+        compareFrom.value = 'mychar';
+        showComparePopup.value = true;
+      } catch(e) { alert('오류: ' + (e.message||e)); } finally { isLoading.value = false; }
     };
 
     const openCompare = targetUser => {
@@ -2249,7 +2449,7 @@ createApp({
       userData.value = null; isLoggedIn.value = false;
       loginForm.value = { server:'', nickname:'', password:'' }; currentView.value = 'dashboard';
       [showPopup, showUserListPopup, showComparePopup, showNeedsPopup,
-       showDealBuilder, showHelpPopup, showChatPopup, showRankingPopup, showHistoryPopup, showAdminPopup, showAllCharsPopup]
+       showDealBuilder, showHelpPopup, showChatPopup, showRankingPopup, showHistoryPopup, showAdminPopup]
         .forEach(r=>r.value=false);
     };
 
@@ -2284,7 +2484,8 @@ createApp({
       openExchangeByAbsoluteIndex, exchangeList, popupStickerName,
       openMemberPopup, filteredUserList, searchKeyword, memberFilter,
       toggleFavorite, isFavorite,
-      openCompare, compareTarget, compareResult,
+      openCompare, openCompareMyChar, compareTarget, compareResult,
+      showAllCharsPopup, allCharsData, allCharsLoading, allCharsMoves, openAllCharsPopup,
       showDealBuilder, openDealBuilder, closeDealBuilder,
       dealCheckGive, dealCheckReceive, dealModeLabel, dealGiveIndex, dealReceiveIndex,
       copyDealBuilderText, confirmDeal, copyAndChat, confirmDealFromChat, pendingDeal,
@@ -2300,7 +2501,6 @@ createApp({
       addChar, removeChar, switchChar,
       noticeTitle, noticeBody, noticeDismissed, showNoticePopup,
       adminNoticeTitle, adminNoticeBody, saveNotice,
-      showAllCharsPopup, allCharsData, allCharsLoading, allCharsAlbumIdx, allCharsTableItems, openAllCharsPopup,
       showAdminPopup, adminTab, adminSearch, adminMembers, isAdminLoading, inactiveDays,
       openAdminPopup, loadAdminMembers, filteredAdminMembers,
       adminDeleteMember, adminResetMember, adminDeleteInactive, adminDeleteEmpty, adminResetAll,

@@ -1564,11 +1564,19 @@ createApp({
     const persistCollection = async () => {
       if (!userData.value) return;
       try {
-        await db.collection('users').doc(myDocId.value).update({
-          collection: userData.value.collection,
+        const col = userData.value.collection;
+        const total = col.filter(c => c > 0).length;
+        const updateData = {
+          collection: col,
           lastUpdated: firebase.firestore.FieldValue.serverTimestamp(),
           lastActive: firebase.firestore.FieldValue.serverTimestamp()
-        });
+        };
+        // 81개 달성 순간 기록 (아직 completedAt 없을 때만)
+        if (total >= 81 && !userData.value.completedAt) {
+          updateData.completedAt = firebase.firestore.FieldValue.serverTimestamp();
+          userData.value.completedAt = new Date();
+        }
+        await db.collection('users').doc(myDocId.value).update(updateData);
         localStorage.setItem('oq_user_v4', JSON.stringify(userData.value));
       } catch {}
     };
@@ -2266,9 +2274,17 @@ createApp({
           const total = col.reduce((a,b)=>a+(b>0?1:0),0);
           if (total<=0) return;
           list.push({ id: doc.id, server:u.server, nickname:u.nickname, totalCount:total,
+            lastUpdated: u.lastUpdated, completedAt: u.completedAt || null,
             isMe: u.server===userData.value.server&&u.nickname===userData.value.nickname });
         });
-        list.sort((a,b)=>b.totalCount-a.totalCount);
+        list.sort((a,b) => {
+          // 1순위: 수집률 높은 순
+          if (b.totalCount !== a.totalCount) return b.totalCount - a.totalCount;
+          // 2순위: 동점이면 completedAt 오래된 순 (먼저 완성한 사람)
+          const aCompleted = tsToDate(a.completedAt)?.getTime() || 9999999999999;
+          const bCompleted = tsToDate(b.completedAt)?.getTime() || 9999999999999;
+          return aCompleted - bCompleted;
+        });
         rankingList.value = list;
       } catch(e) { alert('랭킹 로드 실패'); } finally { isLoading.value=false; }
     };

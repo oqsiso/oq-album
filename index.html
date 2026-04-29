@@ -2418,21 +2418,43 @@ createApp({
 
     const contactAdmin = async () => { closeHelp(); await openDirectChat({ id:'S67_시소', server:67, nickname:'시소' }); };
 
+    // 대표 문서 ID 찾기 - chars 목록 중 첫 번째가 대표
+    const getMasterDocId = (chars) => chars.length > 0 ? chars[0].docId : null;
+
     const loadSavedChars = async () => {
       if (!userData.value) return;
       const myDoc = myDocId.value;
       try {
+        // 1. 내 문서에서 먼저 읽기
         const doc = await db.collection('linkedChars').doc(myDoc).get();
         let chars = [];
-        if (doc.exists) { chars = doc.data().chars || []; }
+        let masterDocId = myDoc;
+
+        if (doc.exists) {
+          const data = doc.data();
+          // syncFrom이 있으면 그 대표 문서에서 읽기
+          if (data.syncFrom) {
+            masterDocId = data.syncFrom;
+            const masterDoc = await db.collection('linkedChars').doc(masterDocId).get();
+            if (masterDoc.exists) chars = masterDoc.data().chars || [];
+          } else {
+            chars = data.chars || [];
+            masterDocId = myDoc;
+          }
+        }
+
+        // 내가 목록에 없으면 추가
         const exists = chars.find(c => c.docId === myDoc);
         if (!exists) {
           chars.unshift({ docId: myDoc, server: userData.value.server, nickname: userData.value.nickname, password: userData.value.password });
-          await db.collection('linkedChars').doc(myDoc).set({ chars }, { merge: true });
+          // 대표 문서에 저장
+          await db.collection('linkedChars').doc(masterDocId).set({ chars }, { merge: false });
+          // 내 문서에 대표 문서 참조 저장
+          if (masterDocId !== myDoc) {
+            await db.collection('linkedChars').doc(myDoc).set({ syncFrom: masterDocId }, { merge: false });
+          }
         }
-        const batch = db.batch();
-        chars.forEach(c => { if (c.docId !== myDoc) { const ref = db.collection('linkedChars').doc(c.docId); batch.set(ref, { chars, syncFrom: myDoc }, { merge: false }); } });
-        await batch.commit();
+
         savedChars.value = chars;
       } catch {
         try {
@@ -2447,8 +2469,17 @@ createApp({
     const saveSavedChars = async () => {
       if (!userData.value) return;
       try {
+        // 대표 문서(첫 번째 캐릭터)에만 저장
+        const masterDocId = savedChars.value.length > 0 ? savedChars.value[0].docId : myDocId.value;
+        await db.collection('linkedChars').doc(masterDocId).set({ chars: savedChars.value }, { merge: false });
+        // 나머지는 syncFrom만 업데이트
         const batch = db.batch();
-        savedChars.value.forEach(c => { const ref = db.collection('linkedChars').doc(c.docId); batch.set(ref, { chars: savedChars.value }, { merge: false }); });
+        savedChars.value.forEach(c => {
+          if (c.docId !== masterDocId) {
+            const ref = db.collection('linkedChars').doc(c.docId);
+            batch.set(ref, { syncFrom: masterDocId }, { merge: false });
+          }
+        });
         await batch.commit();
       } catch { localStorage.setItem(charStorageKey, JSON.stringify(savedChars.value)); }
     };

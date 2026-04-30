@@ -1555,7 +1555,6 @@ createApp({
       return userData.value.collection.slice(idx*9, idx*9+9).filter(c=>c>0).length;
     };
 
-    const todayDate = computed(() => getGameDate());
     const totalCount = computed(() => userData.value ? userData.value.collection.filter(c=>c>0).length : 0);
     const totalProgress = computed(() => Math.round(totalCount.value/81*100));
 
@@ -2609,7 +2608,7 @@ createApp({
     });
 
     return {
-      isLoggedIn, isLoading, loginForm, handleLogin, logout, todayDate,
+      isLoggedIn, isLoading, loginForm, handleLogin, logout,
       userData, myDocId,
       showHelpPopup, openHelp, closeHelp,
       showWelcomePopup, closeWelcomePopup, tutorialStep,

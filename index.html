@@ -498,7 +498,7 @@
               <span class="text-[10px] px-1.5 rounded-full flex-none" :class="user.totalCount>=40?'bg-pink-100 text-pink-600 font-black':'bg-gray-100 text-gray-500'">{{ user.totalCount }}/81</span>
               <span class="text-[9px] font-black px-1.5 py-0.5 rounded-full flex-none"
                     :class="user.isTradeClosed ? 'bg-red-100 text-red-500' : 'bg-emerald-100 text-emerald-600'">
-                {{ user.isTradeClosed ? '마감' : (3 - (user.dailyExchangeDate === getGameDate() ? (user.dailyExchangeCount||0) : 0)) + '회 남음' }}
+                {{ user.isTradeClosed ? '마감' : (3 - (user.dailyExchangeDate === todayDate ? (user.dailyExchangeCount||0) : 0)) + '회 남음' }}
               </span>
             </div>
           </div>
@@ -1377,6 +1377,7 @@ createApp({
     const safeNick = v => (v||'').toString().trim();
     const safeServer = v => Number(v||0);
     const myDocId = computed(() => userData.value ? `S${userData.value.server}_${userData.value.nickname}` : '');
+    const todayDate = computed(() => getGameDate());
     const canEditAlbums = computed(() => {
       if (!userData.value) return false;
       return Number(userData.value.server)===67 && String(userData.value.nickname)==='시소';
@@ -1554,6 +1555,7 @@ createApp({
       return userData.value.collection.slice(idx*9, idx*9+9).filter(c=>c>0).length;
     };
 
+    const todayDate = computed(() => getGameDate());
     const totalCount = computed(() => userData.value ? userData.value.collection.filter(c=>c>0).length : 0);
     const totalProgress = computed(() => Math.round(totalCount.value/81*100));
 
@@ -2607,14 +2609,14 @@ createApp({
     });
 
     return {
-      isLoggedIn, isLoading, loginForm, handleLogin, logout,
+      isLoggedIn, isLoading, loginForm, handleLogin, logout, todayDate,
       userData, myDocId,
       showHelpPopup, openHelp, closeHelp,
       showWelcomePopup, closeWelcomePopup, tutorialStep,
       currentView, currentAlbumIdx, currentAlbumStickers,
       openAlbum, prevAlbum, nextAlbum,
       updateCount, onStickerTap, onStickerHoldStart, onStickerHoldEnd, onStickerTouchEnd, onStickerClick,
-      getAlbumCount, totalCount, totalProgress,
+      getAlbumCount, totalCount, totalProgress, todayDate,
       tradeCount, resetMyStickers, adjustTradeCount, showTradeAdjust,
       showPopup, showUserListPopup, showComparePopup,
       showNeedsPopup, openNeedsPopup, needsKeyword, needsListFiltered, needsLoading,

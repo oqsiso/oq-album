@@ -541,8 +541,21 @@
         </div>
         <button @click="showComparePopup=false" class="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center text-gray-400 btn-press"><i class="fas fa-times text-sm"></i></button>
       </div>
-      <div class="text-[10px] text-gray-400 bg-gray-50 rounded-xl p-2 mb-3">
+      <div class="text-[10px] text-gray-400 bg-gray-50 rounded-xl p-2 mb-2">
         체크1+2 = <b class="text-red-500">교환</b> · 체크1만 = <b class="text-blue-500">주기</b> · 체크2만 = <b class="text-green-600">받기</b>
+      </div>
+      <!-- 정렬 기준 토글 -->
+      <div class="flex gap-1.5 mb-3">
+        <button @click="compareSortMode='star'"
+                class="flex-1 py-1.5 rounded-xl text-[11px] font-black btn-press transition"
+                :class="compareSortMode==='star' ? 'bg-amber-400 text-white' : 'bg-gray-100 text-gray-500'">
+          ⭐ 고성 우선
+        </button>
+        <button @click="compareSortMode='album'"
+                class="flex-1 py-1.5 rounded-xl text-[11px] font-black btn-press transition"
+                :class="compareSortMode==='album' ? 'bg-blue-400 text-white' : 'bg-gray-100 text-gray-500'">
+          📚 앨범완성 우선
+        </button>
       </div>
       <div v-if="isLoading" class="flex justify-center py-8"><div class="loader"></div></div>
       <div v-else class="space-y-3">
@@ -1344,6 +1357,7 @@ createApp({
     const compareResult = ref({ giveOnly: [], receiveOnly: [] });
     const popupStickerName = ref('');
 
+    const compareSortMode = ref('star'); // 'star' or 'album'
     const dealCheckGive = ref(true);
     const dealCheckReceive = ref(true);
     const dealGiveIndex = ref(null);
@@ -1874,10 +1888,15 @@ createApp({
         if ((tCol[i]||0)>1&&(myCol[i]||0)===0) res.receiveOnly.push({ index:i, name:stickerNameByIndex(i), star, remaining });
       }
 
-      // 정렬: 1순위 고성 순, 2순위 앨범 남은 개수 적은 순
+      // 정렬: compareSortMode에 따라 동적 변경
       const sortFn = (a, b) => {
-        if (b.star !== a.star) return b.star - a.star;
-        return a.remaining - b.remaining;
+        if (compareSortMode.value === 'star') {
+          if (b.star !== a.star) return b.star - a.star;
+          return a.remaining - b.remaining;
+        } else {
+          if (a.remaining !== b.remaining) return a.remaining - b.remaining;
+          return b.star - a.star;
+        }
       };
       res.giveOnly.sort(sortFn);
       res.receiveOnly.sort(sortFn);
@@ -2002,6 +2021,10 @@ createApp({
 
     const closeDealBuilder = () => { showDealBuilder.value=false; dealGiveIndex.value=null; dealReceiveIndex.value=null; };
     watch(dealCheckGive, v => { if(!v) dealGiveIndex.value=null; });
+    // 정렬 기준 바뀌면 자동 재정렬
+    watch(compareSortMode, () => {
+      if (compareTarget.value?.id) buildCompare(compareTarget.value);
+    });
     watch(dealCheckReceive, v => { if(!v) dealReceiveIndex.value=null; });
 
     const copyDealBuilderText = () => {
@@ -2648,7 +2671,7 @@ createApp({
       openCompare, openCompareMyChar, compareTarget, compareResult,
       showAllCharsPopup, allCharsData, allCharsLoading, allCharsMoves, allCharsAlbumIdx, allCharsTableItems, albumTabRef, tableScrollRef, openAllCharsPopup,
       onTabDragStart, onTabDragMove, onTabDragEnd, onTableDragStart, onTableDragMove, onTableDragEnd,
-      showDealBuilder, openDealBuilder, closeDealBuilder,
+      compareSortMode, showDealBuilder, openDealBuilder, closeDealBuilder,
       dealCheckGive, dealCheckReceive, dealModeLabel, dealGiveIndex, dealReceiveIndex,
       copyDealBuilderText, confirmDeal, copyAndChat, confirmDealFromChat, pendingDeal,
       getActiveText, getActiveColor,

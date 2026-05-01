@@ -1874,10 +1874,10 @@ createApp({
         if ((tCol[i]||0)>1&&(myCol[i]||0)===0) res.receiveOnly.push({ index:i, name:stickerNameByIndex(i), star, remaining });
       }
 
-      // 정렬: 1순위 앨범 남은 개수 적은 순, 2순위 고성 순
+      // 정렬: 1순위 고성 순, 2순위 앨범 남은 개수 적은 순
       const sortFn = (a, b) => {
-        if (a.remaining !== b.remaining) return a.remaining - b.remaining;
-        return b.star - a.star;
+        if (b.star !== a.star) return b.star - a.star;
+        return a.remaining - b.remaining;
       };
       res.giveOnly.sort(sortFn);
       res.receiveOnly.sort(sortFn);

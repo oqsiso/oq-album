@@ -554,7 +554,8 @@
               <div class="text-[10px] font-black text-gray-600 mb-1">📤 내가 줄 수 있는 스티커 <span class="text-gray-400">(내 2장↑ & 상대 0)</span></div>
               <div v-if="compareResult.giveOnly.length===0" class="text-[11px] text-gray-400 italic">없음 😅</div>
               <div v-else class="flex flex-wrap gap-1">
-                <span v-for="c in compareResult.giveOnly.slice(0,12)" :key="'g_'+c.index" class="text-[10px] bg-white border border-red-100 px-2 py-1 rounded-lg text-gray-600">{{ c.name }}</span>
+                <span v-for="c in compareResult.giveOnly.slice(0,12)" :key="'g_'+c.index"
+                      class="text-[10px] bg-white border border-red-100 px-2 py-1 rounded-lg text-gray-600">{{ c.name }}</span>
                 <span v-if="compareResult.giveOnly.length>12" class="text-[10px] text-gray-400 self-center">+{{ compareResult.giveOnly.length-12 }}개</span>
               </div>
             </div>
@@ -562,7 +563,8 @@
               <div class="text-[10px] font-black text-gray-600 mb-1">📥 내가 받을 수 있는 스티커 <span class="text-gray-400">(내 0 & 상대 2장↑)</span></div>
               <div v-if="compareResult.receiveOnly.length===0" class="text-[11px] text-gray-400 italic">없음 😅</div>
               <div v-else class="flex flex-wrap gap-1">
-                <span v-for="c in compareResult.receiveOnly.slice(0,12)" :key="'r_'+c.index" class="text-[10px] bg-white border border-red-100 px-2 py-1 rounded-lg text-gray-600">{{ c.name }}</span>
+                <span v-for="c in compareResult.receiveOnly.slice(0,12)" :key="'r_'+c.index"
+                      class="text-[10px] bg-white border border-red-100 px-2 py-1 rounded-lg text-gray-600">{{ c.name }}</span>
                 <span v-if="compareResult.receiveOnly.length>12" class="text-[10px] text-gray-400 self-center">+{{ compareResult.receiveOnly.length-12 }}개</span>
               </div>
             </div>
@@ -1856,11 +1858,30 @@ createApp({
       const myCol = userData.value?.collection || Array(81).fill(0);
       const tCol = Array.isArray(targetUser?.collection) ? targetUser.collection : Array(81).fill(0);
       const res = { giveOnly:[], receiveOnly:[] };
+
+      // 앨범별 내가 남은 개수 계산 (완성까지 몇 개 남았나)
+      const albumRemaining = Array(9).fill(0).map((_, aIdx) => {
+        const start = aIdx * 9;
+        return 9 - myCol.slice(start, start+9).filter(c => c > 0).length;
+      });
+
       for (let i=0;i<81;i++) {
-        const obj = { index:i, name:stickerNameByIndex(i) };
-        if ((myCol[i]||0)>1&&(tCol[i]||0)===0) res.giveOnly.push(obj);
-        if ((tCol[i]||0)>1&&(myCol[i]||0)===0) res.receiveOnly.push(obj);
+        const aIdx = Math.floor(i/9);
+        const sIdx = i % 9;
+        const star = STICKER_STARS[aIdx] ? STICKER_STARS[aIdx][sIdx] : 1;
+        const remaining = albumRemaining[aIdx]; // 앨범 완성까지 남은 개수
+        if ((myCol[i]||0)>1&&(tCol[i]||0)===0) res.giveOnly.push({ index:i, name:stickerNameByIndex(i), star, remaining });
+        if ((tCol[i]||0)>1&&(myCol[i]||0)===0) res.receiveOnly.push({ index:i, name:stickerNameByIndex(i), star, remaining });
       }
+
+      // 정렬: 1순위 앨범 남은 개수 적은 순, 2순위 고성 순
+      const sortFn = (a, b) => {
+        if (a.remaining !== b.remaining) return a.remaining - b.remaining;
+        return b.star - a.star;
+      };
+      res.giveOnly.sort(sortFn);
+      res.receiveOnly.sort(sortFn);
+
       compareResult.value = res;
     };
 

@@ -2587,6 +2587,29 @@ createApp({
       if (docId === currentDocId.value) { alert('현재 로그인 중인 캐릭터는 삭제할 수 없어요!'); return; }
       savedChars.value = savedChars.value.filter(c => c.docId !== docId);
       await saveSavedChars();
+      // 삭제된 캐릭의 linkedChars 문서도 초기화
+      // + 그 캐릭이 알고 있는 모든 문서에서도 나를 제거
+      try {
+        const removedDoc = await db.collection('linkedChars').doc(docId).get();
+        if (removedDoc.exists) {
+          const relatedChars = removedDoc.data().chars || [];
+          const batch = db.batch();
+          // 연관 문서들에서 삭제된 캐릭 제거
+          relatedChars.forEach(c => {
+            if (c.docId !== docId) {
+              const ref = db.collection('linkedChars').doc(c.docId);
+              batch.update(ref, {
+                chars: firebase.firestore.FieldValue.arrayRemove(
+                  relatedChars.find(x => x.docId === docId)
+                )
+              });
+            }
+          });
+          // 삭제된 캐릭 문서 자체도 삭제
+          batch.delete(db.collection('linkedChars').doc(docId));
+          await batch.commit();
+        }
+      } catch(e) {}
     };
 
     const fetchCharUnreads = async () => {

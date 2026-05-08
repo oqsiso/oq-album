@@ -2499,38 +2499,48 @@ createApp({
       if (!userData.value) return;
       const myDoc = myDocId.value;
       try {
-        const doc = await db.collection('linkedChars').doc(myDoc).get();
-        let chars = [];
-        if (doc.exists) { chars = doc.data().chars || []; }
+        // linkedChars 전체를 한번에 읽기
+        const allSnapshot = await db.collection('linkedChars').get();
+        const allDocsMap = {};
+        allSnapshot.forEach(d => { allDocsMap[d.id] = d.data().chars || []; });
 
-        // 내 캐릭이 목록에 없으면 추가
-        const exists = chars.find(c => c.docId === myDoc);
-        if (!exists) {
-          chars.unshift({ docId: myDoc, server: userData.value.server, nickname: userData.value.nickname, password: userData.value.password });
-        }
+        // 내 문서 기준으로 연결된 모든 캐릭 탐색 (BFS + 역방향 참조)
+        const charMap = {}; // docId → char object
+        const visited = new Set();
+        const queue = [myDoc];
 
-        // 연결된 캐릭들의 문서도 읽어서 병합 (로그인 순서 달라도 누락 없게)
-        const otherRefs = chars.filter(c => c.docId !== myDoc);
-        if (otherRefs.length > 0) {
-          const otherDocs = await Promise.all(
-            otherRefs.map(c => db.collection('linkedChars').doc(c.docId).get())
-          );
-          otherDocs.forEach(d => {
-            if (d.exists) {
-              (d.data().chars || []).forEach(c => {
-                if (!chars.find(x => x.docId === c.docId)) {
-                  chars.push(c); // 내 목록에 없는 캐릭 추가
-                }
-              });
+        // 내 캐릭 초기화
+        const myChar = { docId: myDoc, server: userData.value.server, nickname: userData.value.nickname, password: userData.value.password };
+        charMap[myDoc] = myChar;
+
+        while (queue.length > 0) {
+          const current = queue.shift();
+          if (visited.has(current)) continue;
+          visited.add(current);
+
+          // 이 문서가 알고 있는 캐릭들
+          (allDocsMap[current] || []).forEach(c => {
+            if (!charMap[c.docId]) charMap[c.docId] = c;
+            if (!visited.has(c.docId)) queue.push(c.docId);
+          });
+
+          // 역방향: 나를 알고 있는 문서들도 탐색
+          Object.entries(allDocsMap).forEach(([docId, chars]) => {
+            if (chars.some(c => c.docId === current) && !visited.has(docId)) {
+              queue.push(docId);
+              chars.forEach(c => { if (!charMap[c.docId]) charMap[c.docId] = c; });
             }
           });
         }
 
-        // 병합된 최종 배열로 전체 동기화
+        let chars = Object.values(charMap);
+        // 내 캐릭 맨 앞으로
+        chars = [myChar, ...chars.filter(c => c.docId !== myDoc)];
+
+        // 병합된 완전한 배열로 전체 동기화
         const batch = db.batch();
         chars.forEach(c => {
-          const ref = db.collection('linkedChars').doc(c.docId);
-          batch.set(ref, { chars, syncFrom: myDoc }, { merge: false });
+          batch.set(db.collection('linkedChars').doc(c.docId), { chars, syncFrom: myDoc }, { merge: false });
         });
         await batch.commit();
         savedChars.value = chars;

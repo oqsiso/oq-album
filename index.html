@@ -173,6 +173,11 @@
           </div>
         </div>
         <div class="flex items-center gap-1.5 flex-none">
+          <button v-if="showEndingBtn" @click="goToEnding"
+                  class="w-9 h-9 rounded-xl bg-purple-50 text-purple-400 flex items-center justify-center border border-purple-100 btn-press"
+                  title="부생일몽 엔딩 도감">
+            <span class="text-sm font-black">夢</span>
+          </button>
           <button @click="openChat" class="relative w-9 h-9 rounded-xl bg-pink-50 text-pink-400 flex items-center justify-center border border-pink-100 btn-press">
             <i class="fas fa-envelope text-sm"></i>
             <span v-if="unreadCount > 0" class="notif-badge pulse">{{ unreadCount > 9 ? '9+' : unreadCount }}</span>
@@ -422,6 +427,19 @@
                 <div class="text-sm font-black text-amber-700">공지사항 작성</div>
                 <div class="text-[11px] text-amber-600 mt-0.5">모든 유저 상단 배너에 표시돼요</div>
               </div>
+            </div>
+            <!-- 엔딩 도감 버튼 토글 -->
+            <div class="flex items-center justify-between mb-3 p-3 bg-purple-50 rounded-xl border border-purple-100">
+              <div>
+                <div class="text-xs font-black text-purple-700">🔮 엔딩 도감 버튼</div>
+                <div class="text-[10px] text-purple-400 mt-0.5">상단에 夢 버튼 표시 여부</div>
+              </div>
+              <button @click="toggleEndingBtn"
+                      class="relative w-12 h-6 rounded-full transition-colors btn-press"
+                      :class="showEndingBtn ? 'bg-purple-500' : 'bg-gray-300'">
+                <div class="absolute top-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform"
+                     :class="showEndingBtn ? 'translate-x-6' : 'translate-x-0.5'"></div>
+              </button>
             </div>
             <input v-model="adminNoticeTitle" type="text" placeholder="제목 (예: 스티커 오픈 일정)"
                    class="w-full p-2.5 border border-amber-200 rounded-xl text-sm bg-white focus:outline-none mb-2">
@@ -1310,6 +1328,7 @@ createApp({
     const showHistoryPopup = ref(false);
     const showAdminPopup = ref(false);
     const showTradeAdjust = ref(false);
+    const showEndingBtn = ref(false); // 관리자가 on/off
     const showWelcomePopup = ref(false);
     const tutorialStep = ref(0);
 
@@ -1524,6 +1543,7 @@ createApp({
             noticeTitle.value = '';
             noticeBody.value = '';
           }
+          showEndingBtn.value = d.showEndingBtn !== false;
         }
       } catch {}
     };
@@ -1640,6 +1660,10 @@ createApp({
         await db.collection('users').doc(myDocId.value).update({ dailyExchangeCount: next, dailyExchangeDate: today });
         localStorage.setItem('oq_user_v4', JSON.stringify(userData.value));
       } catch(e) {}
+    };
+
+    const goToEnding = () => {
+      window.open('../oq-ending/', '_blank');
     };
 
     const resetMyStickers = async () => {
@@ -2353,6 +2377,14 @@ createApp({
       } finally { isHistoryLoading.value=false; }
     };
 
+    const toggleEndingBtn = async () => {
+      if (!canEditAlbums.value) return;
+      showEndingBtn.value = !showEndingBtn.value;
+      try {
+        await db.collection('config').doc('service_info').set({ showEndingBtn: showEndingBtn.value }, { merge: true });
+      } catch(e) { alert('저장 실패: ' + (e.message||e)); }
+    };
+
     const saveNotice = async () => {
       if (!canEditAlbums.value) return;
       try {
@@ -2685,6 +2717,7 @@ createApp({
       showCharSwitcher, showAddChar, addCharForm, savedChars, currentDocId, charUnreadCounts,
       addChar, removeChar, switchChar,
       noticeTitle, noticeBody, noticeDismissed, showNoticePopup,
+      showEndingBtn, goToEnding, toggleEndingBtn,
       adminNoticeTitle, adminNoticeBody, saveNotice,
       showAdminPopup, adminTab, adminSearch, adminMembers, isAdminLoading, inactiveDays,
       openAdminPopup, loadAdminMembers, filteredAdminMembers,

@@ -2502,13 +2502,36 @@ createApp({
         const doc = await db.collection('linkedChars').doc(myDoc).get();
         let chars = [];
         if (doc.exists) { chars = doc.data().chars || []; }
+
+        // 내 캐릭이 목록에 없으면 추가
         const exists = chars.find(c => c.docId === myDoc);
         if (!exists) {
           chars.unshift({ docId: myDoc, server: userData.value.server, nickname: userData.value.nickname, password: userData.value.password });
-          await db.collection('linkedChars').doc(myDoc).set({ chars }, { merge: true });
         }
+
+        // 연결된 캐릭들의 문서도 읽어서 병합 (로그인 순서 달라도 누락 없게)
+        const otherRefs = chars.filter(c => c.docId !== myDoc);
+        if (otherRefs.length > 0) {
+          const otherDocs = await Promise.all(
+            otherRefs.map(c => db.collection('linkedChars').doc(c.docId).get())
+          );
+          otherDocs.forEach(d => {
+            if (d.exists) {
+              (d.data().chars || []).forEach(c => {
+                if (!chars.find(x => x.docId === c.docId)) {
+                  chars.push(c); // 내 목록에 없는 캐릭 추가
+                }
+              });
+            }
+          });
+        }
+
+        // 병합된 최종 배열로 전체 동기화
         const batch = db.batch();
-        chars.forEach(c => { if (c.docId !== myDoc) { const ref = db.collection('linkedChars').doc(c.docId); batch.set(ref, { chars, syncFrom: myDoc }, { merge: false }); } });
+        chars.forEach(c => {
+          const ref = db.collection('linkedChars').doc(c.docId);
+          batch.set(ref, { chars, syncFrom: myDoc }, { merge: false });
+        });
         await batch.commit();
         savedChars.value = chars;
       } catch {

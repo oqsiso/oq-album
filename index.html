@@ -13,14 +13,14 @@
   <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='22' fill='%23111827'/%3E%3Ctext x='50' y='72' text-anchor='middle' font-family='sans-serif' font-size='62' font-weight='900' fill='%23f472b6'%3ES%3C/text%3E%3C/svg%3E">
   <link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='22' fill='%23111827'/%3E%3Ctext x='50' y='72' text-anchor='middle' font-family='sans-serif' font-size='62' font-weight='900' fill='%23f472b6'%3ES%3C/text%3E%3C/svg%3E">
 
-  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
-  <script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
-
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;700;900&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+  <script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
 
   <style>
     [v-cloak] { display: none !important; }
@@ -2349,9 +2349,11 @@ createApp({
         list.sort((a,b) => {
           // 1순위: 수집률 높은 순
           if (b.totalCount !== a.totalCount) return b.totalCount - a.totalCount;
-          // 2순위: 동점이면 completedAt 오래된 순 (먼저 완성한 사람)
-          const aCompleted = tsToDate(a.completedAt)?.getTime() || 9999999999999;
-          const bCompleted = tsToDate(b.completedAt)?.getTime() || 9999999999999;
+          // 2순위: completedAt 오래된 순
+          // completedAt 없는 81개 완성자 = 기능 추가 전 완성자 → 0으로 취급(= 제일 먼저)
+          const fallback = c => c.totalCount >= 81 ? 0 : 9999999999999;
+          const aCompleted = tsToDate(a.completedAt)?.getTime() ?? fallback(a);
+          const bCompleted = tsToDate(b.completedAt)?.getTime() ?? fallback(b);
           return aCompleted - bCompleted;
         });
         rankingList.value = list;
@@ -2622,6 +2624,10 @@ createApp({
         favSet.value = loadFavSet(); isLoggedIn.value = true;
         await loadSavedChars(); await checkAndResetDailyLimit(); await updateLastActive();
         await loadFavSet(); startDailyResetWatcher(); subscribeUnread(); setTimeout(() => fetchCharUnreads(), 1500);
+        // 81개 완성했는데 completedAt 없는 경우 lastUpdated로 소급 등록
+        if (Array.isArray(finalData.collection) && finalData.collection.filter(c=>c>0).length >= 81 && !finalData.completedAt && finalData.lastUpdated) {
+          try { await db.collection('users').doc(`S${server}_${nickname}`).update({ completedAt: finalData.lastUpdated }); } catch {}
+        }
         const isNewUser = !doc.exists;
         if (isNewUser) { tutorialStep.value = 0; setTimeout(() => { showWelcomePopup.value = true; }, 500); }
       } catch(e) { alert('오류: '+(e.message||e)); } finally { isLoading.value=false; }

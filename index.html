@@ -13,14 +13,14 @@
   <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='22' fill='%23111827'/%3E%3Ctext x='50' y='72' text-anchor='middle' font-family='sans-serif' font-size='62' font-weight='900' fill='%23f472b6'%3ES%3C/text%3E%3C/svg%3E">
   <link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='22' fill='%23111827'/%3E%3Ctext x='50' y='72' text-anchor='middle' font-family='sans-serif' font-size='62' font-weight='900' fill='%23f472b6'%3ES%3C/text%3E%3C/svg%3E">
 
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+  <script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
+
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;700;900&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-
-  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
-  <script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
 
   <style>
     [v-cloak] { display: none !important; }
@@ -2499,49 +2499,16 @@ createApp({
       if (!userData.value) return;
       const myDoc = myDocId.value;
       try {
-        // linkedChars 전체를 한번에 읽기
-        const allSnapshot = await db.collection('linkedChars').get();
-        const allDocsMap = {};
-        allSnapshot.forEach(d => { allDocsMap[d.id] = d.data().chars || []; });
-
-        // 내 문서 기준으로 연결된 모든 캐릭 탐색 (BFS + 역방향 참조)
-        const charMap = {}; // docId → char object
-        const visited = new Set();
-        const queue = [myDoc];
-
-        // 내 캐릭 초기화
-        const myChar = { docId: myDoc, server: userData.value.server, nickname: userData.value.nickname, password: userData.value.password };
-        charMap[myDoc] = myChar;
-
-        while (queue.length > 0) {
-          const current = queue.shift();
-          if (visited.has(current)) continue;
-          visited.add(current);
-
-          // 이 문서가 알고 있는 캐릭들
-          (allDocsMap[current] || []).forEach(c => {
-            if (!charMap[c.docId]) charMap[c.docId] = c;
-            if (!visited.has(c.docId)) queue.push(c.docId);
-          });
-
-          // 역방향: 나를 알고 있는 문서들도 탐색
-          Object.entries(allDocsMap).forEach(([docId, chars]) => {
-            if (chars.some(c => c.docId === current) && !visited.has(docId)) {
-              queue.push(docId);
-              chars.forEach(c => { if (!charMap[c.docId]) charMap[c.docId] = c; });
-            }
-          });
+        const doc = await db.collection('linkedChars').doc(myDoc).get();
+        let chars = [];
+        if (doc.exists) { chars = doc.data().chars || []; }
+        const exists = chars.find(c => c.docId === myDoc);
+        if (!exists) {
+          chars.unshift({ docId: myDoc, server: userData.value.server, nickname: userData.value.nickname, password: userData.value.password });
+          await db.collection('linkedChars').doc(myDoc).set({ chars }, { merge: true });
         }
-
-        let chars = Object.values(charMap);
-        // 내 캐릭 맨 앞으로
-        chars = [myChar, ...chars.filter(c => c.docId !== myDoc)];
-
-        // 병합된 완전한 배열로 전체 동기화
         const batch = db.batch();
-        chars.forEach(c => {
-          batch.set(db.collection('linkedChars').doc(c.docId), { chars, syncFrom: myDoc }, { merge: false });
-        });
+        chars.forEach(c => { if (c.docId !== myDoc) { const ref = db.collection('linkedChars').doc(c.docId); batch.set(ref, { chars, syncFrom: myDoc }, { merge: false }); } });
         await batch.commit();
         savedChars.value = chars;
       } catch {
@@ -2587,29 +2554,6 @@ createApp({
       if (docId === currentDocId.value) { alert('현재 로그인 중인 캐릭터는 삭제할 수 없어요!'); return; }
       savedChars.value = savedChars.value.filter(c => c.docId !== docId);
       await saveSavedChars();
-      // 삭제된 캐릭의 linkedChars 문서도 초기화
-      // + 그 캐릭이 알고 있는 모든 문서에서도 나를 제거
-      try {
-        const removedDoc = await db.collection('linkedChars').doc(docId).get();
-        if (removedDoc.exists) {
-          const relatedChars = removedDoc.data().chars || [];
-          const batch = db.batch();
-          // 연관 문서들에서 삭제된 캐릭 제거
-          relatedChars.forEach(c => {
-            if (c.docId !== docId) {
-              const ref = db.collection('linkedChars').doc(c.docId);
-              batch.update(ref, {
-                chars: firebase.firestore.FieldValue.arrayRemove(
-                  relatedChars.find(x => x.docId === docId)
-                )
-              });
-            }
-          });
-          // 삭제된 캐릭 문서 자체도 삭제
-          batch.delete(db.collection('linkedChars').doc(docId));
-          await batch.commit();
-        }
-      } catch(e) {}
     };
 
     const fetchCharUnreads = async () => {

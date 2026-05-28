@@ -339,6 +339,7 @@
           <button class="tab-btn flex-1 text-center" :class="adminTab==='members'?'tab-on':'tab-off'" @click="adminTab='members'; loadAdminMembers()">👥 멤버</button>
           <button class="tab-btn flex-1 text-center" :class="adminTab==='cleanup'?'tab-on':'tab-off'" @click="adminTab='cleanup'">🧹 정리</button>
           <button class="tab-btn flex-1 text-center" :class="adminTab==='album'?'tab-on':'tab-off'" @click="adminTab='album'">📁 앨범</button>
+          <button class="tab-btn flex-1 text-center" :class="adminTab==='ranking'?'tab-on':'tab-off'" @click="adminTab='ranking'; loadAdminRanking()">🏆 랭킹</button>
         </div>
         <div v-if="adminTab==='members'">
           <div class="relative mb-3">
@@ -455,6 +456,25 @@
             </div>
           </div>
         </div>
+        <div v-if="adminTab==='ranking'" class="space-y-2">
+          <p class="text-xs text-gray-400 mb-3">81개 완성자의 완성 시점을 수정할 수 있어요</p>
+          <div v-if="isAdminLoading" class="flex justify-center py-6"><div class="loader"></div></div>
+          <div v-else v-for="u in adminRankingList" :key="u.id" class="border border-gray-100 p-3 rounded-2xl">
+            <div class="flex items-center gap-2 mb-2">
+              <span class="bg-pink-100 text-pink-600 text-[10px] px-1.5 py-0.5 rounded font-black">S{{ u.server }}</span>
+              <span class="font-black text-sm text-gray-800">{{ u.nickname }}</span>
+              <span class="text-[10px] text-emerald-500 font-black">{{ u.totalCount }}/81</span>
+            </div>
+            <div class="flex gap-2 items-center">
+              <input type="datetime-local" v-model="u.editDate"
+                     class="flex-1 text-xs border border-gray-200 rounded-xl px-3 py-2 focus:outline-none focus:border-pink-300">
+              <button @click="saveCompletedAt(u)"
+                      class="px-3 py-2 bg-pink-500 text-white text-xs font-black rounded-xl btn-press">저장</button>
+            </div>
+          </div>
+          <div v-if="!isAdminLoading && adminRankingList.length===0" class="text-center text-gray-400 py-6 text-xs">81개 완성자 없음</div>
+        </div>
+
         <div v-if="adminTab==='album'">
           <div class="space-y-3 mb-4">
             <div v-for="(name, idx) in appConfig.albumNames" :key="idx" class="border border-gray-100 p-3 rounded-2xl">
@@ -1353,6 +1373,7 @@ createApp({
     const adminTab = ref('members');
     const adminSearch = ref('');
     const adminMembers = ref([]);
+    const adminRankingList = ref([]);
     const isAdminLoading = ref(false);
     const inactiveDays = ref(7);
 
@@ -2423,6 +2444,47 @@ createApp({
       } catch(e) { alert('로드 실패: '+(e.message||e)); } finally { isAdminLoading.value=false; }
     };
 
+    const loadAdminRanking = async () => {
+      if (!canEditAlbums.value) return;
+      isAdminLoading.value = true; adminRankingList.value = [];
+      try {
+        const snap = await db.collection('users').get();
+        const list = [];
+        snap.forEach(doc => {
+          const u = doc.data(); if (!u) return;
+          const col = Array.isArray(u.collection) ? u.collection : [];
+          const total = col.reduce((a,b)=>a+(b>0?1:0),0);
+          if (total < 81) return;
+          // datetime-local 입력값용 포맷
+          const cd = tsToDate(u.completedAt);
+          const toLocal = d => {
+            if (!d) return '';
+            const pad = n => String(n).padStart(2,'0');
+            return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+          };
+          list.push({ id:doc.id, server:u.server, nickname:u.nickname, totalCount:total,
+            completedAt:u.completedAt, editDate: toLocal(cd) });
+        });
+        list.sort((a,b)=>{
+          const fallback = c => c.totalCount>=81?0:9999999999999;
+          const at = x => tsToDate(x.completedAt)?.getTime()??fallback(x);
+          return at(a)-at(b);
+        });
+        adminRankingList.value = list;
+      } catch(e) { alert('로드 실패: '+(e.message||e)); } finally { isAdminLoading.value=false; }
+    };
+
+    const saveCompletedAt = async u => {
+      if (!u.editDate) { alert('날짜를 입력해주세요'); return; }
+      try {
+        const d = new Date(u.editDate);
+        await db.collection('users').doc(u.id).update({ completedAt: firebase.firestore.Timestamp.fromDate(d) });
+        u.completedAt = firebase.firestore.Timestamp.fromDate(d);
+        alert(`✅ ${u.nickname} 완성 시점 저장 완료!`);
+        await loadAdminRanking();
+      } catch(e) { alert('저장 실패: '+(e.message||e)); }
+    };
+
     const filteredAdminMembers = computed(() => {
       const kw = (adminSearch.value||'').toLowerCase().trim();
       if (!kw) return adminMembers.value;
@@ -2726,6 +2788,7 @@ createApp({
       showEndingBtn, goToEnding, toggleEndingBtn,
       adminNoticeTitle, adminNoticeBody, saveNotice,
       showAdminPopup, adminTab, adminSearch, adminMembers, isAdminLoading, inactiveDays,
+      adminRankingList, loadAdminRanking, saveCompletedAt,
       openAdminPopup, loadAdminMembers, filteredAdminMembers,
       adminDeleteMember, adminResetMember, adminDeleteInactive, adminDeleteEmpty, adminResetAll,
       contactAdmin

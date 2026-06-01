@@ -1695,8 +1695,12 @@ createApp({
       try {
         const zero = Array(81).fill(0);
         const now = firebase.firestore.FieldValue.serverTimestamp();
-        await db.collection('users').doc(myDocId.value).update({ collection:zero, lastUpdated:now, lastActive:now });
+        await db.collection('users').doc(myDocId.value).update({
+          collection: zero, lastUpdated: now, lastActive: now,
+          completedAt: firebase.firestore.FieldValue.delete()
+        });
         userData.value.collection = zero;
+        userData.value.completedAt = null;
         localStorage.setItem('oq_user_v4', JSON.stringify(userData.value));
         alert('초기화 완료 ✅');
       } catch(e) { alert('실패: '+(e.message||e)); } finally { isLoading.value = false; }
